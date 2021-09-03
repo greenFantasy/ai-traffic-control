@@ -2,8 +2,8 @@ from consts import *
 from typing import Set
 
 class TrafficLight:
-    def __init__(self, directions: Set[MovementOptions]):
-        self.directions = directions
+    def __init__(self, movement_options: Set[MovementOptions]):
+        self.movement_options: MovementOptions = movement_options
         self.state = TrafficLightStates.red
         self.state_start_time: float = self.get_current_time()
 
