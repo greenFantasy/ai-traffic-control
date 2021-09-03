@@ -7,3 +7,5 @@ class Street:
         ## TODO: Should we create the lanes in the init?
         self.direction = direction
         self.lanes = lanes
+        self.min = min([lane.min for lane in lanes])
+        self.max = max([lane.max for lane in lanes])

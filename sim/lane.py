@@ -15,6 +15,8 @@ class Lane:
         self.start = start
         self.end = end
         self.vehicles = []
+        self.min = self.position - self.width / 2
+        self.max = self.position + self.width / 2
 
     def add_vehicle(self, ):
         # TODO

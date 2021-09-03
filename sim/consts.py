@@ -6,6 +6,9 @@ class Direction(Enum):
     east = 2
     west = 3
 
+    def is_north_south(direction):
+        return direction == Direction.north or direction == Direction.south
+
 class MovementOptions(Enum):
     through = 0
     right = 1
