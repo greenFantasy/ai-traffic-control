@@ -14,6 +14,7 @@ class Car (Vehicle):
         self.findBoundaries()
 
     def findBoundaries(self):
+        # Add center calculations self.center
         rlX : float = self.rear_left[0]
         rlY : float = self.rear_left[1]
         if self.direction == Direction.north:
@@ -34,6 +35,7 @@ class Car (Vehicle):
             self.front_right = (rlX- self.height, rlY +self.width)   
 
     def move(self):
+        #Recalculate speed at time step depending on distance2nearestobstacle
         rlX : float = self.rear_left[0]
         rlY : float = self.rear_left[1]
         if self.distance2nearestobstacle()>5:
