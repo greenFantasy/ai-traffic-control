@@ -8,6 +8,7 @@ class World:
     def __init__(self):
         # TODO
         self.streets = []
+        self.time = 0
 
     def get_objects(self):
         # TODO
@@ -17,19 +18,26 @@ class World:
         # TODO
         pass
 
+    def play(self):
+        ...
+        self.time += 1
+
+    def get_current_time(self):
+        return self.time
+
 class SimpleIntersectionWorld(World):
     def __init__(self):
-        self.inner_north_lane = Lane(Direction.north, 1.0, 2.0)
-        self.outer_north_lane = Lane(Direction.north, 3.0, 2.0)
+        self.inner_north_lane = Lane(Direction.north, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
+        self.outer_north_lane = Lane(Direction.north, 1.5*STANDARD_LANE_WIDTH, STANDARD_LANE_WIDTH)
 
-        self.inner_south_lane = Lane(Direction.south, -1.0, 2.0)
-        self.outer_south_lane = Lane(Direction.south, -3.0, 2.0)
+        self.inner_south_lane = Lane(Direction.south, -STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
+        self.outer_south_lane = Lane(Direction.south, -1.5*STANDARD_LANE_WIDTH, STANDARD_LANE_WIDTH)
 
-        self.inner_west_lane = Lane(Direction.west, 1.0, 2.0)
-        self.outer_west_lane = Lane(Direction.west, 3.0, 2.0)
+        self.inner_west_lane = Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
+        self.outer_west_lane = Lane(Direction.west, 1.5*STANDARD_LANE_WIDTH, STANDARD_LANE_WIDTH)
 
-        self.inner_east_lane = Lane(Direction.east, -1.0, 2.0)
-        self.outer_east_lane = Lane(Direction.east, -3.0, 2.0)
+        self.inner_east_lane = Lane(Direction.east, -STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
+        self.outer_east_lane = Lane(Direction.east, -1.5*STANDARD_LANE_WIDTH, STANDARD_LANE_WIDTH)
 
         self.north_street = Street(Direction.north, [self.inner_north_lane, self.outer_north_lane])
         self.south_street = Street(Direction.south, [self.inner_south_lane, self.outer_south_lane])

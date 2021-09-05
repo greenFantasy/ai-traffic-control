@@ -9,12 +9,12 @@ class Intersection:
                  east_street: Street = None,
                  west_street: Street = None):
 
-        self.north_street = north_street
-        self.south_street = south_street
-        self.east_street = east_street
-        self.west_street = west_street
-        self.streets = [s for s in [north_street, south_street,
-                        east_street, west_street] if s]
+        self.street_dict = {}
+        self.street_dict[Direction.north] = self.north_street = north_street
+        self.street_dict[Direction.south] = self.south_street = south_street
+        self.street_dict[Direction.east] = self.east_street = east_street
+        self.street_dict[Direction.west] = self.west_street = west_street
+        self.streets = [s for s in self.street_dict if s]
 
         self._determine_boundaries()
         self._create_traffic_lights() # TODO
@@ -35,6 +35,6 @@ class Intersection:
     def _create_traffic_lights(self):
         self.traffic_lights = {}
         for street in self.streets:
-            self.traffic_lights[(street.direction, MovementOptions.left)] = TrafficLight(set([MovementOptions.left]))
-            self.traffic_lights[(street.direction, MovementOptions.through)] = TrafficLight(set([MovementOptions.through]))
-            self.traffic_lights[(street.direction, MovementOptions.right)] = TrafficLight(set([MovementOptions.right]))
+            self.traffic_lights[(street.direction, MovementOptions.left)] = TrafficLight(MovementOptions.left, street.direction, self)
+            self.traffic_lights[(street.direction, MovementOptions.through)] = TrafficLight(MovementOptions.through, street.direction, self)
+            self.traffic_lights[(street.direction, MovementOptions.right)] = TrafficLight(MovementOptions.right, street.direction, self)
