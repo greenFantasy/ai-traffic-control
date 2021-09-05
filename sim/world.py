@@ -4,21 +4,20 @@ from lane import Lane
 from intersection import Intersection
 from trafficlight import TrafficLight
 from car import Car
-import Float
 
 class World:
     def __init__(self):
-        # TODO
         self.streets = []
         self.time = 0
+        self.time_step = .1
+        self.vehicles = []
 
     def get_objects(self):
-        # TODO
-        pass
-
-    def get_vehicles(self):
-        # TODO
-        pass
+        objects = []
+        for a in [a for a in self.__dict__.keys() if a[0] != " "]
+            if type(self.__dict__[a]) in [Street, Lane, Intersection, TrafficLight, Car]:
+                objects.append(self.__dict__[a])
+        return objects
 
     def add_vehicle_to_lane(self, lane: Lane):
         # Calculate the end of lane
@@ -70,8 +69,9 @@ class World:
         self.vehicles.append(car)
 
     def play(self):
-        ...
-        self.time += 1
+        for v in vehicles:
+            v.move()
+        self.time += self.time_step
 
     def get_current_time(self):
         return self.time
@@ -97,7 +97,8 @@ class SimpleIntersectionWorld(World):
 
         self.streets = [self.north_street, self.south_street, self.west_street, self.east_street]
 
-        self.intersection = Intersection(north_street=self.north_street,
+        self.intersection = Intersection(world,
+                                         north_street=self.north_street,
                                          south_street=self.south_street,
                                          west_street=self.west_street,
                                          east_street=self.east_street)

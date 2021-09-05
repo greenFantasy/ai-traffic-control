@@ -1,13 +1,16 @@
 from consts import *
 from street import Street
 from trafficlight import TrafficLight
+from camera import Camera
 
 class Intersection:
     def __init__(self,
+                 world,
                  north_street: Street = None,
                  south_street: Street = None,
                  east_street: Street = None,
-                 west_street: Street = None):
+                 west_street: Street = None
+                 ):
 
         self.street_dict = {}
         self.street_dict[Direction.north] = self.north_street = north_street
@@ -38,6 +41,6 @@ class Intersection:
     def _create_traffic_lights(self):
         self.traffic_lights = {}
         for street in self.streets:
-            self.traffic_lights[(street.direction, MovementOptions.left)] = TrafficLight(MovementOptions.left, street.direction, self)
-            self.traffic_lights[(street.direction, MovementOptions.through)] = TrafficLight(MovementOptions.through, street.direction, self)
-            self.traffic_lights[(street.direction, MovementOptions.right)] = TrafficLight(MovementOptions.right, street.direction, self)
+            self.traffic_lights[(street.direction, MovementOptions.left)] = TrafficLight(MovementOptions.left, street.direction, self, sensor=Camera(range=30.0))
+            self.traffic_lights[(street.direction, MovementOptions.through)] = TrafficLight(MovementOptions.through, street.direction, self, sensor=Camera(range=30.0))
+            self.traffic_lights[(street.direction, MovementOptions.right)] = TrafficLight(MovementOptions.right, street.direction, self, sensor=Camera(range=30.0))
