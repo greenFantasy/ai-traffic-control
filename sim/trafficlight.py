@@ -43,5 +43,4 @@ class TrafficLight:
         return data
 
     def get_current_time(self):
-        # TODO, likely will need to go in a different file
         return self.intersection.world.get_current_time()
