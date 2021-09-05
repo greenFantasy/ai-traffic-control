@@ -31,7 +31,15 @@ class TrafficLight:
         lanes = self.intersection.street_dict[self.street_direction].lanes
         data = []
         for l in lanes:
-            data.extend(l.get_vehicles()) # TODO: filter out for vehicles in a certain range
+            if self.street_direction == Direction.north:
+                data.extend(l.get_vehicles(intersection.lower_boundary - self.sensor.range,intersection.upper_boundary))
+            elif self.street_direction == Direction.south:
+                data.extend(l.get_vehicles(intersection.lower_boundary,intersection.upper_boundary + self.sensor.range))
+            elif self.street_direction == Direction.east:
+                data.extend(l.get_vehicles(intersection.left_boundary - self.sensor.range,intersection.right_boundary))
+            else:
+                data.extend(l.get_vehicles(intersection.left_boundary,intersection.right_boundary + self.sensor.range))
+        return data
 
     def get_current_time(self):
         # TODO, likely will need to go in a different file
