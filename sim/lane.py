@@ -22,6 +22,7 @@ class Lane:
         self.vehicles = []
         self.min = self.position - self.width / 2
         self.max = self.position + self.width / 2
+        self.street = None
 
     def get_vehicles(self, start: Optional[float], end: Optional[float]):
         if not start and not end:

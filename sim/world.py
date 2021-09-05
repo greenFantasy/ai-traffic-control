@@ -3,6 +3,8 @@ from street import Street
 from lane import Lane
 from intersection import Intersection
 from trafficlight import TrafficLight
+from car import Car
+import Float
 
 class World:
     def __init__(self):
@@ -17,6 +19,55 @@ class World:
     def get_vehicles(self):
         # TODO
         pass
+
+    def add_vehicle_to_lane(self, lane: Lane):
+        # Calculate the end of lane
+        # First, get last car in lane:
+        lastCar = lane.get_vehicles()[-1] if lane.get_vehicles() else None
+        # Then, get last intersection in lane
+        street = lane.street
+        lastIntersection = street.intersections[0] # TODO actually get the last intersection once it's a heap
+        assert lastCar or lastIntersection, "Rajat help me"
+        if lane.direction == Direction.north:
+            min = float("inf")
+            if lastCar:
+                if lastCar.rear_left[1]<min:
+                    min = lastCar.rear_left[1]
+            if lastIntersection.lower_boundary<min:
+                min = lastIntersection.lower_boundary
+        elif lane.direction == Direction.south:
+            min = -float("inf")
+            if lastCar:
+                if lastCar.rear_left[1]>min:
+                    min = lastCar.rear_left[1]
+            if lastIntersection.upper_boundary>min:
+                min = lastIntersection.upper_boundary
+        elif lane.direction == Direction.east:
+            min = float("inf")
+            if lastCar:
+                if lastCar.rear_left[0]<min:
+                    min = lastCar.rear_left[0]
+            if lastIntersection.left_boundary<min:
+                min = lastIntersection.left_boundary
+        elif lane.direction == Direction.west:
+            min = -float("inf")
+            if lastCar:
+                if lastCar.rear_left[0]>min:
+                    min = lastCar.rear_left[0]
+            if lastIntersection.right_boundary>min:
+                min = lastIntersection.right_boundary
+        # TODO(sssai): center the cars in the lane
+        if lane.direction == Direction.north:
+            rear_left = (lane.min + 2,min-30)
+        elif lane.direction == Direction.south:
+            rear_left = (lane.max - 2,min+30)
+        elif lane.direction == Direction.east:
+            rear_left = (min-30, lane.max - 2)
+        elif lane.direction == Direction.west:
+            rear_left = (min+30, lane.min+2)
+        car = Car(rear_left, 15, 6, 5) # TODO: set the size dynamically as a parameter
+        lane.add_vehicle(car)
+        self.vehicles.append(car)
 
     def play(self):
         ...

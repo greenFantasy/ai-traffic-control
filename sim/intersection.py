@@ -15,6 +15,9 @@ class Intersection:
         self.street_dict[Direction.east] = self.east_street = east_street
         self.street_dict[Direction.west] = self.west_street = west_street
         self.streets = [s for s in self.street_dict if s]
+        for s in self.streets:
+            # TODO: make the intersections a heap and maintain sortedness when adding new intersections
+            s.intersections.append(self)
 
         self._determine_boundaries()
         self._create_traffic_lights() # TODO
