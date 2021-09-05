@@ -29,14 +29,14 @@ class Lane:
         # TODO(sssai): enable range selection of vehicles 
 
     def add_vehicle(self, vehicle: Car):
+        # Set lane in vehicle so it knows where it is.
+        vehicle.setLane(self)
+        vehicle.findBoundaries()
         # Ensure vehicle is in the lane
         if self.direction == Direction.north or self.direction == Direction.south:
             assert (self.min <= vehicle.rear_left[0] <= self.max) and (self.min <= vehicle.rear_right[0] <= self.max)
         elif self.direction == Direction.west or self.direction == Direction.east:
             assert (self.min <= vehicle.rear_left[1] <= self.max) and (self.min <= vehicle.rear_right[1] <= self.max)
-        # Set lane in vehicle so it knows where it is.
-        vehicle.setLane(self)
-        vehicle.findBoundaries()
         # Add to the sorted vehicle list (sorted depending on lane direction)
         if self.direction == Direction.north:
             heapq.heappush(self.vehicles, (-vehicle.rear_left[1],vehicle))
