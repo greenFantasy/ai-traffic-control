@@ -1,3 +1,4 @@
+from typing import Optional
 from sim.vehicle import Vehicle
 from consts import *
 from car import Car
@@ -21,6 +22,11 @@ class Lane:
         self.vehicles = []
         self.min = self.position - self.width / 2
         self.max = self.position + self.width / 2
+
+    def get_vehicles(self, start: Optional[float], end: Optional[float]):
+        if not start and not end:
+            return [vehicleTup[1] for vehicleTup in self.vehicles]
+        # TODO(sssai): enable range selection of vehicles 
 
     def add_vehicle(self, vehicle: Car):
         # Ensure vehicle is in the lane
