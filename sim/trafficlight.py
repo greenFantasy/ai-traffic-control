@@ -8,8 +8,6 @@ class TrafficLight:
         self.intersection = intersection
         self.state: TrafficLightStates = TrafficLightStates.red
         self.state_start_time: float = self.get_current_time()
-        self.pos_x = None
-        self.pos_y = None
         self.sensor: Sensor = None
 
     def green_to_yellow(self):
@@ -43,4 +41,4 @@ class TrafficLight:
 
     def get_current_time(self):
         # TODO, likely will need to go in a different file
-        return None
+        return self.intersection.world.get_current_time()

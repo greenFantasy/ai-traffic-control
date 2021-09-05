@@ -19,8 +19,4 @@ class TrafficLightStates(Enum):
     yellow = 1
     red = 2
 
-class SensorTypes(Enum):
-    camera = 0
-    induction = 1
-
 STANDARD_LANE_WIDTH = 12.0

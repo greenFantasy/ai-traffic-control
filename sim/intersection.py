@@ -4,10 +4,12 @@ from trafficlight import TrafficLight
 
 class Intersection:
     def __init__(self,
+                 world,
                  north_street: Street = None,
                  south_street: Street = None,
                  east_street: Street = None,
-                 west_street: Street = None):
+                 west_street: Street = None
+                 ):
 
         self.street_dict = {}
         self.street_dict[Direction.north] = self.north_street = north_street

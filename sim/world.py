@@ -9,6 +9,7 @@ class World:
         # TODO
         self.streets = []
         self.time = 0
+        self.time_step = .1
 
     def get_objects(self):
         # TODO
@@ -20,7 +21,7 @@ class World:
 
     def play(self):
         ...
-        self.time += 1
+        self.time += self.time_step
 
     def get_current_time(self):
         return self.time
@@ -46,7 +47,8 @@ class SimpleIntersectionWorld(World):
 
         self.streets = [self.north_street, self.south_street, self.west_street, self.east_street]
 
-        self.intersection = Intersection(north_street=self.north_street,
+        self.intersection = Intersection(world,
+                                         north_street=self.north_street,
                                          south_street=self.south_street,
                                          west_street=self.west_street,
                                          east_street=self.east_street)
