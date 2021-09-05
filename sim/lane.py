@@ -26,7 +26,13 @@ class Lane:
     def get_vehicles(self, start: Optional[float], end: Optional[float]):
         if not start and not end:
             return [vehicleTup[1] for vehicleTup in self.vehicles]
-        # TODO(sssai): enable range selection of vehicles 
+        elif start and not end:
+            return [vehicleTup[1] for vehicleTup in self.vehicles if vehicleTup[0]>=start]
+        elif not start and end:
+            return [vehicleTup[1] for vehicleTup in self.vehicles if vehicleTup[0]<=end]
+        else:
+            return [vehicleTup[1] for vehicleTup in self.vehicles if end>=vehicleTup[0]>=start]
+
 
     def add_vehicle(self, vehicle: Car):
         # Set lane in vehicle so it knows where it is.
