@@ -28,7 +28,7 @@ class TrafficLight:
         lanes = self.intersection.street_dict[self.street_direction].lanes
         data = []
         for l in lanes:
-            data.extend(lanes.vehicles) # TODO: filter out for vehicles in a certain range
+            data.extend(l.vehicles) # TODO: filter out for vehicles in a certain range
 
     def get_current_time(self):
         # TODO, likely will need to go in a different file
