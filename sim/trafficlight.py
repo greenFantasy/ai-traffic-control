@@ -3,13 +3,13 @@ from typing import Set
 from sensor import Sensor
 
 class TrafficLight:
-    def __init__(self, movement_options: MovementOptions, street_direction: Direction, intersection):
+    def __init__(self, movement_options: MovementOptions, street_direction: Direction, intersection, sensor):
         self.movement_option: MovementOptions = movement_options
         self.street_direction: Direction = street_direction
         self.intersection = intersection
         self.state: TrafficLightStates = TrafficLightStates.red
         self.state_start_time: float = self.get_current_time()
-        self.sensor: Sensor = None
+        self.sensor: Sensor = sensor # TODO: Should be able to have multiple sensors
 
     def green_to_yellow(self):
         assert(self.state == TrafficLightStates.green)
@@ -27,6 +27,8 @@ class TrafficLight:
         self.state_start_time = self.get_current_time()
 
     def get_sensor_data(self):
+        if not self.sensor:
+            return []
         lanes = self.intersection.street_dict[self.street_direction].lanes
         data = []
         for l in lanes:
