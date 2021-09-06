@@ -12,12 +12,13 @@ class Intersection:
                  west_street: Street = None
                  ):
 
+        self.world = world
         self.street_dict = {}
         self.street_dict[Direction.north] = self.north_street = north_street
         self.street_dict[Direction.south] = self.south_street = south_street
         self.street_dict[Direction.east] = self.east_street = east_street
         self.street_dict[Direction.west] = self.west_street = west_street
-        self.streets = [s for s in self.street_dict if s]
+        self.streets = [s for s in self.street_dict.values() if s]
         for s in self.streets:
             # TODO: make the intersections a heap and maintain sortedness when adding new intersections
             s.intersections.append(self)

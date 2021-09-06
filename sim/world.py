@@ -14,8 +14,8 @@ class World:
 
     def get_objects(self):
         objects = []
-        for a in [a for a in self.__dict__.keys() if a[0] != " "]
-            if type(self.__dict__[a]) in [Street, Lane, Intersection, TrafficLight, Car]:
+        for a in [a for a in self.__dict__.keys() if a[0] != " "]:
+            if type(self.__dict__[a]) in [Street, Lane, Intersection]:
                 objects.append(self.__dict__[a])
         return objects
 
@@ -69,8 +69,8 @@ class World:
         self.vehicles.append(car)
 
     def play(self):
-        for v in vehicles:
-            v.move()
+        for v in self.vehicles:
+            v.move(self.time_step)
         self.time += self.time_step
 
     def get_current_time(self):
@@ -78,6 +78,7 @@ class World:
 
 class SimpleIntersectionWorld(World):
     def __init__(self):
+        super().__init__()
         self.inner_north_lane = Lane(Direction.north, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
         self.outer_north_lane = Lane(Direction.north, 1.5*STANDARD_LANE_WIDTH, STANDARD_LANE_WIDTH)
 
@@ -97,7 +98,7 @@ class SimpleIntersectionWorld(World):
 
         self.streets = [self.north_street, self.south_street, self.west_street, self.east_street]
 
-        self.intersection = Intersection(world,
+        self.intersection = Intersection(self,
                                          north_street=self.north_street,
                                          south_street=self.south_street,
                                          west_street=self.west_street,
