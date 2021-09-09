@@ -1,6 +1,7 @@
 from typing import Tuple
 from vehicle import Vehicle
 from consts import *
+from bisect import bisect_left
 
 class Car (Vehicle):
     def __init__(self, rear_left: Tuple[float], height: float, width: float, init_speed: float) -> None:
@@ -54,7 +55,22 @@ class Car (Vehicle):
         self.lane = lane
 
     def distance2nearestobstacle(self):
-        #TODO
-        pass
+        # Cars can have three obstacles - 
+        #   - cars in the same intersection
+        #   - cars in the same lane
+        #   - red traffic light (in the same street)
+        # Firstly, lets get the cars in the same lane:
+        assert self.lane, "Cars must have a lane in order to move."
+        currLane = self.lane
+        vehiclesinLane = currLane.get_vehicles()
+        vehiclePos = bisect_left(vehiclesinLane, self)
+        assert vehiclePos!=len(vehiclesinLane), "Car is not in the lane's vehicle list"
+        if vehiclePos==0:
+            # There are no other vehicles in the lane
+            closestVehicle = float("inf")
+        else:
+            carInFront = vehiclesinLane[vehiclePos-1]
+            closestVehicle = abs(carInFront.rear_left - carInFront.rear_left)
+
 
     
