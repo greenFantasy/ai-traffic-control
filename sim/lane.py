@@ -1,5 +1,5 @@
 from typing import Optional
-from sim.vehicle import Vehicle
+from vehicle import Vehicle
 from consts import *
 from car import Car
 import heapq
@@ -24,16 +24,10 @@ class Lane:
         self.max = self.position + self.width / 2
         self.street = None
 
-    def get_vehicles(self, start: Optional[float], end: Optional[float]):
-        if not start and not end:
-            return [vehicleTup[1] for vehicleTup in self.vehicles]
-        elif start and not end:
-            return [vehicleTup[1] for vehicleTup in self.vehicles if vehicleTup[0]>=start]
-        elif not start and end:
-            return [vehicleTup[1] for vehicleTup in self.vehicles if vehicleTup[0]<=end]
-        else:
-            return [vehicleTup[1] for vehicleTup in self.vehicles if end>=vehicleTup[0]>=start]
-
+    def get_vehicles(self, start: Optional[float] = None, end: Optional[float] = None):
+        start = start if start else -float('inf')
+        end = end if end else float('inf')
+        return [vehicleTup[1] for vehicleTup in self.vehicles if end>=vehicleTup[1].get_changing_coordinate()>=start]
 
     def add_vehicle(self, vehicle: Car):
         # Set lane in vehicle so it knows where it is.
