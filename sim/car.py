@@ -60,7 +60,17 @@ class Car (Vehicle):
     def setLane(self, lane):
         self.lane = lane
 
-    def distance2nearestobstacle(self):
+    def get_intersection_boundary_by_dir(self, intersection) -> float:
+        if self.lane.direction == Direction.north:
+            return intersection.lower_boundary
+        elif self.lane.direction == Direction.south:
+            return intersection.upper_boundary
+        elif self.lane.direction == Direction.east:
+            return intersection.left_boundary
+        elif self.lane.direction == Direction.west:
+            return intersection.right_boundary
+
+    def distance2nearestobstacle(self) -> float:
         # Cars can have three obstacles - 
         #   - cars in the same intersection
         #   - cars in the same lane
@@ -76,7 +86,16 @@ class Car (Vehicle):
             closestVehicle = float("inf")
         else:
             carInFront = vehiclesinLane[vehiclePos-1]
-            closestVehicle = abs(carInFront.rear_left - carInFront.rear_left)
+            closestVehicle = abs(carInFront.get_changing_coordinate() - self.get_changing_coordinate())
+        # Secondly, let's get cars in the same intersection:
+        # TODO(sssai)
+        closestCarInIntersection = float("inf")
+        # Thirdly, let's find the nearest intersection:
+        currStreet = currLane.street
+        assert currStreet, f"Lane {currLane} is not in a street"
+        nearestIntersection = currStreet.intersections[0] # TODO(sssai) actually get the nearest intersection once it's a heap
+        closestIntersection = abs(self.get_intersection_boundary_by_dir(nearestIntersection) - self.get_changing_coordinate())
+        return min([closestVehicle, closestCarInIntersection, closestIntersection])
 
 
     
