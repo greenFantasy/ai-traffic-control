@@ -2,6 +2,7 @@ from typing import Tuple
 from vehicle import Vehicle
 from consts import *
 from bisect import bisect_left
+import warnings
 
 class Car (Vehicle):
     def __init__(self, rear_left: Tuple[float], height: float, width: float, init_speed: float) -> None:
@@ -12,6 +13,29 @@ class Car (Vehicle):
         self.height = height
         self.width = width
         self.lane = None
+        self.id = 0 # TODO(sssai): make this an input to initialize Car 
+    
+    # Efficiency matters - so we define each of the cmp functions
+    def __eq__(self, other):
+        return self.get_changing_coordinate() == other.get_changing_coordinate() and self.id == other.id
+
+    def __ne__(self, other):
+        return self.get_changing_coordinate() != other.get_changing_coordinate()
+
+    def __lt__(self, other):
+        return self.get_changing_coordinate() < other.get_changing_coordinate()
+
+    def __le__(self, other):
+        return self.get_changing_coordinate() <= other.get_changing_coordinate()
+
+    def __gt__(self, other):
+        return self.get_changing_coordinate() > other.get_changing_coordinate()
+
+    def __ge__(self, other):
+        return self.get_changing_coordinate() >= other.get_changing_coordinate()
+
+    def __repr__(self):
+        return "Car at (%s,%s)" % (self.rear_left[0], self.rear_left[1])
 
     def get_changing_coordinate(self):
         if not self.lane or Direction.is_north_south(self.lane.direction):
@@ -46,7 +70,14 @@ class Car (Vehicle):
         rlX : float = self.rear_left[0]
         rlY : float = self.rear_left[1]
         assert self.lane is not None, "Lane is not set - cannot move car"
-        # if self.distance2nearestobstacle()>5: #TODO(sssai): implement variable speed depending on distance2nearestobstacle
+        if self.distance2nearestobstacle()>10:
+            self.speed = 30
+        elif 5<=self.distance2nearestobstacle()<=10:
+            self.speed = 15
+        elif 2<=self.distance2nearestobstacle()<=5:
+            self.speed = 5
+        elif self.distance2nearestobstacle()<=2:
+            self.speed = 0
         if self.lane.direction == Direction.north:
             self.rear_left = (rlX, rlY+self.speed * time_step)
         elif self.lane.direction == Direction.south:
@@ -90,11 +121,30 @@ class Car (Vehicle):
         # Secondly, let's get cars in the same intersection:
         # TODO(sssai)
         closestCarInIntersection = float("inf")
-        # Thirdly, let's find the nearest intersection:
+        # Thirdly, let's find the nearest intersection with a red light:
         currStreet = currLane.street
         assert currStreet, f"Lane {currLane} is not in a street"
         nearestIntersection = currStreet.intersections[0] # TODO(sssai) actually get the nearest intersection once it's a heap
-        closestIntersection = abs(self.get_intersection_boundary_by_dir(nearestIntersection) - self.get_changing_coordinate())
+        if self.plan ==[]:
+            warnings.warn("Car has no plan - defaulting to Move.through")
+            nextMove = MovementOptions.through
+        else:
+            nextMove = self.plan[0]
+        currTrafficLight = nearestIntersection.traffic_lights[(currLane.direction, nextMove)]
+        if currTrafficLight.state != TrafficLightStates.red:
+            closestIntersection = float("inf")
+        else:
+            diffIntersection = self.get_intersection_boundary_by_dir(nearestIntersection) - self.get_changing_coordinate()
+            if currLane.direction == Direction.north or currLane.direction == Direction.east:
+                if diffIntersection >= 0:
+                    closestIntersection = diffIntersection
+                else:
+                    closestIntersection = float("inf")
+            elif currLane.direction == Direction.south or currLane.direction == Direction.west:
+                if diffIntersection <= 0:
+                    closestIntersection = abs(diffIntersection)
+                else:
+                    closestIntersection = float("inf")
         return min([closestVehicle, closestCarInIntersection, closestIntersection])
 
 
