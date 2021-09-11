@@ -7,7 +7,7 @@ class Path:
         self.end = self.parametrization.get_pos(self.parametrization.max_p) # Ending coordinates
         self.vehicles = [] # TODO: will vehicles list contain tuple elements like before? If so, first element should be p-value, and second element shoulld be vehicle
 
-    def add_connecting_path(self, path)
+    def add_connecting_path(self, path):
         # TODO: connect path and self
         pass
 

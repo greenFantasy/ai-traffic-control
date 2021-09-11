@@ -24,7 +24,7 @@ class Parametrization:
     def __init__(self,
         name: str,
         coor_func: Callable[[float], Tuple[float, float]],
-        max_p: float,
+        max_pos: float,
         starting_coors: Tuple[float, float]=(0, 0)
     ):
 
@@ -36,8 +36,8 @@ class Parametrization:
 
     def get_pos(self, p) -> Tuple[float, float]:
         # get position associated with p
-        if p > max_pos:
-            raise ValueError(f'p = {p} > max_pos allowed for {name} parametrization')
+        if p > self.max_pos:
+            raise ValueError(f'p = {p} > max_pos allowed for {self.name} parametrization')
 
         (x, y) = self.coor_func(p)
         return (x + self.starting_coors[0], y + self.starting_coors[1])
