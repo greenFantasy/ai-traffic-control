@@ -1,5 +1,6 @@
 from enum import Enum
 from collections.abc import Callable
+from typing import Tuple
 
 class Direction(Enum):
     north = 0
