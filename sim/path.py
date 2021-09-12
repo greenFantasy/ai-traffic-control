@@ -7,19 +7,21 @@ class Path:
         self.parametrization = parametrization
         self.start = self.parametrization.get_pos(0) # Starting coordinates
         self.end = self.parametrization.get_pos(self.parametrization.max_p) # Ending coordinates
-        self.vehicles = [] 
+        self.vehicles = []
         self.traffic_lights = [] # TODO: I presume a path will have at most two traffic lights - i.e. one at the front one at the back. If so, we shouldn't use a list, just store both as Optionals
+        self.connecting_paths = []
+
     def add_connecting_path(self, path):
         # TODO: connect path and self
-        pass
+        self.connecting_paths.append(path)
 
     def add_traffic_light(self, traffic_light, pos):
         # TODO: add traffic light to a position along this path
         pass
 
     def get_vehicles(self, startP: Optional[float] = None, endP: Optional[float] = None):
-        start = startP if startP else -float('inf')
-        end = endP if endP else float('inf')
+        start = startP if startP else 0
+        end = endP if endP else self.parametrization.max_p
         return [vehicleTup[1] for vehicleTup in self.vehicles if end>=vehicleTup[1].p_value>=start]
 
     def add_vehicle(self, vehicle, pos):

@@ -6,14 +6,13 @@ from camera import Camera
 class Intersection:
     def __init__(self,
                  world,
-                 north_street: Street = None,
-                 south_street: Street = None,
-                 east_street: Street = None,
-                 west_street: Street = None
+                 streets, # in a clockwise order
+                 paths_to_connect, # triples, incoming, outgoing, movementOption
                  ):
 
         self.world = world
         self.street_dict = {}
+        self.paths_to_connect: List[Tuple[Path, Path]] = paths_to_connect
         self.street_dict[Direction.north] = self.north_street = north_street
         self.street_dict[Direction.south] = self.south_street = south_street
         self.street_dict[Direction.east] = self.east_street = east_street
@@ -38,6 +37,10 @@ class Intersection:
                                   if not Direction.is_north_south(street.direction)])
         self.upper_boundary = max([street.max for street in self.streets
                                   if not Direction.is_north_south(street.direction)])
+
+    def _create_paths_in_intersection(self):
+        # TODO
+        pass
 
     def _create_traffic_lights(self):
         self.traffic_lights = {}
