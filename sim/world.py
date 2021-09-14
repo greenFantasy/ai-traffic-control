@@ -107,7 +107,22 @@ class SimpleIntersectionWorld(World):
         self.east_street = Street(Direction.east, [self.inner_east_lane, self.outer_east_lane])
 
         self.streets = [self.north_street, self.south_street, self.west_street, self.east_street]
-
+        self.paths_to_connect = [(self.inner_north_lane_i, self.inner_north_lane_o, MovementOptions.through),
+                                (self.outer_north_lane_i, self.outer_north_lane_o, MovementOptions.through),
+                                (self.inner_north_lane_i, self.inner_west_lane_o, MovementOptions.left),
+                                (self.outer_north_lane_i, self.outer_east_lane_o, MovementOptions.right),
+                                (self.inner_south_lane_i, self.inner_south_lane_o, MovementOptions.through),
+                                (self.outer_south_lane_i, self.outer_south_lane_o, MovementOptions.through),
+                                (self.inner_south_lane_i, self.inner_east_lane_o, MovementOptions.left),
+                                (self.outer_south_lane_i, self.outer_west_lane_o, MovementOptions.right),
+                                (self.inner_west_lane_i, self.inner_west_lane_o, MovementOptions.through),
+                                (self.outer_west_lane_i, self.outer_west_lane_o, MovementOptions.through),
+                                (self.inner_west_lane_i, self.inner_south_lane_o, MovementOptions.left),
+                                (self.outer_west_lane_i, self.outer_north_lane_o, MovementOptions.right),
+                                (self.inner_east_lane_i, self.inner_east_lane_o, MovementOptions.through),
+                                (self.outer_east_lane_i, self.outer_east_lane_o, MovementOptions.through),
+                                (self.inner_east_lane_i, self.inner_north_lane_o, MovementOptions.left),
+                                (self.outer_east_lane_i, self.outer_south_lane_o, MovementOptions.right),]
         self.intersection = Intersection(self,
                                          north_street=self.north_street,
                                          south_street=self.south_street,
