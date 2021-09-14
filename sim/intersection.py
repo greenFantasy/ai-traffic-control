@@ -4,6 +4,7 @@ from trafficlight import TrafficLight
 from camera import Camera
 from typing import Tuple, List
 from path import Path
+from parametrization import *
 
 class Intersection:
     def __init__(self,
@@ -47,14 +48,15 @@ class Intersection:
             inboundEnd = inbound.end
             outboundStart = outbound.start
             subPath = Path(parametrization = LinearParam(inboundEnd, outboundStart), width = STANDARD_LANE_WIDTH)
-            inbound.add_connecting_path(subPath)
-            subPath.add_connecting_path(outbound)
+            inbound.add_connecting_path(subPath, moveOp)
+            subPath.add_connecting_path(outbound, MovementOptions.through)
             # get traffic light corresponding to this path movement
             street = inbound.street
-            inbound.add_traffic_light(self.traffic_lights[(street, moveOp)], moveOp)
+            inbound.add_traffic_light(self.traffic_lights[(street.id, moveOp)], moveOp)
 
     def _create_traffic_lights(self):
         for street in self.streets:
+            # TODO: Includes outbound streets, which we don't want
             self.traffic_lights[(street.id, MovementOptions.left)] = TrafficLight(MovementOptions.left, street.id, self, sensor=Camera(range=30.0))
             self.traffic_lights[(street.id, MovementOptions.through)] = TrafficLight(MovementOptions.through, street.id, self, sensor=Camera(range=30.0))
             self.traffic_lights[(street.id, MovementOptions.right)] = TrafficLight(MovementOptions.right, street.id, self, sensor=Camera(range=30.0))

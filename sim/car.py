@@ -10,7 +10,7 @@ class Car (Vehicle):
         super().__init__()
         self.center = center
         self.speed = init_speed
-        self.plan : List[MovementOptions] = []
+        self.plan : List[MovementOptions] = [MovementOptions.through] * 10 # TODO: Fix to have actual plan
         self.height = height
         self.width = width
         self.path = None
@@ -37,13 +37,14 @@ class Car (Vehicle):
         return self.p_value >= other.p_value
 
     def __repr__(self):
-        return "Car at (%s,%s)" % (self.rear_left[0], self.rear_left[1])
+        return "Car at (%s,%s)" % (self.center[0], self.center[1])
 
     def findBoundaries(self):
         self.center: Tuple[float, float] = self.path.parametrization.get_pos(self.p_value)
         center_vec = torch.tensor(self.center)
         forward_vec = torch.tensor(self.path.parametrization.get_direction_vector(self.p_value))
         right_vec = torch.tensor(self.path.parametrization.get_perp_vector(self.p_value))
+        # TODO: Boundaries may not be correct?
         self.rear_left = tuple((center_vec - 0.5 * forward_vec - 0.5 * right_vec).tolist())
         self.rear_right = tuple((center_vec - 0.5 * forward_vec + 0.5 * right_vec).tolist())
         self.front_left = tuple((center_vec + 0.5 * forward_vec - 0.5 * right_vec).tolist())
@@ -60,19 +61,19 @@ class Car (Vehicle):
             self.speed = 5
         elif self.distance2nearestobstacle()<=2:
             self.speed = 0
-        if (self.p_value + self.speed*time_step) > self.path.parametrization.max_p:
+        if (self.p_value + self.speed*time_step) > self.path.parametrization.max_pos:
             # Move to next path
             connecting_paths = self.path.connecting_paths
             assert len(connecting_paths.values())>0, "Path has no connecting paths" # Perhaps despawn the car here
             if len(connecting_paths.values()) == 1:
-                nextPath = connecting_paths.values()[0]
+                nextPath = list(connecting_paths.values())[0]
             else:
                 nextMoveOp = self.plan.pop(0)
                 assert nextMoveOp in connecting_paths, "No path specified for planned move op"
                 nextPath = connecting_paths[nextMoveOp]
             # Remove from current path # Assuming that our vehicle is the top of the heap
             self.path.vehicles.pop(-1) # Make sure this works
-            nextPath.add_vehicles(self, 0)
+            nextPath.add_vehicle(self, 0)
         self.setPValue(self.p_value + self.speed*time_step)
 
     def setPath(self, path):
@@ -105,7 +106,7 @@ class Car (Vehicle):
             distclosestTrafficLight =  float("inf")
         elif currPath.traffic_light[nextMove].state == TrafficLightStates.red:
             # closest traffic light is at end of path
-            distclosestTrafficLight = currPath.parametrization.max_p - self.p_value
+            distclosestTrafficLight = currPath.parametrization.max_pos - self.p_value
         else:
             # No traffic light at end of path
             distclosestTrafficLight =  float("inf")

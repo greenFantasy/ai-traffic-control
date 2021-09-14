@@ -1,6 +1,5 @@
 from consts import *
 from street import Street
-from lane import Lane
 from intersection import Intersection
 from trafficlight import TrafficLight
 from car import Car
@@ -109,4 +108,21 @@ class SimpleIntersectionWorld(World):
         self.outer_west_lane_o = Path(LinearParam((-24, 18), (-100, 18)), width = STANDARD_LANE_WIDTH)
         self.streets.append(Street(7, [self.inner_west_lane_o, self.outer_west_lane_o]))
 
-        self.intersection = Intersection(self, self.streets, )
+        self.paths_to_connect = [(self.inner_north_lane_i, self.inner_north_lane_o, MovementOptions.through),
+                                (self.outer_north_lane_i, self.outer_north_lane_o, MovementOptions.through),
+                                (self.inner_north_lane_i, self.inner_west_lane_o, MovementOptions.left),
+                                (self.outer_north_lane_i, self.outer_east_lane_o, MovementOptions.right),
+                                (self.inner_south_lane_i, self.inner_south_lane_o, MovementOptions.through),
+                                (self.outer_south_lane_i, self.outer_south_lane_o, MovementOptions.through),
+                                (self.inner_south_lane_i, self.inner_east_lane_o, MovementOptions.left),
+                                (self.outer_south_lane_i, self.outer_west_lane_o, MovementOptions.right),
+                                (self.inner_west_lane_i, self.inner_west_lane_o, MovementOptions.through),
+                                (self.outer_west_lane_i, self.outer_west_lane_o, MovementOptions.through),
+                                (self.inner_west_lane_i, self.inner_south_lane_o, MovementOptions.left),
+                                (self.outer_west_lane_i, self.outer_north_lane_o, MovementOptions.right),
+                                (self.inner_east_lane_i, self.inner_east_lane_o, MovementOptions.through),
+                                (self.outer_east_lane_i, self.outer_east_lane_o, MovementOptions.through),
+                                (self.inner_east_lane_i, self.inner_north_lane_o, MovementOptions.left),
+                                (self.outer_east_lane_i, self.outer_south_lane_o, MovementOptions.right),]
+
+        self.intersection = Intersection(self, self.streets, self.paths_to_connect)

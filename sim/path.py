@@ -2,14 +2,14 @@ from consts import *
 import heapq
 from typing import Optional, Dict
 from trafficlight import TrafficLight
-from parametrization import Parametrization
+from parametrization import *
 
 class Path:
     def __init__(self, parametrization: Parametrization, width):
         self.parametrization = parametrization
         self.width = width
         self.start = self.parametrization.get_pos(0) # Starting coordinates
-        self.end = self.parametrization.get_pos(self.parametrization.max_p) # Ending coordinates
+        self.end = self.parametrization.get_pos(self.parametrization.max_pos) # Ending coordinates
         self.vehicles = []
         self.traffic_light: Dict[MovementOptions, TrafficLight] = {MovementOptions.left: None,MovementOptions.through: None, MovementOptions.right: None}
         self.connecting_paths: Dict[MovementOptions, Path] =  {}
@@ -25,7 +25,7 @@ class Path:
     def get_vehicles(self, startP: Optional[float] = None, endP: Optional[float] = None):
         heapq.heapify(self.vehicles)
         start = startP if startP else 0
-        end = endP if endP else self.parametrization.max_p
+        end = endP if endP else self.parametrization.max_pos
         return [vehicle for vehicle in self.vehicles if end>=vehicle.p_value>=start]
 
     def add_vehicle(self, vehicle, pos=0):

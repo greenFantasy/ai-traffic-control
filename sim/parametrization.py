@@ -5,7 +5,7 @@ import torch
 class Parametrization:
     def __init__(self,
         name: str,
-        coor_func: Callable[[float], Tuple[float, float]],
+        coor_func, # Callable[[float], Tuple[float, float]],
         max_pos: float,
         starting_coors: Tuple[float, float]=(0, 0)
     ):
@@ -33,8 +33,8 @@ class Parametrization:
         return y, -x
 
 class LinearParam(Parametrization):
-    def __init__(self, name, start_coor: Tuple[float, float], end_coor: Tuple[float, float]):
-        start_tensor, end_tensor = torch.tensor(start_coor), torch.tensor(end_coor)
+    def __init__(self, start_coor: Tuple[float, float], end_coor: Tuple[float, float], name=None):
+        start_tensor, end_tensor = torch.tensor(start_coor, dtype=float), torch.tensor(end_coor, dtype=float)
         norm = torch.norm(end_tensor - start_tensor)
         self.direction_vector = (end_tensor - start_tensor) / norm
         coor_func = lambda p: tuple((p * self.direction_vector).tolist())
