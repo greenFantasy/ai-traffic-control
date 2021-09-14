@@ -28,6 +28,10 @@ class Parametrization:
         # TODO: get direction vector associated with a specific position along the path, to determine which angle the vehicle should be facing
         pass
 
+    def get_perp_vector(self, p) -> Tuple[float, float]:
+        x, y = self.get_direction_vector(p)
+        return y, -x
+
 class LinearParam(Parametrization):
     def __init__(self, name, start_coor: Tuple[float, float], end_coor: Tuple[float, float]):
         start_tensor, end_tensor = torch.tensor(start_coor), torch.tensor(end_coor)

@@ -45,7 +45,7 @@ class Intersection:
         for (inbound, outbound, moveOp) in self.paths_to_connect:
             inboundEnd = inbound.end
             outboundStart = outbound.start
-            subPath = Path() #TODO(rajatmittal): Hey Rajat
+            subPath = Path(parametrization = LinearParam(inboundEnd, outboundStart)) 
             inbound.add_connecting_path(subPath)
             subPath.add_connecting_path(outbound)
             # get traffic light corresponding to this path movement
