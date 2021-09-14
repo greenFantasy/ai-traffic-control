@@ -2,6 +2,7 @@ from consts import *
 import heapq
 from typing import Optional, Dict
 from trafficlight import TrafficLight
+from parametrization import Parametrization
 
 class Path:
     def __init__(self, parametrization: Parametrization):
