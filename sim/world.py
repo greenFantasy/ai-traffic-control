@@ -83,33 +83,30 @@ class SimpleIntersectionWorld(World):
         super().__init__()
         self.inner_north_lane_i = Path(LinearParam((6, -100), (6, -24)), width = STANDARD_LANE_WIDTH)# Lane(Direction.north, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
         self.outer_north_lane_i = Path(LinearParam((18, -100), (18, -24)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street(0, [self.inner_north_lane_i, self.outer_north_lane_i]))
         self.inner_north_lane_o = Path(LinearParam((6, 24), (6, 100)), width = STANDARD_LANE_WIDTH)# Lane(Direction.north, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
         self.outer_north_lane_o = Path(LinearParam((18, 24), (18, 100)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street(1, [self.inner_north_lane_o, self.outer_north_lane_o]))
 
         self.inner_south_lane_i = Path(LinearParam((6, 100), (6, 24)), width = STANDARD_LANE_WIDTH)
         self.outer_south_lane_i = Path(LinearParam((18, 100), (18, 24)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street(2, [self.inner_south_lane_i, self.outer_south_lane_i]))
         self.inner_south_lane_o = Path(LinearParam((6, -24), (6, -100)), width = STANDARD_LANE_WIDTH)
         self.outer_south_lane_o = Path(LinearParam((18, -24), (18, -100)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street(3, [self.inner_south_lane_o, self.outer_south_lane_o]))
 
-        self.inner_west_lane_i = Path(LinearParam((-100, 6), (-24, 6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
-        self.outer_west_lane_i = Path(LinearParam((-100, 18), (-24, 18)), width = STANDARD_LANE_WIDTH)
-        self.inner_west_lane_i = Path(LinearParam((24, 6), (100, 6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
-        self.outer_west_lane_i = Path(LinearParam((24, 18), (100, 18)), width = STANDARD_LANE_WIDTH)
+        self.inner_east_lane_i = Path(LinearParam((-100, 6), (-24, 6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
+        self.outer_east_lane_i = Path(LinearParam((-100, 18), (-24, 18)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street(4, [self.inner_east_lane_i, self.outer_east_lane_i]))
+        self.inner_east_lane_o = Path(LinearParam((24, 6), (100, 6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
+        self.outer_east_lane_o = Path(LinearParam((24, 18), (100, 18)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street(5, [self.inner_east_lane_o, self.outer_east_lane_o]))
 
-        self.inner_east_lane_i = Path(LinearParam((100, 6), (24, 6)), width = STANDARD_LANE_WIDTH)
-        self.outer_east_lane_i = Path(LinearParam((100, 18), (24, 18)), width = STANDARD_LANE_WIDTH)
-        self.inner_east_lane_o = Path(LinearParam((100, 6), (24, 6)), width = STANDARD_LANE_WIDTH)
-        self.outer_east_lane_o = Path(LinearParam((100, 18), (24, 18)), width = STANDARD_LANE_WIDTH)
+        self.inner_west_lane_i = Path(LinearParam((100, 6), (24, 6)), width = STANDARD_LANE_WIDTH)
+        self.outer_west_lane_i = Path(LinearParam((100, 18), (24, 18)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street(6, [self.inner_west_lane_i, self.outer_west_lane_i]))
+        self.inner_west_lane_o = Path(LinearParam((-24, 6), (-100, 6)), width = STANDARD_LANE_WIDTH)
+        self.outer_west_lane_o = Path(LinearParam((-24, 18), (-100, 18)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street(7, [self.inner_west_lane_o, self.outer_west_lane_o]))
 
-        self.north_street = Street(Direction.north, [self.inner_north_lane, self.outer_north_lane])
-        self.south_street = Street(Direction.south, [self.inner_south_lane, self.outer_south_lane])
-        self.west_street = Street(Direction.west, [self.inner_west_lane, self.outer_west_lane])
-        self.east_street = Street(Direction.east, [self.inner_east_lane, self.outer_east_lane])
-
-        self.streets = [self.north_street, self.south_street, self.west_street, self.east_street]
-
-        self.intersection = Intersection(self,
-                                         north_street=self.north_street,
-                                         south_street=self.south_street,
-                                         west_street=self.west_street,
-                                         east_street=self.east_street)
+        self.intersection = Intersection(self, self.streets, )
