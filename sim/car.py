@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 from vehicle import Vehicle
 from consts import *
 from bisect import bisect_left
@@ -9,7 +9,7 @@ class Car (Vehicle):
         super().__init__()
         self.rear_left = rear_left
         self.speed = init_speed
-        self.plan = []
+        self.plan : List[MovementOptions] = []
         self.height = height
         self.width = width
         self.path = None
@@ -77,11 +77,18 @@ class Car (Vehicle):
         assert vehiclePos!=len(vehiclesinPath), "Car is not in the path's vehicle list"
         if vehiclePos==0:
             # This is the first vehicle in the path
-            closestVehicle = float("inf")
+            distclosestVehicle = float("inf")
         else:
             carInFront = vehiclesinPath[vehiclePos-1]
-            closestVehicle = abs(carInFront.p_value - self.p_value)
+            distclosestVehicle = abs(carInFront.p_value - self.p_value)
         # Second, traffic lights
-        # TODO: traffic light code not yet implemented
-        closestTrafficLight =  currPath.parametrization.max_p - self.p_value
+        nextMove = self.plan[0]
+        if not currPath.traffic_light[nextMove]:
+            # No traffic light at end of path
+            distclosestTrafficLight =  float("inf")
+        else:
+            # closest traffic light is at end of path
+            distclosestTrafficLight = currPath.parametrization.max_p - self.p_value
+        return min(distclosestVehicle, distclosestTrafficLight)
+
     
