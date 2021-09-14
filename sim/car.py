@@ -63,6 +63,7 @@ class Car (Vehicle):
     
     def setPValue(self, p_value):
         self.p_value = p_value
+        # TODO(sssai): run code to calculate vehicle boundaries
 
     def distance2nearestobstacle(self) -> float:
         # Cars can have two obstacles - 
@@ -71,15 +72,16 @@ class Car (Vehicle):
         # First, cars
         assert self.path, "Cars must have a path in order to move."
         currPath = self.path
-        vehiclesinPath = currPath.get_vehicles()
+        vehiclesinPath = currPath.get_vehicles() # TODO(sssai): optimize by using get_vehicles to just get the vehiclees in front of the car (smaller p-value)
         vehiclePos = bisect_left(vehiclesinPath, self)
         assert vehiclePos!=len(vehiclesinPath), "Car is not in the path's vehicle list"
         if vehiclePos==0:
-            # There are no other vehicles in the path
+            # This is the first vehicle in the path
             closestVehicle = float("inf")
         else:
             carInFront = vehiclesinPath[vehiclePos-1]
             closestVehicle = abs(carInFront.p_value - self.p_value)
         # Second, traffic lights
         # TODO: traffic light code not yet implemented
+        closestTrafficLight =  currPath.parametrization.max_p - self.p_value
     
