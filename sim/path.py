@@ -5,8 +5,9 @@ from trafficlight import TrafficLight
 from parametrization import Parametrization
 
 class Path:
-    def __init__(self, parametrization: Parametrization):
+    def __init__(self, parametrization: Parametrization, width):
         self.parametrization = parametrization
+        self.width = width
         self.start = self.parametrization.get_pos(0) # Starting coordinates
         self.end = self.parametrization.get_pos(self.parametrization.max_p) # Ending coordinates
         self.vehicles = []
@@ -26,11 +27,12 @@ class Path:
         end = endP if endP else self.parametrization.max_p
         return [vehicleTup[1] for vehicleTup in self.vehicles if end>=vehicleTup[1].p_value>=start]
 
-    def add_vehicle(self, vehicle, pos):
+    def add_vehicle(self, vehicle, pos=0):
         # TODO: add vehicle to a position along this path
         # Set path in vehicle so it knows where it is.
         vehicle.setPath(self)
         vehicle.setPValue(pos)
         # Ensure vehicle is in the path - TODO: vehicles don't have position anymore??
         # Add vehicle to vehicle list
+        # TODO: Should heap be updated here (since the first element could be outdated)?
         heapq.heappush(self.vehicles, (vehicle.p_value,vehicle))

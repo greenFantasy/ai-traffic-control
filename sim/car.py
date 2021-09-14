@@ -3,19 +3,20 @@ from vehicle import Vehicle
 from consts import *
 from bisect import bisect_left
 import warnings
+import torch
 
 class Car (Vehicle):
-    def __init__(self, rear_left: Tuple[float], height: float, width: float, init_speed: float) -> None:
+    def __init__(self, center: Tuple[float], height: float, width: float, init_speed: float) -> None:
         super().__init__()
-        self.rear_left = rear_left
+        self.center = center
         self.speed = init_speed
         self.plan : List[MovementOptions] = []
         self.height = height
         self.width = width
         self.path = None
         self.p_value = None
-        self.id = 0 # TODO(sssai): make this an input to initialize Car 
-    
+        self.id = 0 # TODO(sssai): make this an input to initialize Car
+
     # Efficiency matters - so we define each of the cmp functions
     def __eq__(self, other):
         return self.p_value == other.p_value and self.id == other.id
@@ -38,11 +39,15 @@ class Car (Vehicle):
     def __repr__(self):
         return "Car at (%s,%s)" % (self.rear_left[0], self.rear_left[1])
 
-    def findBoundaries(self): # Can't do this anymore - tf is a derivative 
-        # Add center calculations self.center
-        rlX : float = self.rear_left[0]
-        rlY : float = self.rear_left[1]
-        raise AssertionError("Not implemented with paths - how?")
+    def findBoundaries(self):
+        self.center: Tuple[float, float] = self.path.parametrization.get_pos(self.p_value)
+        center_vec = torch.tensor(self.center)
+        forward_vec = torch.tensor(self.path.parametrization.get_direction_vector(self.p_value))
+        right_vec = torch.tensor(self.path.parametrization.get_perp_vector(self.p_value))
+        self.rear_left = tuple((center_vec - 0.5 * forward_vec - 0.5 * right_vec).tolist())
+        self.rear_right = tuple((center_vec - 0.5 * forward_vec + 0.5 * right_vec).tolist())
+        self.front_left = tuple((center_vec + 0.5 * forward_vec - 0.5 * right_vec).tolist())
+        self.front_right = tuple((center_vec + 0.5 * forward_vec + 0.5 * right_vec).tolist())
 
     def move(self, time_step):
         #Recalculate speed at time step depending on distance2nearestobstacle
@@ -55,18 +60,17 @@ class Car (Vehicle):
             self.speed = 5
         elif self.distance2nearestobstacle()<=2:
             self.speed = 0
-        self.p_value += self.speed+time_step
-        self.findBoundaries()
+        self.setPValue(self.p_value + self.speed+time_step)
 
     def setPath(self, path):
         self.path = path
-    
+
     def setPValue(self, p_value):
         self.p_value = p_value
-        # TODO(sssai): run code to calculate vehicle boundaries
+        self.findBoundaries()
 
     def distance2nearestobstacle(self) -> float:
-        # Cars can have two obstacles - 
+        # Cars can have two obstacles -
         #   - cars on the same path
         #   - traffic light on the same path
         # First, cars
@@ -90,5 +94,3 @@ class Car (Vehicle):
             # closest traffic light is at end of path
             distclosestTrafficLight = currPath.parametrization.max_p - self.p_value
         return min(distclosestVehicle, distclosestTrafficLight)
-
-    
