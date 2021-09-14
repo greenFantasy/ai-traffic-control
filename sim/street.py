@@ -1,14 +1,13 @@
 from consts import *
-from lane import Lane
 from typing import List
+from path import Path
 
 class Street:
-    def __init__(self, direction: Direction, lanes: List[Lane]):
-        ## TODO: Should we create the lanes in the init?
-        self.direction = direction
-        self.lanes = lanes
-        self.min = min([lane.min for lane in lanes])
-        self.max = max([lane.max for lane in lanes])
-        for l in lanes:
-            l.street = self
+    def __init__(self, paths: List[Path]):
+        ## TODO: Should we create the paths in the init?
+        self.min = None #TODO(rajatmittal): Do we need these params
+        self.max = None
+        self.paths = paths
+        for p in self.paths:
+            p.street = self
         self.intersections = []

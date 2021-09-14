@@ -26,7 +26,7 @@ class TrafficLight:
         self.state = TrafficLightStates.green
         self.state_start_time = self.get_current_time()
 
-    def get_sensor_data(self):
+    def get_sensor_data(self): # TODO(rajatmittal)
         if not self.sensor:
             return []
         lanes = self.intersection.street_dict[self.street_direction].lanes
