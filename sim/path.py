@@ -11,20 +11,21 @@ class Path:
         self.end = self.parametrization.get_pos(self.parametrization.max_p) # Ending coordinates
         self.vehicles = []
         self.traffic_light: Dict[MovementOptions, TrafficLight] = {MovementOptions.left: None,MovementOptions.through: None, MovementOptions.right: None}
-        self.connecting_paths = []
+        self.connecting_paths: Dict[MovementOptions, Path] =  {}
         self.street = None
 
-    def add_connecting_path(self, path):
+    def add_connecting_path(self, path, moveOp):
         # TODO: connect path and self
-        self.connecting_paths.append(path)
+        self.connecting_paths[moveOp] = path
 
     def add_traffic_light(self, traffic_light: TrafficLight, movementOp: MovementOptions):
         self.traffic_light[movementOp] = traffic_light
 
     def get_vehicles(self, startP: Optional[float] = None, endP: Optional[float] = None):
+        heapq.heapify(self.vehicles)
         start = startP if startP else 0
         end = endP if endP else self.parametrization.max_p
-        return [vehicleTup[1] for vehicleTup in self.vehicles if end>=vehicleTup[1].p_value>=start]
+        return [vehicle for vehicle in self.vehicles if end>=vehicle.p_value>=start]
 
     def add_vehicle(self, vehicle, pos):
         # TODO: add vehicle to a position along this path
@@ -33,4 +34,4 @@ class Path:
         vehicle.setPValue(pos)
         # Ensure vehicle is in the path - TODO: vehicles don't have position anymore??
         # Add vehicle to vehicle list
-        heapq.heappush(self.vehicles, (vehicle.p_value,vehicle))
+        heapq.heappush(self.vehicles, vehicle)

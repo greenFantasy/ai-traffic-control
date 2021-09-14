@@ -55,7 +55,20 @@ class Car (Vehicle):
             self.speed = 5
         elif self.distance2nearestobstacle()<=2:
             self.speed = 0
-        self.p_value += self.speed+time_step
+        if (self.p_value + self.speed*time_step) > self.path.parametrization.max_p:
+            # Move to next path 
+            connecting_paths = self.path.connecting_paths
+            assert len(connecting_paths.values())>0, "Path has no connecting paths" # Perhaps despawn the car here
+            if len(connecting_paths.values()) == 1:
+                nextPath = connecting_paths.values()[0]
+            else:
+                nextMoveOp = self.plan.pop(0)
+                assert nextMoveOp in connecting_paths, "No path specified for planned move op"
+                nextPath = connecting_paths[nextMoveOp]
+            # Remove from current path # Assuming that our vehicle is the top of the heap
+            self.path.vehicles.pop(-1) # Make sure this works
+            nextPath.add_vehicles(self, 0) 
+        self.p_value += self.speed*time_step
         self.findBoundaries()
 
     def setPath(self, path):
@@ -86,9 +99,12 @@ class Car (Vehicle):
         if not currPath.traffic_light[nextMove]:
             # No traffic light at end of path
             distclosestTrafficLight =  float("inf")
-        else:
+        elif currPath.traffic_light[nextMove].state == TrafficLightStates.red:
             # closest traffic light is at end of path
             distclosestTrafficLight = currPath.parametrization.max_p - self.p_value
+        else:
+            # No traffic light at end of path
+            distclosestTrafficLight =  float("inf")
         return min(distclosestVehicle, distclosestTrafficLight)
 
     
