@@ -3,6 +3,7 @@ import heapq
 from typing import Optional, Dict
 from trafficlight import TrafficLight
 from parametrization import *
+import logger
 
 class Path:
     def __init__(self, parametrization: Parametrization, width):
@@ -29,7 +30,8 @@ class Path:
         return [vehicle for vehicle in self.vehicles if end>=vehicle.p_value>=start]
 
     def add_vehicle(self, vehicle, pos=0):
-        # TODO: add vehicle to a position along this path
+        # Spawn Vehicle
+        logger.logger.logVehicleSpawn(vehicle)
         # Set path in vehicle so it knows where it is.
         vehicle.setPath(self)
         vehicle.setPValue(pos)

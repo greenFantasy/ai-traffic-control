@@ -5,6 +5,7 @@ from trafficlight import TrafficLight
 from car import Car
 from path import Path
 from parametrization import *
+import logger
 
 class World:
     def __init__(self):
@@ -12,6 +13,7 @@ class World:
         self.time = 0
         self.time_step = .1
         self.vehicles = []
+        logger.init(self)
 
     def get_objects(self):
         objects = []
@@ -56,7 +58,6 @@ class World:
         #             min = lastCar.rear_left[0]
         #     if lastIntersection.right_boundary>min:
         #         min = lastIntersection.right_boundary
-        # # TODO(sssai): center the cars in the lane
         # if lane.direction == Direction.north:
         #     rear_left = (lane.min + 2,min-30)
         # elif lane.direction == Direction.south:
@@ -65,7 +66,7 @@ class World:
         #     rear_left = (min-30, lane.max - 2)
         # elif lane.direction == Direction.west:
         #     rear_left = (min+30, lane.min+2)
-        car = Car(path.start, 15, 6, 5) # TODO: set the size dynamically as a parameter
+        car = Car(path.start, 15, 6, 5, id = "car1") # TODO: set the size dynamically as a parameter
         path.add_vehicle(car)
         self.vehicles.append(car)
 
