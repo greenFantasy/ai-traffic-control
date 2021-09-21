@@ -3,16 +3,20 @@ from world import *
 import time
 
 world = SimpleIntersectionWorld()
-world.add_vehicle_to_lane(world.outer_north_lane_i)
-for i in range(100):
-    print(world.vehicles)
-    world.play()
+print(len(world.sensors))
 
-world.intersection.traffic_lights[(0, MovementOptions.through)].red_to_green()
+# world.add_vehicle_to_lane(world.outer_north_lane_i)
+# for i in range(100):
+#     print(world.vehicles)
+#     world.play()
+#
+# world.intersection.traffic_lights[(0, MovementOptions.through)].red_to_green()
+#
+# for i in range(100):
+#     print(world.vehicles)
+#     world.play()
 
-for i in range(100):
-    print(world.vehicles)
-    world.play()
+
 # print("Intersection Lower Boundary:", world.intersection.lower_boundary)
 # s = time.time()
 # for i in range(100):

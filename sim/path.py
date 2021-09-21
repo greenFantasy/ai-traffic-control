@@ -1,12 +1,13 @@
 from consts import *
 import heapq
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from trafficlight import TrafficLight
+from sensor import Sensor
 from parametrization import *
 import logger
 
 class Path:
-    def __init__(self, parametrization: Parametrization, width):
+    def __init__(self, parametrization: Parametrization, width, sensors=[]):
         self.parametrization = parametrization
         self.width = width
         self.start = self.parametrization.get_pos(0) # Starting coordinates
@@ -15,6 +16,7 @@ class Path:
         self.traffic_light: Dict[MovementOptions, TrafficLight] = {MovementOptions.left: None,MovementOptions.through: None, MovementOptions.right: None}
         self.connecting_paths: Dict[MovementOptions, Path] =  {}
         self.street = None
+        self.sensors: List[Sensor] = sensors
 
     def add_connecting_path(self, path, moveOp):
         # TODO: connect path and self
@@ -38,3 +40,7 @@ class Path:
         # Ensure vehicle is in the path - TODO: vehicles don't have position anymore??
         # Add vehicle to vehicle list
         heapq.heappush(self.vehicles, vehicle)
+
+    def add_sensor(self, p_min=self.parametrization.max_pos - 110, p_max=self.parametrization.max_pos - 100, sensor_type='binary'):
+        assert p_min >= 0 and p_max <= self.parametrization.max_pos
+        self.sensors.append(Sensor(self, p_min, p_max, sensor_type))

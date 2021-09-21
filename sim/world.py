@@ -13,6 +13,7 @@ class World:
         self.time = 0
         self.time_step = .1
         self.vehicles = []
+        self.sensors = []
         logger.init(self)
 
     def get_objects(self):
@@ -22,50 +23,7 @@ class World:
                 objects.append(self.__dict__[a])
         return objects
 
-    def add_vehicle_to_lane(self, path: Path):
-        # Calculate the end of lane
-        # First, get last car in lane:
-        # lastCar = lane.get_vehicles()[-1] if lane.get_vehicles() else None
-        # # Then, get last intersection in lane
-        # street = lane.street
-        # lastIntersection = street.intersections[0] # TODO actually get the last intersection once it's a heap
-        # assert lastCar or lastIntersection, "Rajat help me"
-        # if lane.direction == Direction.north:
-        #     min = float("inf")
-        #     if lastCar:
-        #         if lastCar.rear_left[1]<min:
-        #             min = lastCar.rear_left[1]
-        #     if lastIntersection.lower_boundary<min:
-        #         min = lastIntersection.lower_boundary
-        # elif lane.direction == Direction.south:
-        #     min = -float("inf")
-        #     if lastCar:
-        #         if lastCar.rear_left[1]>min:
-        #             min = lastCar.rear_left[1]
-        #     if lastIntersection.upper_boundary>min:
-        #         min = lastIntersection.upper_boundary
-        # elif lane.direction == Direction.east:
-        #     min = float("inf")
-        #     if lastCar:
-        #         if lastCar.rear_left[0]<min:
-        #             min = lastCar.rear_left[0]
-        #     if lastIntersection.left_boundary<min:
-        #         min = lastIntersection.left_boundary
-        # elif lane.direction == Direction.west:
-        #     min = -float("inf")
-        #     if lastCar:
-        #         if lastCar.rear_left[0]>min:
-        #             min = lastCar.rear_left[0]
-        #     if lastIntersection.right_boundary>min:
-        #         min = lastIntersection.right_boundary
-        # if lane.direction == Direction.north:
-        #     rear_left = (lane.min + 2,min-30)
-        # elif lane.direction == Direction.south:
-        #     rear_left = (lane.max - 2,min+30)
-        # elif lane.direction == Direction.east:
-        #     rear_left = (min-30, lane.max - 2)
-        # elif lane.direction == Direction.west:
-        #     rear_left = (min+30, lane.min+2)
+    def add_vehicle_to_path(self, path: Path):
         car = Car(path.start, 15, 6, 5, id = "car1") # TODO: set the size dynamically as a parameter
         path.add_vehicle(car)
         self.vehicles.append(car)
@@ -108,6 +66,12 @@ class SimpleIntersectionWorld(World):
         self.inner_west_lane_o = Path(LinearParam((-24, 6), (-100, 6)), width = STANDARD_LANE_WIDTH)
         self.outer_west_lane_o = Path(LinearParam((-24, 18), (-100, 18)), width = STANDARD_LANE_WIDTH)
         self.streets.append(Street(7, [self.inner_west_lane_o, self.outer_west_lane_o]))
+
+        for s in self.streets:
+            for p in s.paths:
+                if len(p.connecting_paths) > 0:
+                    p.add_sensor()
+                    self.sensors.extend(p.sensors)
 
         self.paths_to_connect = [(self.inner_north_lane_i, self.inner_north_lane_o, MovementOptions.through),
                                 (self.outer_north_lane_i, self.outer_north_lane_o, MovementOptions.through),

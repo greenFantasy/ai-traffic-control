@@ -31,21 +31,5 @@ class TrafficLight:
         self.state_start_time = self.get_current_time()
         logger.logger.logTrafficLightChange(self, TrafficLightStates.red, TrafficLightStates.green)
 
-    # def get_sensor_data(self): # TODO(rajatmittal)
-    #     if not self.sensor:
-    #         return []
-    #     lanes = self.intersection.street_dict[self.street_direction].lanes
-    #     data = []
-    #     for l in lanes:
-    #         if self.street_direction == Direction.north:
-    #             data.extend(l.get_vehicles(self.intersection.lower_boundary - self.sensor.range,self.intersection.upper_boundary))
-    #         elif self.street_direction == Direction.south:
-    #             data.extend(l.get_vehicles(self.intersection.lower_boundary,self.intersection.upper_boundary + self.sensor.range))
-    #         elif self.street_direction == Direction.east:
-    #             data.extend(l.get_vehicles(self.intersection.left_boundary - self.sensor.range,self.intersection.right_boundary))
-    #         else:
-    #             data.extend(l.get_vehicles(self.intersection.left_boundary,self.intersection.right_boundary + self.sensor.range))
-    #     return data
-
     def get_current_time(self):
         return self.intersection.world.get_current_time()
