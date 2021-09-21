@@ -1,4 +1,4 @@
-from consts import TrafficLightStates
+from consts import *
 
 def init(world):
     global logger
@@ -7,12 +7,12 @@ def init(world):
 class Logger:
     def __init__(self, world) -> None:
         self.world = world
-
-    def logVehicleSpawn(self, vehicle : Car) -> None:
+    
+    def logVehicleSpawn(self, vehicle) -> None:
         pass
 
-    def logVehicleDespawn(self, vehicle : Car) -> None:
+    def logVehicleDespawn(self, vehicle) -> None:
         pass
 
-    def logTrafficLightChange(self, traffic_light: TrafficLight, state_old: TrafficLightStates, state_new: TrafficLightStates) -> None:
+    def logTrafficLightChange(self, traffic_light, state_old, state_new) -> None:
         pass
