@@ -4,9 +4,10 @@ from consts import *
 from bisect import bisect_left
 import warnings
 import torch
+import logger
 
 class Car (Vehicle):
-    def __init__(self, center: Tuple[float], height: float, width: float, init_speed: float) -> None:
+    def __init__(self, center: Tuple[float], height: float, width: float, init_speed: float, id: str) -> None:
         super().__init__()
         self.center = center
         self.speed = init_speed
@@ -15,7 +16,7 @@ class Car (Vehicle):
         self.width = width
         self.path = None
         self.p_value = None
-        self.id = 0 # TODO(sssai): make this an input to initialize Car
+        self.id = id
 
     # Efficiency matters - so we define each of the cmp functions
     # TODO(sssai): Not sure if necessary, but should the comparisons make sure the cars are on the same path
@@ -66,8 +67,12 @@ class Car (Vehicle):
         if (self.p_value + self.speed*time_step) > self.path.parametrization.max_pos:
             # Move to next path
             connecting_paths = self.path.connecting_paths
-            assert len(connecting_paths.values())>0, "Path has no connecting paths" # Perhaps despawn the car here
-            if len(connecting_paths.values()) == 1:
+            nextPath = None
+            if not len(connecting_paths.values())>0:
+                # Despawn car 
+                logger.logger.logVehicleDespawn(self)
+            #TODO(sssai): log when car changes paths (car.id, intersection.id, incoming_path, outgoing_path, wait_time, arrived_on_green, timestamp, etc)
+            elif len(connecting_paths.values()) == 1:
                 nextPath = list(connecting_paths.values())[0]
             else:
                 nextMoveOp = self.plan.pop(0)
@@ -75,7 +80,10 @@ class Car (Vehicle):
                 nextPath = connecting_paths[nextMoveOp]
             # Remove from current path # Assuming that our vehicle is the top of the heap
             self.path.vehicles.pop(-1) # Make sure this works
-            nextPath.add_vehicle(self, 0)
+            if nextPath:
+                nextPath.add_vehicle(self, 0)
+            else:
+                return
         self.setPValue(self.p_value + self.speed*time_step)
 
     def setPath(self, path):
@@ -92,7 +100,7 @@ class Car (Vehicle):
         # First, cars
         assert self.path, "Cars must have a path in order to move."
         currPath = self.path
-        vehiclesinPath = currPath.get_vehicles() # TODO(sssai): optimize by using get_vehicles to just get the vehiclees in front of the car (smaller p-value)
+        vehiclesinPath = currPath.get_vehicles() # TODO(sssai): optimize by using get_vehicles to just get the vehicles in front of the car (smaller p-value)
         vehiclePos = bisect_left(vehiclesinPath, self)
         assert vehiclePos!=len(vehiclesinPath), "Car is not in the path's vehicle list"
         if vehiclePos==0:
