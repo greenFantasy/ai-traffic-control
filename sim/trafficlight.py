@@ -4,13 +4,12 @@ from sensor import Sensor
 import logger
 
 class TrafficLight:
-    def __init__(self, movement_options: MovementOptions, street_id, intersection, sensor, traffic_light_id: str):
+    def __init__(self, movement_options: MovementOptions, street_id, intersection, traffic_light_id: str):
         self.movement_option: MovementOptions = movement_options
         self.street_id: int = street_id
         self.intersection = intersection
         self.state: TrafficLightStates = TrafficLightStates.red
         self.state_start_time: float = self.get_current_time()
-        self.sensor: Sensor = sensor # TODO: Should be able to have multiple sensors
         self.id = traffic_light_id
 
     def green_to_yellow(self):

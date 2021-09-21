@@ -1,7 +1,6 @@
 from consts import *
 from street import Street
 from trafficlight import TrafficLight
-from camera import Camera
 from typing import Tuple, List
 from path import Path
 from parametrization import *
@@ -57,6 +56,6 @@ class Intersection:
     def _create_traffic_lights(self):
         for street in self.streets:
             # TODO: Includes outbound streets, which we don't want
-            self.traffic_lights[(street.id, MovementOptions.left)] = TrafficLight(MovementOptions.left, street.id, self, sensor=Camera(range=30.0), traffic_light_id="Left_"+street.id)
-            self.traffic_lights[(street.id, MovementOptions.through)] = TrafficLight(MovementOptions.through, street.id, self, sensor=Camera(range=30.0), traffic_light_id="Through_"+street.id)
-            self.traffic_lights[(street.id, MovementOptions.right)] = TrafficLight(MovementOptions.right, street.id, self, sensor=Camera(range=30.0), traffic_light_id="Right_"+street.id)
+            self.traffic_lights[(street.id, MovementOptions.left)] = TrafficLight(MovementOptions.left, street.id, self, traffic_light_id="Left_"+street.id)
+            self.traffic_lights[(street.id, MovementOptions.through)] = TrafficLight(MovementOptions.through, street.id, self, traffic_light_id="Through_"+street.id)
+            self.traffic_lights[(street.id, MovementOptions.right)] = TrafficLight(MovementOptions.right, street.id, self, traffic_light_id="Right_"+street.id)

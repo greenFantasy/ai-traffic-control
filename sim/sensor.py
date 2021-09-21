@@ -11,13 +11,13 @@ class Sensor:
     at once. In this case, our implementation is to create separate sensors for each path that
     that camera looks at.
     """
-    def __init__(self, path, p_min, p_max, sensor_type='binary') -> None:
+    def __init__(self, path, p_min: float, p_max: float, sensor_type='binary') -> None:
         """
         Arguments:
             path: Path() object which the sensor is placed on
             p_min, p_max: Range of p-values that the sensor can detect vehicles on
             sensor_type: Must be one of ['binary', 'count', 'all']
-                TODO (rajatmittal): Currently all is not supported
+                TODO (rajatmittal): Currently "all" is not supported
         """
         self.path = path
         self.p_min = p_min
