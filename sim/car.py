@@ -71,6 +71,9 @@ class Car (Vehicle):
                 # Despawn car 
                 logger.logger.logVehicleDespawn(self)
             #TODO(sssai): log when car changes paths (car.id, intersection.id, incoming_path, outgoing_path, wait_time, arrived_on_green, timestamp, etc)
+            # Wait Time - instead, just measure time spent on path (Time_spent_on_path) 
+            # Also log - Average Speed on Path (Time_spent_on_path / path_length (maxPos))
+            # TODO(sssai): Recursively determine if waiting for red light based on car in front 
             elif len(connecting_paths.values()) == 1:
                 nextPath = list(connecting_paths.values())[0]
             else:
