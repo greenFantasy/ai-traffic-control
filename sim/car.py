@@ -19,6 +19,7 @@ class Car (Vehicle):
 
     # Efficiency matters - so we define each of the cmp functions
     # TODO(sssai): Not sure if necessary, but should the comparisons make sure the cars are on the same path
+    # and for eq
     def __eq__(self, other):
         return self.p_value == other.p_value and self.id == other.id
 
