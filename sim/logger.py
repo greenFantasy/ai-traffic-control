@@ -1,6 +1,8 @@
 from consts import *
 from io import BytesIO
 import csv
+import sys
+sys.path.append('../data')
 
 # https://stackoverflow.com/questions/41888080/python-efficient-way-to-add-rows-to-dataframe
 
