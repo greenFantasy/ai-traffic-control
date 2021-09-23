@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      working-directory: ./
+      working-directory: ./sim
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
@@ -27,5 +27,5 @@ jobs:
     - name: Test create_world
       run: |
         # test create_world.py
-        python sim/create_world.py
+        python create_world.py
       working-directory: ${{env.working-directory}}
