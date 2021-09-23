@@ -23,6 +23,7 @@ class Sensor:
         self.p_min = p_min
         self.p_max = p_max
         self.sensor_type = sensor_type
+        self.id = "SENSOR_ID" #TODO(rajatmittal): all u
 
     def get_data(self):
         vehicles = self.path.get_vehicles(self.p_min, self.p_max)
@@ -31,6 +32,6 @@ class Sensor:
         elif self.sensor_type == 'count':
             return len(vehicles)
         elif self.sensor_type == 'all':
-            raise NotImplementedError
+            raise NotImplementedError # TODO(rajatmittal): get_data currently returns an int - do we want to allow polymorphism with lists
         else:
             raise ValueError(f"Invalid sensor_type {self.sensor_type}")

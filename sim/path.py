@@ -17,6 +17,7 @@ class Path:
         self.connecting_paths: Dict[MovementOptions, Path] =  {}
         self.street = None
         self.sensors: List[Sensor] = sensors if sensors else []
+        self.id = "PATH_NAME" #TODO - make this a id related to the street or intersection that the path is part of
 
     def add_connecting_path(self, path, moveOp):
         # TODO: connect path and self
@@ -32,8 +33,6 @@ class Path:
         return [vehicle for vehicle in self.vehicles if end>=vehicle.p_value>=start]
 
     def add_vehicle(self, vehicle, pos=0):
-        # Spawn Vehicle
-        logger.logger.logVehicleSpawn(vehicle)
         # Set path in vehicle so it knows where it is.
         vehicle.setPath(self)
         vehicle.setPValue(pos)

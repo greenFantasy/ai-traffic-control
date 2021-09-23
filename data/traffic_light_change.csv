@@ -1,0 +1,2 @@
+Traffic_Light_ID,State_Old,State_New,TimeStamp
+Through_0,red,green,10.0

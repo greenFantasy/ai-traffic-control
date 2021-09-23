@@ -21,3 +21,6 @@ class TrafficLightStates(Enum):
     red = 2
 
 STANDARD_LANE_WIDTH = 12.0
+
+def isclose(a, b, rel_tol=1e-9, abs_tol=0.0):
+    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
