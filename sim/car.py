@@ -102,16 +102,13 @@ class Car (Vehicle):
             # Spawn Vehicle
             logger.logger.logVehicleSpawn(self)
         self.path = path
-<<<<<<< HEAD
         if len(self.plan) == 0:
             curr_path = path
             while len(curr_path.connecting_paths) > 0:
                 idx = random.randint(0, len(curr_path.connecting_paths) - 1)
                 self.plan.append(list(curr_path.connecting_paths.keys())[idx])
                 curr_path = curr_path.connecting_paths[self.plan[-1]]
-=======
         self.time_path_entered = logger.logger.world.time
->>>>>>> c35d5667aba63caadee4dbb73659df511897c8d5
 
     def setPValue(self, p_value):
         self.p_value = p_value

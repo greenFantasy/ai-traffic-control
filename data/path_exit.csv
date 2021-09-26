@@ -1,4 +1,4 @@
 Path_ID,Vehicle_ID,Time_Spent,Average_Speed
 PATH_NAME,car1,10.0,"tensor(0.1316, dtype=torch.float64)"
-PATH_NAME,car1,1.6,"tensor(0.0333, dtype=torch.float64)"
+PATH_NAME,car1,1.4,"tensor(0.0330, dtype=torch.float64)"
 PATH_NAME,car1,2.5,"tensor(0.0329, dtype=torch.float64)"

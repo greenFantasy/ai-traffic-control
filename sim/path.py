@@ -42,6 +42,6 @@ class Path:
 
     def add_sensor(self, p_min=None, p_max=None, sensor_type='binary'):
         p_min = p_min if p_min else self.parametrization.max_pos - 40
-        p_max = p_max if p_max else p_min + 10
+        p_max = p_max if p_max else p_min + 35
         assert p_min >= 0 and p_max <= self.parametrization.max_pos
         self.sensors.append(Sensor(self, p_min, p_max, sensor_type))
