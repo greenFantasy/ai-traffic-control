@@ -16,6 +16,8 @@ class Car (Vehicle):
         self.height = height
         self.width = width
         self.path = None
+        self.time_path_entered = 0
+        self.despawned = False
         self.p_value = None
         self.id = id
 
@@ -55,6 +57,8 @@ class Car (Vehicle):
         self.front_right = tuple((center_vec + 0.5 * forward_vec + 0.5 * right_vec).tolist())
 
     def move(self, time_step):
+        if self.despawned:
+            return
         #Recalculate speed at time step depending on distance2nearestobstacle
         assert self.path is not None, "Path is not set - cannot move car"
         if self.distance2nearestobstacle()>10:
@@ -66,15 +70,18 @@ class Car (Vehicle):
         elif self.distance2nearestobstacle()<=2:
             self.speed = 0
         if (self.p_value + self.speed*time_step) > self.path.parametrization.max_pos:
+            #First, log the the path exit
+            logger.logger.logVehiclePathExit(self, self.path, self.time_path_entered)
             # Move to next path
             connecting_paths = self.path.connecting_paths
             nextPath = None
             if not len(connecting_paths.values())>0:
                 # Despawn car
                 logger.logger.logVehicleDespawn(self)
-            #TODO(sssai): log when car changes paths (car.id, intersection.id, incoming_path, outgoing_path, wait_time, arrived_on_green, timestamp, etc)
+                self.despawned = True
             # Wait Time - instead, just measure time spent on path (Time_spent_on_path)
             # Also log - Average Speed on Path (Time_spent_on_path / path_length (maxPos))
+            # TODO(sssai): log when car changes paths (car.id, intersection.id, incoming_path, outgoing_path, wait_time, arrived_on_green, timestamp, etc)
             # TODO(sssai): Recursively determine if waiting for red light based on car in front
             elif len(connecting_paths.values()) == 1:
                 nextPath = list(connecting_paths.values())[0]
@@ -91,13 +98,20 @@ class Car (Vehicle):
         self.setPValue(self.p_value + self.speed*time_step)
 
     def setPath(self, path):
+        if not self.path:
+            # Spawn Vehicle
+            logger.logger.logVehicleSpawn(self)
         self.path = path
+<<<<<<< HEAD
         if len(self.plan) == 0:
             curr_path = path
             while len(curr_path.connecting_paths) > 0:
                 idx = random.randint(0, len(curr_path.connecting_paths) - 1)
                 self.plan.append(list(curr_path.connecting_paths.keys())[idx])
                 curr_path = curr_path.connecting_paths[self.plan[-1]]
+=======
+        self.time_path_entered = logger.logger.world.time
+>>>>>>> c35d5667aba63caadee4dbb73659df511897c8d5
 
     def setPValue(self, p_value):
         self.p_value = p_value

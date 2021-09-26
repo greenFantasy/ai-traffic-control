@@ -3,7 +3,7 @@ from world import *
 import time
 
 world = SimpleIntersectionWorld()
-print(len(world.sensors))
+#print(len(world.sensors))
 
 world.add_vehicle_to_path(world.inner_north_lane_i)
 for i in range(100):

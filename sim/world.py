@@ -10,11 +10,11 @@ import logger
 class World:
     def __init__(self):
         self.streets = []
-        self.time = 0
-        self.time_step = .1
+        self.time = 0.0
+        self.time_step = 0.1
         self.vehicles = []
         self.sensors = []
-        logger.init(self)
+        logger.init(self, enable=True)
 
     def get_objects(self):
         objects = []
@@ -29,8 +29,13 @@ class World:
         self.vehicles.append(car)
 
     def play(self):
+        # Move the vehicles
         for v in self.vehicles:
             v.move(self.time_step)
+        # Log sensor data every second
+        if isclose(int(round(self.time)),self.time):
+            for s in self.sensors:
+                logger.logger.logSensorData(s)
         self.time += self.time_step
 
     def get_current_time(self):
