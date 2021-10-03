@@ -9,8 +9,8 @@ world.add_vehicle_to_path(world.inner_north_lane_i)
 world.add_vehicle_to_path(world.inner_south_lane_i)
 
 for i in range(1000):
-    #print(world.vehicles)
-    print(world.sensors[0].get_data(), world.time)
+    # print(world.vehicles)
+    # print(world.sensors[0].get_data(), world.time)
     world.play()
 
 # world.intersection.traffic_lights[('0', MovementOptions.through)].red_to_green()
@@ -21,10 +21,10 @@ for i in range(1000):
 # world.intersection.traffic_lights[('0', MovementOptions.left)].green_to_yellow()
 # world.intersection.traffic_lights[('0', MovementOptions.right)].green_to_yellow()
 
-for i in range(1000):
-    print(world.vehicles)
-    # print(world.sensors[0].get_data(), world.time)
-    world.play()
+# for i in range(1000):
+#     print(world.vehicles)
+#     # print(world.sensors[0].get_data(), world.time)
+#     world.play()
 
 # for i in range(100):
 #     #print(world.vehicles)
