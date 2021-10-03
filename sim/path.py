@@ -1,5 +1,5 @@
 from consts import *
-import heapq
+# import heapq
 from typing import Optional, Dict, List
 from trafficlight import TrafficLight
 from sensor import Sensor
@@ -27,18 +27,21 @@ class Path:
         self.traffic_light[movementOp] = traffic_light
 
     def get_vehicles(self, startP: Optional[float] = None, endP: Optional[float] = None):
-        heapq.heapify(self.vehicles)
         start = startP if startP else 0
         end = endP if endP else self.parametrization.max_pos
         return [vehicle for vehicle in self.vehicles if end>=vehicle.p_value>=start]
 
     def add_vehicle(self, vehicle, pos=0):
         # Set path in vehicle so it knows where it is.
+        if len(self.vehicles) > 0 and self.vehicles[-1].p_value == pos: # self.vehicles[0].height:
+            print("Failed to add vehicle")
+            return False
         vehicle.setPath(self)
         vehicle.setPValue(pos)
         # Ensure vehicle is in the path - TODO: vehicles don't have position anymore??
         # Add vehicle to vehicle list
-        heapq.heappush(self.vehicles, vehicle)
+        self.vehicles.append(vehicle)
+        return True
 
     def add_sensor(self, p_min=None, p_max=None, sensor_type='binary'):
         p_min = p_min if p_min else self.parametrization.max_pos - 40

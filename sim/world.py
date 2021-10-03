@@ -29,8 +29,9 @@ class World:
 
     def add_vehicle_to_path(self, path: Path):
         car = Car(path.start, 15, 6, 5, id = "car1") # TODO: set the size dynamically as a parameter
-        path.add_vehicle(car)
-        self.vehicles.append(car)
+        result = path.add_vehicle(car)
+        if result:
+            self.vehicles.append(car)
 
     def play(self):
         self.time += self.time_step

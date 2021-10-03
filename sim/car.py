@@ -31,16 +31,16 @@ class Car (Vehicle):
         return self.p_value != other.p_value
 
     def __lt__(self, other):
-        return self.p_value < other.p_value
+        return -self.p_value < -other.p_value
 
     def __le__(self, other):
-        return self.p_value <= other.p_value
+        return -self.p_value <= -other.p_value
 
     def __gt__(self, other):
-        return self.p_value > other.p_value
+        return -self.p_value > -other.p_value
 
     def __ge__(self, other):
-        return self.p_value >= other.p_value
+        return -self.p_value >= -other.p_value
 
     def __repr__(self):
         return "Car at (%s,%s)" % (self.center[0], self.center[1])
@@ -61,15 +61,13 @@ class Car (Vehicle):
             return
         #Recalculate speed at time step depending on distance2nearestobstacle
         assert self.path is not None, "Path is not set - cannot move car"
-        if self.distance2nearestobstacle()>10:
-            self.speed = 30
-        elif 5<=self.distance2nearestobstacle()<=10:
-            self.speed = 15
-        elif 2<=self.distance2nearestobstacle()<=5:
-            self.speed = 5
-        elif self.distance2nearestobstacle()<=2:
+        if self.distance2nearestobstacle()>=15:
+            self.speed = 3
+        elif 7<self.distance2nearestobstacle()<=15:
+            self.speed = 2
+        elif self.distance2nearestobstacle()<=7:
             self.speed = 0
-        if (self.p_value + self.speed*time_step) > self.path.parametrization.max_pos:
+        if (self.p_value + self.speed*time_step) >= self.path.parametrization.max_pos:
             #First, log the the path exit
             logger.logger.logVehiclePathExit(self, self.path, self.time_path_entered)
             # Move to next path
@@ -91,12 +89,14 @@ class Car (Vehicle):
                 assert nextMoveOp in connecting_paths, "No path specified for planned move op"
                 nextPath = connecting_paths[nextMoveOp]
             # Remove from current path # Assuming that our vehicle is the top of the heap
-            self.path.vehicles.pop(-1) # Make sure this works
+            old_path = self.path
+            self.path.vehicles.pop(0) # Make sure this works
             if nextPath:
-                nextPath.add_vehicle(self, 0)
+                nextPath.add_vehicle(self, (self.p_value + self.speed*time_step) - old_path.parametrization.max_pos)
             else:
                 return
-        self.setPValue(self.p_value + self.speed*time_step)
+        else:
+            self.setPValue(self.p_value + self.speed*time_step)
 
     def setPath(self, path):
         if not self.path:
@@ -130,7 +130,8 @@ class Car (Vehicle):
             distclosestVehicle = float("inf")
         else:
             carInFront = vehiclesinPath[vehiclePos-1]
-            distclosestVehicle = abs(carInFront.p_value - self.p_value)
+            distclosestVehicle = carInFront.p_value - self.p_value
+            assert distclosestVehicle > 0, f"negative distance {distclosestVehicle}"
         # Second, traffic lights
         nextMove = self.plan[0]
         if not currPath.traffic_light[nextMove]:

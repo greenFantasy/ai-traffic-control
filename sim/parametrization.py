@@ -19,7 +19,7 @@ class Parametrization:
     def get_pos(self, p) -> Tuple[float, float]:
         # get position associated with p
         if p > self.max_pos:
-            raise ValueError(f'p = {p} > max_pos allowed for {self.name} parametrization')
+            raise ValueError(f'p = {p} > {self.max_pos} allowed for {self.name} parametrization')
 
         (x, y) = self.coor_func(p)
         return (x + self.starting_coors[0], y + self.starting_coors[1])

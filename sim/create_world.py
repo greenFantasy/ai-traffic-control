@@ -1,6 +1,7 @@
 from consts import *
 from world import *
 import time
+import random
 
 world = SimpleIntersectionWorld()
 #print(len(world.sensors))
@@ -8,10 +9,15 @@ world = SimpleIntersectionWorld()
 world.add_vehicle_to_path(world.inner_north_lane_i)
 world.add_vehicle_to_path(world.inner_south_lane_i)
 
-for i in range(1000):
-    # print(world.vehicles)
-    # print(world.sensors[0].get_data(), world.time)
+streets = world.streets[::2]
+
+for i in range(10000):
     world.play()
+    if i % 20 == 0:
+        r1 = random.randint(0, 3)
+        r2 = random.randint(0, 1)
+        world.add_vehicle_to_path(streets[r1].paths[r2])
+
 
 # world.intersection.traffic_lights[('0', MovementOptions.through)].red_to_green()
 # world.intersection.traffic_lights[('0', MovementOptions.left)].red_to_green()
