@@ -6,6 +6,12 @@ world = SimpleIntersectionWorld()
 #print(len(world.sensors))
 
 world.add_vehicle_to_path(world.inner_north_lane_i)
+world.add_vehicle_to_path(world.inner_south_lane_i)
+
+for i in range(1000):
+    #print(world.vehicles)
+    print(world.sensors[0].get_data(), world.time)
+    world.play()
 
 # world.intersection.traffic_lights[('0', MovementOptions.through)].red_to_green()
 # world.intersection.traffic_lights[('0', MovementOptions.left)].red_to_green()

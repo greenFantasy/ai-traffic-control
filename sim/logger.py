@@ -49,6 +49,25 @@ class Logger:
         data = [vehicle.id, round(self.world.time, roundingPrecision)]
         csvwriter.writerow(data)
 
+    def logVehicleMovement(self, vehicleList) -> None:
+        if not self.enabled:
+            return
+        dataName = 'vehicle_movement' # HERE
+        if dataName not in self.csv_writer_dict:
+            # Initialize
+            filename = dataPathPrefix+dataName+".csv"
+            csvwriter = csv.writer(open(filename,'w', newline=''))
+            fields = ["Vehicle_Coords","TimeStamp"] # HERE
+            csvwriter.writerow(fields)
+            self.csv_writer_dict[dataName] = csvwriter
+        csvwriter = self.csv_writer_dict[dataName]
+        coords = []
+        currTime = round(self.world.time, roundingPrecision)
+        for vehicle in vehicleList:
+            coords.append(vehicle.center)
+        data = [coords, currTime]
+        csvwriter.writerow(data)
+
     def logTrafficLightChange(self, traffic_light, state_old, state_new) -> None:
         if not self.enabled:
             return
