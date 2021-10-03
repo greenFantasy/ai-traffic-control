@@ -6,6 +6,8 @@ world = SimpleIntersectionWorld()
 #print(len(world.sensors))
 
 world.add_vehicle_to_path(world.inner_north_lane_i)
+world.add_vehicle_to_path(world.inner_south_lane_i)
+
 for i in range(100):
     #print(world.vehicles)
     print(world.sensors[0].get_data(), world.time)

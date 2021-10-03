@@ -19,7 +19,7 @@ class World:
     def get_objects(self):
         objects = []
         for a in [a for a in self.__dict__.keys() if a[0] != " "]:
-            if type(self.__dict__[a]) in [Street, Lane, Intersection]:
+            if type(self.__dict__[a]) in [Street, Intersection]:
                 objects.append(self.__dict__[a])
         return objects
 
@@ -36,6 +36,8 @@ class World:
         if isclose(int(round(self.time)),self.time):
             for s in self.sensors:
                 logger.logger.logSensorData(s)
+        # log vehicle positions:
+        logger.logger.logVehicleMovement(self.vehicles)
         self.time += self.time_step
 
     def get_current_time(self):
@@ -51,18 +53,18 @@ class SimpleIntersectionWorld(World):
         self.outer_north_lane_o = Path(LinearParam((18, 24), (18, 100)), width = STANDARD_LANE_WIDTH)
         self.streets.append(Street("1", [self.inner_north_lane_o, self.outer_north_lane_o]))
 
-        self.inner_south_lane_i = Path(LinearParam((6, 100), (6, 24)), width = STANDARD_LANE_WIDTH)
-        self.outer_south_lane_i = Path(LinearParam((18, 100), (18, 24)), width = STANDARD_LANE_WIDTH)
+        self.inner_south_lane_i = Path(LinearParam((-6, 100), (-6, 24)), width = STANDARD_LANE_WIDTH)
+        self.outer_south_lane_i = Path(LinearParam((-18, 100), (-18, 24)), width = STANDARD_LANE_WIDTH)
         self.streets.append(Street("2", [self.inner_south_lane_i, self.outer_south_lane_i]))
-        self.inner_south_lane_o = Path(LinearParam((6, -24), (6, -100)), width = STANDARD_LANE_WIDTH)
-        self.outer_south_lane_o = Path(LinearParam((18, -24), (18, -100)), width = STANDARD_LANE_WIDTH)
+        self.inner_south_lane_o = Path(LinearParam((-6, -24), (-6, -100)), width = STANDARD_LANE_WIDTH)
+        self.outer_south_lane_o = Path(LinearParam((-18, -24), (-18, -100)), width = STANDARD_LANE_WIDTH)
         self.streets.append(Street("3", [self.inner_south_lane_o, self.outer_south_lane_o]))
 
-        self.inner_east_lane_i = Path(LinearParam((-100, 6), (-24, 6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
-        self.outer_east_lane_i = Path(LinearParam((-100, 18), (-24, 18)), width = STANDARD_LANE_WIDTH)
+        self.inner_east_lane_i = Path(LinearParam((-100, -6), (-24, -6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
+        self.outer_east_lane_i = Path(LinearParam((-100, -18), (-24, -18)), width = STANDARD_LANE_WIDTH)
         self.streets.append(Street("4", [self.inner_east_lane_i, self.outer_east_lane_i]))
-        self.inner_east_lane_o = Path(LinearParam((24, 6), (100, 6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
-        self.outer_east_lane_o = Path(LinearParam((24, 18), (100, 18)), width = STANDARD_LANE_WIDTH)
+        self.inner_east_lane_o = Path(LinearParam((24, -6), (100, -6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
+        self.outer_east_lane_o = Path(LinearParam((24, -18), (100, -18)), width = STANDARD_LANE_WIDTH)
         self.streets.append(Street("5", [self.inner_east_lane_o, self.outer_east_lane_o]))
 
         self.inner_west_lane_i = Path(LinearParam((100, 6), (24, 6)), width = STANDARD_LANE_WIDTH)
