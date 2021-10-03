@@ -4,13 +4,18 @@ from sensor import Sensor
 import logger
 
 class TrafficLight:
-    def __init__(self, movement_options: MovementOptions, street_id, intersection, traffic_light_id: str):
+    def __init__(self, movement_options: MovementOptions, street_id, intersection, traffic_light_id: str, yellow_to_red_time: float = 2.0):
         self.movement_option: MovementOptions = movement_options
         self.street_id: int = street_id
         self.intersection = intersection
         self.state: TrafficLightStates = TrafficLightStates.red
         self.state_start_time: float = self.get_current_time()
         self.id = traffic_light_id
+        self.yellow_to_red_time = yellow_to_red_time
+
+    def check_yellow_to_red(self):
+        if self.state == TrafficLightStates.yellow and self.get_current_time() - self.state_start_time > self.yellow_to_red_time:
+            self.yellow_to_red()
 
     def green_to_yellow(self):
         assert(self.state == TrafficLightStates.green)

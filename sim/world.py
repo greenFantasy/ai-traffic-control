@@ -2,18 +2,22 @@ from consts import *
 from street import Street
 from intersection import Intersection
 from trafficlight import TrafficLight
+from controller import Controller
 from car import Car
 from path import Path
+from typing import List
 from parametrization import *
 import logger
 
 class World:
     def __init__(self):
-        self.streets = []
-        self.time = 0.0
-        self.time_step = 0.1
+        self.streets: List[Street] = []
+        self.time: float = 0.0
+        self.time_step: float = 0.1
         self.vehicles = []
         self.sensors = []
+        self.traffic_lights: List[TrafficLight] = []
+        self.controllers: List[Controller] = []
         logger.init(self, enable=True)
 
     def get_objects(self):
@@ -29,6 +33,8 @@ class World:
         self.vehicles.append(car)
 
     def play(self):
+        self.time += self.time_step
+        self.fix_time()
         # Move the vehicles
         for v in self.vehicles:
             v.move(self.time_step)
@@ -36,10 +42,18 @@ class World:
         if isclose(int(round(self.time)),self.time):
             for s in self.sensors:
                 logger.logger.logSensorData(s)
-        self.time += self.time_step
+        # Turn traffic lights from yellow to red as needed
+        for tl in self.traffic_lights:
+            tl.check_yellow_to_red()
+        if self.time % 2 == 0:
+            for c in self.controllers:
+                c.control()
 
     def get_current_time(self):
         return self.time
+
+    def fix_time(self):
+        self.time = round(self.time, 1) # int(round(self.time / self.time_step)) * self.time_step
 
 class SimpleIntersectionWorld(World):
     def __init__(self):
@@ -89,7 +103,9 @@ class SimpleIntersectionWorld(World):
                                 (self.inner_east_lane_i, self.inner_north_lane_o, MovementOptions.left),
                                 (self.outer_east_lane_i, self.outer_south_lane_o, MovementOptions.right),]
 
-        self.intersection = Intersection(self, self.streets, self.paths_to_connect)
+        self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
+        self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
+        self.controllers.append(Controller(self, self.intersection, [20.] * 4))
 
         for s in self.streets:
             for p in s.paths:
