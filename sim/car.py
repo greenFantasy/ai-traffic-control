@@ -56,7 +56,7 @@ class Car (Vehicle):
         self.front_left = tuple((center_vec + 0.5 * forward_vec - 0.5 * right_vec).tolist())
         self.front_right = tuple((center_vec + 0.5 * forward_vec + 0.5 * right_vec).tolist())
 
-    def move(self, time_step):
+    def move(self, time_step, world):
         if self.despawned:
             return
         #Recalculate speed at time step depending on distance2nearestobstacle
@@ -79,6 +79,7 @@ class Car (Vehicle):
                 # Despawn car
                 logger.logger.logVehicleDespawn(self)
                 self.despawned = True
+                world.vehicles.remove(self)
             # Wait Time - instead, just measure time spent on path (Time_spent_on_path)
             # Also log - Average Speed on Path (Time_spent_on_path / path_length (maxPos))
             # TODO(sssai): log when car changes paths (car.id, intersection.id, incoming_path, outgoing_path, wait_time, arrived_on_green, timestamp, etc)

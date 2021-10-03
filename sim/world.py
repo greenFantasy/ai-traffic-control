@@ -37,7 +37,7 @@ class World:
         self.fix_time()
         # Move the vehicles
         for v in self.vehicles:
-            v.move(self.time_step)
+            v.move(self.time_step, self)
         # Log sensor data every second
         if isclose(int(round(self.time)),self.time):
             for s in self.sensors:
