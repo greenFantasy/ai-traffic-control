@@ -131,3 +131,5 @@ dmypy.json
 *.csv
 
 **/data/
+
+**.mp4
