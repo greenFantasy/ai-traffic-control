@@ -49,6 +49,7 @@ class Intersection:
             subPath = Path(parametrization = LinearParam(inboundEnd, outboundStart), width = STANDARD_LANE_WIDTH)
             inbound.add_connecting_path(subPath, moveOp)
             subPath.add_connecting_path(outbound, MovementOptions.through)
+            self.sub_paths.append(subPath)
             # get traffic light corresponding to this path movement
             street = inbound.street
             inbound.add_traffic_light(self.traffic_lights[(street.id, moveOp)], moveOp)

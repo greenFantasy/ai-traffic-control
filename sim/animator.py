@@ -28,7 +28,18 @@ def main(world):
                 pos = path.parametrization.get_pos(i)
                 xs.append(pos[0])
                 ys.append(pos[1])
-            ax.plot(xs, ys, 'r')
+            ax.plot(xs, ys, 'black')
+
+    # plot the paths statically
+    inter = world.intersection
+    for path in inter.sub_paths:
+        xs = []
+        ys = []
+        for i in range(int(path.parametrization.max_pos)):
+            pos = path.parametrization.get_pos(i)
+            xs.append(pos[0])
+            ys.append(pos[1])
+        ax.plot(xs, ys, 'g')
 
     # initialization function: plot the background of each frame
     def init():

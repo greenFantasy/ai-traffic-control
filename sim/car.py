@@ -62,9 +62,9 @@ class Car (Vehicle):
         #Recalculate speed at time step depending on distance2nearestobstacle
         assert self.path is not None, "Path is not set - cannot move car"
         if self.distance2nearestobstacle()>=15:
-            self.speed = 3
+            self.speed = 9
         elif 7<self.distance2nearestobstacle()<=15:
-            self.speed = 2
+            self.speed = 6
         elif self.distance2nearestobstacle()<=7:
             self.speed = 0
         if (self.p_value + self.speed*time_step) >= self.path.parametrization.max_pos:
