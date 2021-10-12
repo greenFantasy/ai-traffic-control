@@ -1,0 +1,56 @@
+from consts import *
+from world import *
+import time
+import random
+
+world = DedicatedLeftTurnIntersectionWorld()
+#print(len(world.sensors))
+
+world.add_vehicle_to_path(world.outer_north_lane_i_common, id = "carA")
+world.add_vehicle_to_path(world.outer_south_lane_i_common, id = "carB")
+
+streets = world.streets[::2]
+
+for i in range(1000):
+    world.play()
+    # if i % 20 == 0:
+    #     r1 = random.randint(0, 3)
+    #     r2 = random.randint(0, 1)
+    #     world.add_vehicle_to_path(streets[r1].paths[r2], id = f"car{i}")
+
+import animator
+
+print("Simulation Complete")
+animate = True
+if animate:
+    animator.main(world)
+
+# world.intersection.traffic_lights[('0', MovementOptions.through)].red_to_green()
+# world.intersection.traffic_lights[('0', MovementOptions.left)].red_to_green()
+# world.intersection.traffic_lights[('0', MovementOptions.right)].red_to_green()
+
+# world.intersection.traffic_lights[('0', MovementOptions.through)].green_to_yellow()
+# world.intersection.traffic_lights[('0', MovementOptions.left)].green_to_yellow()
+# world.intersection.traffic_lights[('0', MovementOptions.right)].green_to_yellow()
+
+# for i in range(1000):
+#     print(world.vehicles)
+#     # print(world.sensors[0].get_data(), world.time)
+#     world.play()
+
+# for i in range(100):
+#     #print(world.vehicles)
+#     world.play()
+
+
+# print("Intersection Lower Boundary:", world.intersection.lower_boundary)
+# s = time.time()
+# for i in range(100):
+#     for v in world.vehicles:
+#         print(world.time, v.rear_left)
+#         tl = world.intersection.traffic_lights[(Direction.north, MovementOptions.through)]
+    # if len(tl.get_sensor_data()) > 0:
+    #    print("I SEE A CAR LETS GOOOOOOOOO")
+#     world.play()
+# e = time.time()
+# print(e - s)
