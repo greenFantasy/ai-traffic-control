@@ -41,8 +41,9 @@ class Path:
         vehicle.setPValue(pos)
         # Ensure vehicle is in the path boundaries - TODO: vehicles don't have position anymore??
         # Add vehicle to vehicle list
-        self.vehicles.append(vehicle)
-        self.vehicles.sort(key = lambda x: x.p_value)
+        # self.vehicles.append(vehicle)
+        self.vehicles.insert(0, vehicle)
+        #self.vehicles.sort(key = lambda x: x.p_value)
         return True
 
     def add_sensor(self, p_min=None, p_max=None, sensor_type='binary'):

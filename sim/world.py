@@ -9,6 +9,8 @@ from typing import List
 from parametrization import *
 import logger
 import copy
+import sys
+sys.path.append('../data')
 
 class World:
     def __init__(self):

@@ -15,7 +15,7 @@ df = pd.read_csv(filename)
 
 # First set up the figure, the axis, and the plot element we want to animate
 fig = plt.figure()
-ax = plt.axes(xlim=(-100, 100), ylim=(-100, 100))
+ax = plt.axes(xlim=(-110, 110), ylim=(-110, 110))
 line, = ax.plot([], [], "bo", lw=2)
 
 # load world

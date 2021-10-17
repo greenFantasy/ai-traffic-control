@@ -2,6 +2,7 @@ from consts import *
 from world import *
 import time
 import random
+import sys
 sys.path.append('../data')
 
 world = SimpleIntersectionWorld()
