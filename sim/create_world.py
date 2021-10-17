@@ -2,6 +2,7 @@ from consts import *
 from world import *
 import time
 import random
+sys.path.append('../data')
 
 world = SimpleIntersectionWorld()
 #print(len(world.sensors))
