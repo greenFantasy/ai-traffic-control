@@ -7,7 +7,7 @@ from parametrization import *
 import logger
 
 class Path:
-    def __init__(self, parametrization: Parametrization, width, sensors=None):
+    def __init__(self, parametrization: Parametrization, width, sensors=None, id=None):
         self.parametrization = parametrization
         self.width = width
         self.start = self.parametrization.get_pos(0) # Starting coordinates
@@ -17,7 +17,13 @@ class Path:
         self.connecting_paths: Dict[MovementOptions, Path] =  {}
         self.street = None
         self.sensors: List[Sensor] = sensors if sensors else []
-        self.id = "PATH_NAME" #TODO - make this a id related to the street or intersection that the path is part of
+        self.id = id #TODO - make this a id related to the street or intersection that the path is part of
+
+    def __repr__(self):
+        return f"Path with id {self.id}"
+
+    def set_id(self, id):
+        self.id = id
 
     def add_connecting_path(self, path, moveOp):
         # TODO: connect path and self

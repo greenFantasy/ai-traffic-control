@@ -11,9 +11,9 @@ class Direction(Enum):
         return direction == Direction.north or direction == Direction.south
 
 class MovementOptions(Enum):
-    through = 0
-    right = 1
-    left = 2
+    through = "through"
+    right = "right"
+    left = "left"
 
 class TrafficLightStates(Enum):
     green = 0

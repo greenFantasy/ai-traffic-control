@@ -18,7 +18,24 @@ class World:
         self.sensors = []
         self.traffic_lights: List[TrafficLight] = []
         self.controllers: List[Controller] = []
+        self.car_id_counter: int = 0
         logger.init(self, enable=True)
+
+    def set_path_ids(self) -> None:
+        """
+        Sets the ids of all the paths in the world. The id is defaulted to the
+        name of the variable in the world class, otherwise it's related to the
+        street name.
+        """
+        for k, v in self.__dict__.items():
+            if isinstance(v, Path):
+                v.set_id(k)
+        for s in self.streets:
+            i = 0
+            for p in s.paths:
+                if not p.id:
+                    p.set_id(f"{s.id}--{i}")
+                    i += 1
 
     def get_objects(self):
         objects = []
@@ -28,7 +45,8 @@ class World:
         return objects
 
     def add_vehicle_to_path(self, path: Path):
-        car = Car(path.start, 15, 6, 5, id = "car1") # TODO: set the size dynamically as a parameter
+        self.car_id_counter += 1
+        car = Car(path.start, 15, 6, 5, id = f"car{self.car_id_counter}") # TODO: set the size dynamically as a parameter
         result = path.add_vehicle(car)
         if result:
             self.vehicles.append(car)
@@ -62,31 +80,33 @@ class SimpleIntersectionWorld(World):
         super().__init__()
         self.inner_north_lane_i = Path(LinearParam((6, -100), (6, -24)), width = STANDARD_LANE_WIDTH)# Lane(Direction.north, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
         self.outer_north_lane_i = Path(LinearParam((18, -100), (18, -24)), width = STANDARD_LANE_WIDTH)
-        self.streets.append(Street("0", [self.inner_north_lane_i, self.outer_north_lane_i]))
+        self.streets.append(Street("north_incoming", [self.inner_north_lane_i, self.outer_north_lane_i]))
         self.inner_north_lane_o = Path(LinearParam((6, 24), (6, 100)), width = STANDARD_LANE_WIDTH)# Lane(Direction.north, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
         self.outer_north_lane_o = Path(LinearParam((18, 24), (18, 100)), width = STANDARD_LANE_WIDTH)
-        self.streets.append(Street("1", [self.inner_north_lane_o, self.outer_north_lane_o]))
+        self.streets.append(Street("north_outgoing", [self.inner_north_lane_o, self.outer_north_lane_o]))
 
         self.inner_south_lane_i = Path(LinearParam((-6, 100), (-6, 24)), width = STANDARD_LANE_WIDTH)
         self.outer_south_lane_i = Path(LinearParam((-18, 100), (-18, 24)), width = STANDARD_LANE_WIDTH)
-        self.streets.append(Street("2", [self.inner_south_lane_i, self.outer_south_lane_i]))
+        self.streets.append(Street("south_incoming", [self.inner_south_lane_i, self.outer_south_lane_i]))
         self.inner_south_lane_o = Path(LinearParam((-6, -24), (-6, -100)), width = STANDARD_LANE_WIDTH)
         self.outer_south_lane_o = Path(LinearParam((-18, -24), (-18, -100)), width = STANDARD_LANE_WIDTH)
-        self.streets.append(Street("3", [self.inner_south_lane_o, self.outer_south_lane_o]))
+        self.streets.append(Street("south_outgoing", [self.inner_south_lane_o, self.outer_south_lane_o]))
 
         self.inner_east_lane_i = Path(LinearParam((-100, -6), (-24, -6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
         self.outer_east_lane_i = Path(LinearParam((-100, -18), (-24, -18)), width = STANDARD_LANE_WIDTH)
-        self.streets.append(Street("4", [self.inner_east_lane_i, self.outer_east_lane_i]))
+        self.streets.append(Street("east_incoming", [self.inner_east_lane_i, self.outer_east_lane_i]))
         self.inner_east_lane_o = Path(LinearParam((24, -6), (100, -6)), width = STANDARD_LANE_WIDTH) # Lane(Direction.west, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
         self.outer_east_lane_o = Path(LinearParam((24, -18), (100, -18)), width = STANDARD_LANE_WIDTH)
-        self.streets.append(Street("5", [self.inner_east_lane_o, self.outer_east_lane_o]))
+        self.streets.append(Street("east_outgoing", [self.inner_east_lane_o, self.outer_east_lane_o]))
 
         self.inner_west_lane_i = Path(LinearParam((100, 6), (24, 6)), width = STANDARD_LANE_WIDTH)
         self.outer_west_lane_i = Path(LinearParam((100, 18), (24, 18)), width = STANDARD_LANE_WIDTH)
-        self.streets.append(Street("6", [self.inner_west_lane_i, self.outer_west_lane_i]))
+        self.streets.append(Street("west_incoming", [self.inner_west_lane_i, self.outer_west_lane_i]))
         self.inner_west_lane_o = Path(LinearParam((-24, 6), (-100, 6)), width = STANDARD_LANE_WIDTH)
         self.outer_west_lane_o = Path(LinearParam((-24, 18), (-100, 18)), width = STANDARD_LANE_WIDTH)
-        self.streets.append(Street("7", [self.inner_west_lane_o, self.outer_west_lane_o]))
+        self.streets.append(Street("west_outgoing", [self.inner_west_lane_o, self.outer_west_lane_o]))
+
+        self.set_path_ids() # Set ids for all the paths created above.
 
         self.paths_to_connect = [(self.inner_north_lane_i, self.inner_north_lane_o, MovementOptions.through),
                                 (self.outer_north_lane_i, self.outer_north_lane_o, MovementOptions.through),

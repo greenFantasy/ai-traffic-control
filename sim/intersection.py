@@ -17,6 +17,7 @@ class Intersection:
         self.paths = []
         self._populate_paths()
         self.paths_to_connect: List[Tuple[Path, Path, MovementOptions]] = paths_to_connect
+        self.incoming_paths = self._get_incoming_paths()
         for s in self.streets:
             # TODO: make the intersections a heap and maintain sortedness when adding new intersections
             s.intersections.append(self)
@@ -25,6 +26,20 @@ class Intersection:
         self.sub_paths = []
         self._create_paths_in_intersection()
         self._determine_boundaries()
+
+    def _get_incoming_paths(self):
+        # TODO (rajatmittal): Document assumption that incomcing path is in path_to_connect
+        incoming_paths = []
+        for p in self.paths_to_connect:
+            if p[0] not in incoming_paths:
+                incoming_paths.append(p)
+        return incoming_paths
+
+    def get_approaching_vehicles(self):
+        vehicles = []
+        for path in self.incoming_paths:
+            vehicles.extend(path.get_vehicles(self.parametrization.max_pos - 50, self.parametrization.max_pos))
+        return vehicles
 
     def _populate_paths(self):
         for street in self.streets:
@@ -47,6 +62,8 @@ class Intersection:
             inboundEnd = inbound.end
             outboundStart = outbound.start
             subPath = Path(parametrization = LinearParam(inboundEnd, outboundStart), width = STANDARD_LANE_WIDTH)
+            subPath.set_id(f"{moveOp}_CONNECTING--{inbound.id}--{outbound.id}")
+            self.sub_paths.append(subPath)
             inbound.add_connecting_path(subPath, moveOp)
             subPath.add_connecting_path(outbound, MovementOptions.through)
             # get traffic light corresponding to this path movement
