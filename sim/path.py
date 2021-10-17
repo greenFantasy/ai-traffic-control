@@ -7,17 +7,18 @@ from parametrization import *
 import logger
 
 class Path:
-    def __init__(self, parametrization: Parametrization, width, sensors=None):
+    def __init__(self, parametrization: Parametrization, width, sensors=None, aux_path = False):
         self.parametrization = parametrization
         self.width = width
         self.start = self.parametrization.get_pos(0) # Starting coordinates
         self.end = self.parametrization.get_pos(self.parametrization.max_pos) # Ending coordinates
-        self.vehicles = []
+        self.vehicles = [] # Vehicles are sorted so those with the highest p-value are last
         self.traffic_light: Dict[MovementOptions, TrafficLight] = {MovementOptions.left: None,MovementOptions.through: None, MovementOptions.right: None}
         self.connecting_paths: Dict[MovementOptions, Path] =  {}
         self.street = None
         self.sensors: List[Sensor] = sensors if sensors else []
         self.id = "PATH_NAME" #TODO - make this a id related to the street or intersection that the path is part of
+        self.aux_path = aux_path
 
     def add_connecting_path(self, path, moveOp):
         # TODO: connect path and self
@@ -33,14 +34,15 @@ class Path:
 
     def add_vehicle(self, vehicle, pos=0):
         # Set path in vehicle so it knows where it is.
-        if len(self.vehicles) > 0 and self.vehicles[-1].p_value == pos: # self.vehicles[0].height:
+        if len(self.vehicles) > 0 and isclose(self.vehicles[0].p_value,pos, abs_tol=0.001): # self.vehicles[0].height:
             print("Failed to add vehicle")
             return False
         vehicle.setPath(self)
         vehicle.setPValue(pos)
-        # Ensure vehicle is in the path - TODO: vehicles don't have position anymore??
+        # Ensure vehicle is in the path boundaries - TODO: vehicles don't have position anymore??
         # Add vehicle to vehicle list
         self.vehicles.append(vehicle)
+        self.vehicles.sort(key = lambda x: x.p_value)
         return True
 
     def add_sensor(self, p_min=None, p_max=None, sensor_type='binary'):

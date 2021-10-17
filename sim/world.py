@@ -58,6 +58,9 @@ class World:
     def fix_time(self):
         self.time = round(self.time, 1) # int(round(self.time / self.time_step)) * self.time_step
 
+    def log_world(self):
+        logger.logger.logSaveWorld(self)
+
     # def build_path_w_left_turn(self, parametrization: Parametrization, width, sensors=None) -> List[Path]:
     #     commonPara = copy.deepcopy(parametrization)
     #     currentPara = copy.deepcopy(parametrization)
@@ -121,13 +124,14 @@ class SimpleIntersectionWorld(World):
                 if len(p.connecting_paths) > 0: # only add sensors for incoming paths
                     p.add_sensor()
                     self.sensors.extend(p.sensors)
+        self.log_world()
 
 class DedicatedLeftTurnIntersectionWorld(World):
     def __init__(self):
         super().__init__()
         self.outer_north_lane_i_common = Path(LinearParam((18, -100), (18, -44)), width = STANDARD_LANE_WIDTH)
-        self.outer_north_lane_i_left = Path(LinearParam((18, -44), (6, -24)), width = STANDARD_LANE_WIDTH)
-        self.outer_north_lane_i_straight = Path(LinearParam((18, -44), (18, -24)), width = STANDARD_LANE_WIDTH)
+        self.outer_north_lane_i_left = Path(LinearParam((18, -44), (6, -24)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_north_lane_i_straight = Path(LinearParam((18, -44), (18, -24)), width = STANDARD_LANE_WIDTH, aux_path=True)
         self.outer_north_lane_i_common.add_connecting_path(self.outer_north_lane_i_left, MovementOptions.left)
         self.outer_north_lane_i_common.add_connecting_path(self.outer_north_lane_i_straight, MovementOptions.through)
         self.streets.append(Street("0", [self.outer_north_lane_i_common, self.outer_north_lane_i_left, self.outer_north_lane_i_straight]))
@@ -135,8 +139,8 @@ class DedicatedLeftTurnIntersectionWorld(World):
         self.streets.append(Street("1", [self.outer_north_lane_o]))
 
         self.outer_south_lane_i_common = Path(LinearParam((-18, 100), (-18, 44)), width = STANDARD_LANE_WIDTH)
-        self.outer_south_lane_i_left = Path(LinearParam((-18, 44), (-6, 24)), width = STANDARD_LANE_WIDTH)
-        self.outer_south_lane_i_straight = Path(LinearParam((-18, 44), (-18, 24)), width = STANDARD_LANE_WIDTH)
+        self.outer_south_lane_i_left = Path(LinearParam((-18, 44), (-6, 24)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_south_lane_i_straight = Path(LinearParam((-18, 44), (-18, 24)), width = STANDARD_LANE_WIDTH, aux_path=True)
         self.outer_south_lane_i_common.add_connecting_path(self.outer_south_lane_i_left, MovementOptions.left)
         self.outer_south_lane_i_common.add_connecting_path(self.outer_south_lane_i_straight, MovementOptions.through)
         self.streets.append(Street("2", [self.outer_south_lane_i_common, self.outer_south_lane_i_left, self.outer_south_lane_i_straight]))
@@ -144,8 +148,8 @@ class DedicatedLeftTurnIntersectionWorld(World):
         self.streets.append(Street("3", [self.outer_south_lane_o]))
 
         self.outer_east_lane_i_common = Path(LinearParam((-100, -18), (-44, -18)), width = STANDARD_LANE_WIDTH)
-        self.outer_east_lane_i_left = Path(LinearParam((-44, -18), (-24, -6)), width = STANDARD_LANE_WIDTH)
-        self.outer_east_lane_i_straight = Path(LinearParam((-44, -18), (-24, -18)), width = STANDARD_LANE_WIDTH)
+        self.outer_east_lane_i_left = Path(LinearParam((-44, -18), (-24, -6)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_east_lane_i_straight = Path(LinearParam((-44, -18), (-24, -18)), width = STANDARD_LANE_WIDTH, aux_path=True)
         self.outer_east_lane_i_common.add_connecting_path(self.outer_east_lane_i_left, MovementOptions.left)
         self.outer_east_lane_i_common.add_connecting_path(self.outer_east_lane_i_straight, MovementOptions.through)
         self.streets.append(Street("4", [self.outer_east_lane_i_common, self.outer_east_lane_i_left, self.outer_east_lane_i_straight]))
@@ -153,8 +157,8 @@ class DedicatedLeftTurnIntersectionWorld(World):
         self.streets.append(Street("5", [self.outer_east_lane_o]))
 
         self.outer_west_lane_i_common = Path(LinearParam((100, 18), (44, 18)), width = STANDARD_LANE_WIDTH)
-        self.outer_west_lane_i_left = Path(LinearParam((44, 18), (24, 6)), width = STANDARD_LANE_WIDTH)
-        self.outer_west_lane_i_straight = Path(LinearParam((44, 18), (24, 18)), width = STANDARD_LANE_WIDTH)
+        self.outer_west_lane_i_left = Path(LinearParam((44, 18), (24, 6)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_west_lane_i_straight = Path(LinearParam((44, 18), (24, 18)), width = STANDARD_LANE_WIDTH, aux_path=True)
         self.outer_west_lane_i_common.add_connecting_path(self.outer_west_lane_i_left, MovementOptions.left)
         self.outer_west_lane_i_common.add_connecting_path(self.outer_west_lane_i_straight, MovementOptions.through)
         self.streets.append(Street("6", [self.outer_west_lane_i_common, self.outer_west_lane_i_left, self.outer_west_lane_i_straight]))
@@ -184,3 +188,4 @@ class DedicatedLeftTurnIntersectionWorld(World):
                     #p.add_sensor() # TODO(rajatmittal): add_sensor requires paths to be longer than 40 feet
                     #self.sensors.extend(p.sensors)
                     pass
+        self.log_world()

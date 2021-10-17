@@ -2,6 +2,7 @@ from consts import *
 from io import BytesIO
 import csv
 import sys
+import numpy as np
 sys.path.append('../data')
 
 # https://stackoverflow.com/questions/41888080/python-efficient-way-to-add-rows-to-dataframe
@@ -31,7 +32,7 @@ class Logger:
             csvwriter.writerow(fields)
             self.csv_writer_dict[dataName] = csvwriter
         csvwriter = self.csv_writer_dict[dataName]
-        data = [vehicle.id, round(self.world.time, roundingPrecision)] # HERE
+        data = [vehicle.id, round(self.world.time, roundingPrecision)] # 
         csvwriter.writerow(data)
 
     def logVehicleDespawn(self, vehicle) -> None:
@@ -116,3 +117,33 @@ class Logger:
         csvwriter = self.csv_writer_dict[dataName]
         data = [sensor.id, sensor.get_data(),round(self.world.time, roundingPrecision)]
         csvwriter.writerow(data)
+
+    def logSaveWorld(self, world):
+        # plot the paths statically
+        pathxs = []
+        pathys = []
+        for street in world.streets:
+            for path in street.paths:
+                xs = []
+                ys = []
+                for i in range(int(path.parametrization.max_pos)):
+                    pos = path.parametrization.get_pos(i)
+                    xs.append(pos[0])
+                    ys.append(pos[1])
+                pathxs.append(xs)
+                pathys.append(ys)
+        # plot the paths statically
+        inter = world.intersection
+        genpathxs = []
+        genpathys = []
+        for path in inter.sub_paths:
+            xs = []
+            ys = []
+            for i in range(int(path.parametrization.max_pos)):
+                pos = path.parametrization.get_pos(i)
+                xs.append(pos[0])
+                ys.append(pos[1])
+            genpathxs.append(xs)
+            genpathys.append(ys)
+        worldSavePath = dataPathPrefix + "worldsave" + ".npz"
+        np.savez(worldSavePath, pathxs = pathxs, pathys = pathys, genpathxs = genpathxs, genpathys = genpathys)

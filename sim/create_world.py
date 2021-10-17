@@ -11,19 +11,12 @@ world.add_vehicle_to_path(world.inner_south_lane_i, id = "carB")
 
 streets = world.streets[::2]
 
-for i in range(1000):
+for i in range(10000):
     world.play()
     if i % 20 == 0:
         r1 = random.randint(0, 3)
         r2 = random.randint(0, 1)
         world.add_vehicle_to_path(streets[r1].paths[r2], id = f"car{i}")
-
-import animator
-
-print("Simulation Complete")
-animate = True
-if animate:
-    animator.main(world)
 
 # world.intersection.traffic_lights[('0', MovementOptions.through)].red_to_green()
 # world.intersection.traffic_lights[('0', MovementOptions.left)].red_to_green()
