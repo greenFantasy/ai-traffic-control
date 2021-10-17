@@ -13,11 +13,30 @@ df = pd.read_csv(filename)
 
 # First, process the vehicle movement into a dataframe
 
-
 # First set up the figure, the axis, and the plot element we want to animate
 fig = plt.figure()
-ax = plt.axes(xlim=(-100, 100), ylim=(-100, 100))
+ax = plt.axes(xlim=(-110, 110), ylim=(-110, 110))
 line, = ax.plot([], [], "bo", lw=2)
+
+# load world
+worldSavePath = dataPathPrefix + "worldsave" + ".npz"
+worldSave = np.load(worldSavePath, allow_pickle=True)
+pathxs = worldSave['pathxs']
+pathys = worldSave['pathys']
+genpathxs = worldSave['genpathxs']
+genpathys = worldSave['genpathys']
+
+# plot the paths statically
+for i in range(len(pathxs)):
+    xs = pathxs[i]
+    ys = pathys[i]
+    ax.plot(xs, ys, 'black')
+
+# plot the generated paths statically
+for i in range(len(genpathxs)):
+    xs = genpathxs[i]
+    ys = genpathys[i]
+    ax.plot(xs, ys, 'g')
 
 # initialization function: plot the background of each frame
 def init():
@@ -36,7 +55,7 @@ def animate(i):
 print("Animating...")
 # call the animator.  blit=True means only re-draw the parts that have changed.
 anim = animation.FuncAnimation(fig, animate, init_func=init,
-                               frames=len(df), interval=10, blit=True)
+                            frames=len(df), interval=5, blit=True)
 
 # save the animation as an mp4.  This requires ffmpeg or mencoder to be
 # installed.  The extra_args ensure that the x264 codec is used, so that

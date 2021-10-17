@@ -1,4 +1,6 @@
 from typing import Tuple, List
+
+from torch._C import _valgrind_toggle
 from vehicle import Vehicle
 from consts import *
 from bisect import bisect_left
@@ -43,7 +45,7 @@ class Car (Vehicle):
         return -self.p_value >= -other.p_value
 
     def __repr__(self):
-        return "Car at (%s,%s)" % (self.center[0], self.center[1])
+        return self.id
 
     def findBoundaries(self):
         self.center: Tuple[float, float] = self.path.parametrization.get_pos(self.p_value)
@@ -62,9 +64,9 @@ class Car (Vehicle):
         #Recalculate speed at time step depending on distance2nearestobstacle
         assert self.path is not None, "Path is not set - cannot move car"
         if self.distance2nearestobstacle()>=15:
-            self.speed = 3
+            self.speed = 9
         elif 7<self.distance2nearestobstacle()<=15:
-            self.speed = 2
+            self.speed = 6
         elif self.distance2nearestobstacle()<=7:
             self.speed = 0
         if (self.p_value + self.speed*time_step) >= self.path.parametrization.max_pos:
@@ -90,12 +92,14 @@ class Car (Vehicle):
                 nextPath = connecting_paths[nextMoveOp]
             # Remove from current path # Assuming that our vehicle is the top of the heap
             old_path = self.path
-            self.path.vehicles.pop(0) # Make sure this works
+            assert self.path.get_vehicles()[-1].id == self.id, f"Car {self.id} is not last in path list: {self.path.get_vehicles()}"
+            self.path.vehicles.pop(-1) # Make sure this works
             if nextPath:
                 nextPath.add_vehicle(self, (self.p_value + self.speed*time_step) - old_path.parametrization.max_pos)
             else:
                 return
         else:
+            #print(self.p_value + self.speed*time_step)
             self.setPValue(self.p_value + self.speed*time_step)
 
     def setPath(self, path):
@@ -123,15 +127,19 @@ class Car (Vehicle):
         assert self.path, "Cars must have a path in order to move."
         currPath = self.path
         vehiclesinPath = currPath.get_vehicles() # TODO(sssai): optimize by using get_vehicles to just get the vehicles in front of the car (smaller p-value)
-        vehiclePos = bisect_left(vehiclesinPath, self)
-        assert vehiclePos!=len(vehiclesinPath), "Car is not in the path's vehicle list"
-        if vehiclePos==0:
-            # This is the first vehicle in the path
+        vehiclesinPath.sort(key= lambda x: x.p_value) # TODO(sssai): why isn't it sorted by default??
+        try:
+            vehiclePos = vehiclesinPath.index(self) #TODO(sssai): change to binary search i.e. vehiclePos = bisect_left(vehiclesinPath, self)
+        except ValueError:
+            raise AssertionError(f"Car {self.id} is not in the path's vehicle list: {[(vehicle.id,vehicle.p_value) for vehicle in vehiclesinPath]}")
+        if vehiclePos==len(vehiclesinPath)-1:
+            # This is the last vehicle in the path
             distclosestVehicle = float("inf")
         else:
-            carInFront = vehiclesinPath[vehiclePos-1]
+            carInFront = vehiclesinPath[vehiclePos+1]
             distclosestVehicle = carInFront.p_value - self.p_value
-            assert distclosestVehicle > 0, f"negative distance {distclosestVehicle}"
+            assert distclosestVehicle!=0, f"Cars {carInFront} and {self} are are the exact same position. Undefined behaivior"
+            assert distclosestVehicle > 0, f"negative distance {distclosestVehicle}, {vehiclesinPath[0].p_value, self.p_value, vehiclePos}"
         # Second, traffic lights
         nextMove = self.plan[0]
         if not currPath.traffic_light[nextMove]:
@@ -143,4 +151,20 @@ class Car (Vehicle):
         else:
             # No traffic light at end of path
             distclosestTrafficLight =  float("inf")
-        return min(distclosestVehicle, distclosestTrafficLight)
+        # Third, check the paths ahead for cars
+        connecting_paths = self.path.connecting_paths
+        nextPath = None
+        distEndPath = currPath.parametrization.max_pos - self.p_value
+        distclosestVehicleinNextPath = float("inf")
+        if not len(connecting_paths.values())>0:
+            nextPath = None
+        elif len(connecting_paths.values()) == 1:
+            nextPath = list(connecting_paths.values())[0]
+        else:
+            assert nextMove in connecting_paths, "No path specified for planned move op"
+            nextPath = connecting_paths[nextMove]
+        if nextPath and len(nextPath.get_vehicles())>0:
+            # get first vehicle in path
+            firstVehicle = nextPath.get_vehicles()[0]
+            distclosestVehicleinNextPath = distEndPath + firstVehicle.p_value
+        return min([distclosestVehicle, distclosestTrafficLight, distclosestVehicleinNextPath])

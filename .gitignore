@@ -129,4 +129,5 @@ dmypy.json
 .pyre/
 
 data/
-*.DS_Store
+**.DS_Store
+**.mp4
