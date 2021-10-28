@@ -1,62 +1,122 @@
+from datetime import time
 import numpy as np
-from matplotlib import pyplot as plt
+from matplotlib import artist, pyplot as plt
 from matplotlib import animation
 import sys
 import pandas as pd
 import ast
+import dill 
 sys.path.append('../data')
 
 dataPathPrefix = '../data/'
 animateData = 'vehicle_movement'
+trafficLightData = 'traffic_light_change'
 filename = dataPathPrefix+animateData+".csv"
-df = pd.read_csv(filename)
+dfVehicles = pd.read_csv(filename)
+worldSavePath = dataPathPrefix + "worldsave" + ".pkl"
+# load world
+with open(worldSavePath, 'rb') as worldfile:
+    world = dill.load(worldfile)
+filename = dataPathPrefix+trafficLightData+".csv"
+dfTrafficLight = pd.read_csv(filename)
 
-# First, process the vehicle movement into a dataframe
-
-# First set up the figure, the axis, and the plot element we want to animate
+# First set up the figure, the axis, and the plot elements we want to animate
 fig = plt.figure()
 ax = plt.axes(xlim=(-110, 110), ylim=(-110, 110))
 ax.set_aspect('equal')
 line, = ax.plot([], [], "bo", lw=2)
 
-# load world
-worldSavePath = dataPathPrefix + "worldsave" + ".npz"
-worldSave = np.load(worldSavePath, allow_pickle=True)
-pathxs = worldSave['pathxs']
-pathys = worldSave['pathys']
-genpathxs = worldSave['genpathxs']
-genpathys = worldSave['genpathys']
+# store the paths in a dict
+paths = dict()
+for street in world.streets:
+    for path in street.paths:
+        xs = []
+        ys = []
+        for i in range(int(path.parametrization.max_pos)):
+            pos = path.parametrization.get_pos(i)
+            xs.append(pos[0])
+            ys.append(pos[1])
+        paths[path.id] = (xs, ys)
+inter = world.intersection
+# store the generated paths in a dict as well
+subpaths = dict()
+for path in inter.sub_paths:
+    xs = []
+    ys = []
+    for i in range(int(path.parametrization.max_pos)):
+        pos = path.parametrization.get_pos(i)
+        xs.append(pos[0])
+        ys.append(pos[1])
+    subpaths[path.id] = (xs, ys) 
 
-# plot the paths statically
-for i in range(len(pathxs)):
-    xs = pathxs[i]
-    ys = pathys[i]
+# Load up traffic light changes - store in a hashmap for easy access
+tlcHashmap = dict()
+for i in range(len(dfTrafficLight)):
+    currElem = dfTrafficLight.iloc[i]
+    tlID = currElem['Traffic_Light_ID']
+    newState = currElem['State_New']
+    timeStamp = currElem['TimeStamp']
+    if timeStamp in tlcHashmap:
+        tlcHashmap[timeStamp].append((tlID, newState))
+    else:
+        tlcHashmap[timeStamp] = [(tlID, newState)]
+
+# Store traffic lights in world in hashmap for easy access
+tlHashmap = dict()
+for tl in world.traffic_lights:
+    tlHashmap[tl.id] = tl
+
+# plot the normal paths statically
+for key in paths.keys():
+    (xs, ys) = paths[key]
     ax.plot(xs, ys, 'black')
 
-# plot the generated paths statically
-for i in range(len(genpathxs)):
-    xs = genpathxs[i]
-    ys = genpathys[i]
-    ax.plot(xs, ys, 'g')
+# plot the generated paths as empty at first just to create the objects - they are populated in init
+subpathArtists = dict()
+for key in subpaths.keys():
+    (xs, ys) = subpaths[key]
+    artis, = ax.plot([], [], 'red')
+    subpathArtists[key] = (artis, 'red')
 
 # initialization function: plot the background of each frame
 def init():
-    line.set_data([], [])
-    return line,
+    cars.set_data([], [])
+    artists = [cars]
+    for key in subpathArtists.keys():
+        (artis, color) = subpathArtists[key]
+        (xs, ys) = subpaths[key]
+        artis.set_data(xs, ys)
+        artis.set_color(color)
+        artists.append(artis)
+    return artists
 
 # animation function.  This is called sequentially
 dataNameToPlot = "Vehicle_Coords"
 def animate(i):
-    coords = ast.literal_eval(df.iloc[i][dataNameToPlot])
+    coords = ast.literal_eval(dfVehicles.iloc[i][dataNameToPlot])
+    time = dfVehicles.iloc[i]['TimeStamp']
     x = [coord[0] for coord in coords]
     y = [coord[1] for coord in coords]
-    line.set_data(x, y)
-    return line,
+    cars.set_data(x, y)
+    timeArtist = ax.annotate(f'Time @ {time}', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
+    if time in tlcHashmap:
+        for (tlID, color) in tlcHashmap[time]:
+            #get pathIDs from tlIDs
+            currtl = tlHashmap[tlID]
+            for (path, moveOp) in currtl.controlling_paths:
+                changing_path = path.connecting_paths[moveOp]
+                (artis, _) = subpathArtists[changing_path.id]
+                artis.set_color(color)
+                subpathArtists[changing_path.id] = (artis, color)
+    artists = [cars, timeArtist]
+    for (artis, _) in subpathArtists.values():
+        artists.append(artis)
+    return artists
 
 print("Animating...")
 # call the animator.  blit=True means only re-draw the parts that have changed.
 anim = animation.FuncAnimation(fig, animate, init_func=init,
-                            frames=len(df), interval=5, blit=True)
+                            frames=len(dfVehicles), interval=5, blit=True)
 
 # save the animation as an mp4.  This requires ffmpeg or mencoder to be
 # installed.  The extra_args ensure that the x264 codec is used, so that
