@@ -5,13 +5,14 @@ import logger
 
 class TrafficLight:
     def __init__(self, movement_options: MovementOptions, street_id, intersection, traffic_light_id: str, yellow_to_red_time: float = 2.0):
-        self.movement_option: MovementOptions = movement_options
+        self.movement_option: MovementOptions = movement_options # TODO(rajatmittal): what is this used for
         self.street_id: int = street_id
         self.intersection = intersection
         self.state: TrafficLightStates = TrafficLightStates.red
         self.state_start_time: float = self.get_current_time()
         self.id = traffic_light_id
         self.yellow_to_red_time = yellow_to_red_time
+        self.controlling_paths = []
 
     def check_yellow_to_red(self):
         if self.state == TrafficLightStates.yellow and self.get_current_time() - self.state_start_time > self.yellow_to_red_time:
@@ -37,3 +38,6 @@ class TrafficLight:
 
     def get_current_time(self):
         return self.intersection.world.get_current_time()
+
+    def add_path(self, path, moveOp):
+        self.controlling_paths.append((path,moveOp))

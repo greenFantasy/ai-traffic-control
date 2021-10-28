@@ -19,6 +19,8 @@ class Path:
         self.sensors: List[Sensor] = sensors if sensors else []
         self.id = id #TODO - make this a id related to the street or intersection that the path is part of
         self.aux_path = aux_path
+        self.sub_path = False
+        self.color = None
 
     def __repr__(self):
         return f"Path with id {self.id}"
@@ -32,6 +34,7 @@ class Path:
 
     def add_traffic_light(self, traffic_light: TrafficLight, movementOp: MovementOptions):
         self.traffic_light[movementOp] = traffic_light
+        traffic_light.add_path(self, movementOp)
 
     def get_vehicles(self, startP: Optional[float] = None, endP: Optional[float] = None):
         start = startP if startP else 0
@@ -57,3 +60,10 @@ class Path:
         p_max = p_max if p_max else p_min + 35
         assert p_min >= 0 and p_max <= self.parametrization.max_pos
         self.sensors.append(Sensor(self, p_min, p_max, sensor_type))
+
+    def _set_sub_path(self):
+        self.sub_path = True
+        self.color = "red"
+    
+    def _set_color(self, color):
+        self.color = color
