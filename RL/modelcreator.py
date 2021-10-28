@@ -2,11 +2,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision
-from torchvision import models
-import random
+# import torchvision
+# from torchvision import models
+# import random
 # from flags import CUDA
-from tqdm import tqdm
+# from tqdm import tqdm
 import os
 
 def print_children_nan(model):
@@ -22,25 +22,26 @@ def print_children_nan(model):
 class StateActionNetwork(nn.Module):
     def __init__(self,
                  loss_function,
-                 init_low=-0.001,
-                 init_high=0.001,
+                 input_size,
+                 output_size,
+                 init_low=-0.1,
+                 init_high=0.1,
                  cuda=False,
                 ):
 
         super(StateActionNetwork, self).__init__()
-        # self.input_size = input_size
+        self.input_size = input_size
+        self.output_size = output_size
 
         self.cuda = cuda
 
         self.init_low = init_low
         self.init_high = init_high
 
-        # self.resnet = models.resnet18(pretrained=False)
-        # self.resnet.conv1 = nn.Conv2d(13, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
-        # self.resnet_head = nn.Sequential(*list(self.resnet.children())[:-1])
-        # del self.resnet
-        # self.flatten = nn.Flatten()
-        # self.fc = nn.Linear(518, 1)
+        layers = [nn.Flatten(), nn.Linear(self.input_size, 20), 
+                    nn.ReLU(), nn.Linear(20, 10), 
+                    nn.ReLU(), nn.Linear(10, self.output_size)]
+        self.forward_block = nn.Sequential(*layers)
 
         self.init_parameters(init_low, init_high)
 
@@ -49,12 +50,10 @@ class StateActionNetwork(nn.Module):
             p.data.uniform_(init_low, init_high)
             
     def forward(self, state):
-        dev = "cuda" if self.cuda else "cpu"
+        # dev = "cuda" if self.cuda else "cpu"
         
-        assert tuple(state.shape[1:]) == (6,), f'Environment state is size {state.shape} in forward, expected {}'
-    
-
-        return values
+        # assert tuple(state.shape[1:]) == (6,), f'Environment state is size {state.shape} in forward, expected {}'
+        return self.forward_block(state)
 
     def train_all(self,
                   train_data,
@@ -165,7 +164,7 @@ class StateActionNetwork(nn.Module):
         return metrics(self.forward(states, a=None, train=False), values)
 
 if __name__ == '__main__':
-    model = StateActionNetwork(loss_function=nn.MSELoss(), init_low=-0.1, init_high=0.1, cuda=CUDA)
+    model = StateActionNetwork(loss_function=nn.MSELoss(), input_size=40, output_size=4, init_low=-20.0, init_high=20.0)
     print(torch.__version__)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     torch.save(model, os.path.join(dir_path, 'model.pt'))

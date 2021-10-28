@@ -3,6 +3,7 @@ from street import Street
 from intersection import Intersection
 from trafficlight import TrafficLight
 from controller import Controller
+from controller import RLController
 from car import Car
 from path import Path
 from typing import List
@@ -10,7 +11,15 @@ from parametrization import *
 import logger
 import copy
 import sys
+import os
+
+RL_DIR = "../RL"
+MODEL_FILE = "model.pt"
+
+sys.path.append(RL_DIR)
 sys.path.append('../data')
+
+from modelcreator import StateActionNetwork
 
 class World:
     def __init__(self):
@@ -141,13 +150,15 @@ class SimpleIntersectionWorld(World):
 
         self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
-        self.controllers.append(Controller(self, self.intersection, [20.] * 4))
 
         for s in self.streets:
             for p in s.paths:
                 if len(p.connecting_paths) > 0: # only add sensors for incoming paths
                     p.add_sensor()
                     self.sensors.extend(p.sensors)
+        self.controllers.append(RLController(self, self.intersection, num_snapshots=5, reward_window=0))
+        model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
+        self.controllers[0].set_model(model)
         self.log_world()
 
 class DedicatedLeftTurnIntersectionWorld(World):
@@ -206,12 +217,12 @@ class DedicatedLeftTurnIntersectionWorld(World):
 
         self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
-        self.controllers.append(Controller(self, self.intersection, [20.] * 4))
+        self.controllers.append(Controller(self, self.intersection, [1.] * 4))
 
         for s in self.streets:
             for p in s.paths:
                 if len(p.connecting_paths) > 0: # only add sensors for incoming paths
-                    #p.add_sensor() # TODO(rajatmittal): add_sensor requires paths to be longer than 40 feet
-                    #self.sensors.extend(p.sensors)
+                    # p.add_sensor() # TODO(rajatmittal): add_sensor requires paths to be longer than 40 feet
+                    # self.sensors.extend(p.sensors)
                     pass
         self.log_world()

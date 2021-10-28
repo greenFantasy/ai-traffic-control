@@ -9,11 +9,11 @@ world = SimpleIntersectionWorld()
 #print(len(world.sensors))
 
 world.add_vehicle_to_path(world.inner_north_lane_i, id = "carA")
-world.add_vehicle_to_path(world.inner_south_lane_i, id = "carB")
+# world.add_vehicle_to_path(world.inner_south_lane_i, id = "carB")
 
 streets = world.streets[::2]
 
-for i in range(10000):
+for i in range(1000):
     world.play()
     if i % 20 == 0:
         r1 = random.randint(0, 3)

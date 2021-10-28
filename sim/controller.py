@@ -71,14 +71,16 @@ class RLController(Controller):
     def __init__(self, world, intersection, num_snapshots: int, reward_window: float):
         super().__init__(world, intersection, [])
 
-        self.mode='train' # Can be train or eval
+        self.min_wait_time = 5.0
+
+        self.mode='eval' # Can be train or eval
         self.reward_prep = [] # list of tuples, (time, reward)
         self.previous_actions = [] # list of (time, state, action) or (time, state, action, next_state)
         self.sars_to_save = [] # list of (state, action, reward, next_state) tuples
 
         # State calculation
         self.total_snapshots: int = num_snapshots
-        self.snapshots: List[torch.tensor] = [] # change this to contain k-1 0s
+        self.snapshots: List[torch.tensor] = [self.get_current_snapshot() for _ in range(num_snapshots)]
 
         # Reward Calculation
         self.reward_window: float = reward_window # number of seconds after action which we use to compute the reward
@@ -87,10 +89,17 @@ class RLController(Controller):
         self.model = model
 
     def get_action(self, env_state):
-        return self.model.forward(env_state)
+        input = env_state.unsqueeze(0)
+        return int(torch.argmax(self.model.forward(input).squeeze(0)))
+    
+    def get_current_snapshot(self):
+        return torch.tensor([s.get_data() for s in self.world.sensors]).float()
 
     def get_environment_state(self):
-        self.snapshots.append(torch.tensor([s.get_data() for s in self.world.sensors]))
+        """
+        In the future, will need to add more to state (time since last light change, time of day, etc)
+        """
+        self.snapshots.append(self.get_current_snapshot())
         self.snapshots = self.snapshots[1:]
         return torch.hstack(self.snapshots)
 
@@ -124,18 +133,18 @@ class RLController(Controller):
                 pass
 
     def control(self) -> None:
-        self.prepare_reward() # appends to rewards
-        self.update_saved_sars() # removes action from previous_actions and puts it into sars_to_save with the next_state and reward both updated
+        # self.prepare_reward() # appends to rewards
+        # self.update_saved_sars() # removes action from previous_actions and puts it into sars_to_save with the next_state and reward both updated
+        environment_state = self.get_environment_state()
         if self.in_termination:
             if self.is_state_finished():
                 self.start_next_state()
         else:
             if self.world.get_current_time() - self.state_start_time > self.min_wait_time:
-                environment_state = self.get_environment_state()
-                if self.previous_actions:
-                    self.previous_actions[0] = tuple(list(self.previous_actions[0]) + [environment_state])
+                # if self.previous_actions:
+                #    self.previous_actions[0] = tuple(list(self.previous_actions[0]) + [environment_state])
                 self.next_state = self.get_action(environment_state)
-                self.previous_actions = [(world.get_current_time(), environment_state, self.next_states)] + self.previous_actions
+                # self.previous_actions = [(self.world.get_current_time(), environment_state, self.next_states)] + self.previous_actions
                 if self.next_state != self.state:
                     self.in_termination = True
                     for l in self.lights[self.state]:
