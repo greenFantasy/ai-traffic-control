@@ -7,14 +7,14 @@ sys.path.append('../data')
 
 world = DedicatedLeftTurnIntersectionWorld()
 # random.seed(0)
-world.add_vehicle_to_path(world.outer_north_lane_i_common, id = "carA")
-world.add_vehicle_to_path(world.outer_south_lane_i_common, id = "carB")
+# world.add_vehicle_to_path(world.outer_north_lane_i_common, id = "carA")
+# world.add_vehicle_to_path(world.outer_south_lane_i_common, id = "carB")
 
 streets = world.streets[::2]
 
 for i in range(10000):
     world.play()
-    if i % 20 == 0:
+    if i % 40 == 0:
         add_car = False
         while (not add_car):
             r1 = random.randint(0, 3)

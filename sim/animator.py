@@ -1,4 +1,6 @@
 from datetime import time
+
+import matplotlib
 import numpy as np
 from matplotlib import artist, pyplot as plt
 from matplotlib import animation
@@ -23,8 +25,8 @@ dfTrafficLight = pd.read_csv(filename)
 # First set up the figure, the axis, and the plot elements we want to animate
 fig = plt.figure()
 ax = plt.axes(xlim=(-110, 110), ylim=(-110, 110))
-ax.set_aspect('equal')
-line, = ax.plot([], [], "bo", lw=2)
+cars, = ax.plot([], [], "bo", lw=2)
+#time, =  ax
 
 # store the paths in a dict
 paths = dict()
@@ -98,7 +100,7 @@ def animate(i):
     x = [coord[0] for coord in coords]
     y = [coord[1] for coord in coords]
     cars.set_data(x, y)
-    timeArtist = ax.annotate(f'Time @ {time}', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
+    # timeArtist = ax.annotate(f'Time @ {time}', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
     if time in tlcHashmap:
         for (tlID, color) in tlcHashmap[time]:
             #get pathIDs from tlIDs
@@ -108,9 +110,9 @@ def animate(i):
                 (artis, _) = subpathArtists[changing_path.id]
                 artis.set_color(color)
                 subpathArtists[changing_path.id] = (artis, color)
-    artists = [cars, timeArtist]
+    artists = [cars]# , timeArtist]
     for (artis, _) in subpathArtists.values():
-        artists.append(artis)
+       artists.append(artis)
     return artists
 
 print("Animating...")

@@ -1,6 +1,5 @@
 from typing import Tuple, List
 
-from torch._C import _valgrind_toggle
 from vehicle import Vehicle
 from consts import *
 from bisect import bisect_left
@@ -14,6 +13,8 @@ class Car (Vehicle):
         super().__init__()
         self.center = center
         self.speed = init_speed
+        self.top_speed = 60 # 60 ft/sec is approximately 40mph
+        self.accel_param = 0.1
         self.plan : List[MovementOptions] = []
         self.height = height
         self.width = width
@@ -63,12 +64,11 @@ class Car (Vehicle):
             return
         #Recalculate speed at time step depending on distance2nearestobstacle
         assert self.path is not None, "Path is not set - cannot move car"
-        if self.distance2nearestobstacle()>=15:
-            self.speed = 9
-        elif 7<self.distance2nearestobstacle()<=15:
-            self.speed = 6
-        elif self.distance2nearestobstacle()<=7:
-            self.speed = 0
+        d = self.distance2nearestobstacle()
+        desired_speed = max(min(min((d - 10) / 2.0, self.top_speed), self.path.speed_limit), 0)
+        ap = 0.9 if desired_speed < 10 else self.accel_param * time_step
+        self.speed = self.speed + ap * (desired_speed - self.speed)
+
         if (self.p_value + self.speed*time_step) >= self.path.parametrization.max_pos:
             #First, log the the path exit
             logger.logger.logVehiclePathExit(self, self.path, self.time_path_entered)

@@ -10,6 +10,7 @@ path a at time t_1 is not equal to probability of a car being generated on path 
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict
+import random
 
 class Generator(ABC):
 
@@ -39,4 +40,6 @@ class SimpleGenerator(Generator):
         assert 1 >= self.p >= 0
 
     def generate(self) -> None:
-        pass
+        for path in self.world.spawnable_paths:
+            if random.random() < self.p:
+                self.world.add_vehicle_to_path(path)

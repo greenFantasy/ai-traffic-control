@@ -7,7 +7,7 @@ from parametrization import *
 import logger
 
 class Path:
-    def __init__(self, parametrization: Parametrization, width, sensors=None, id=None, aux_path=False):
+    def __init__(self, parametrization: Parametrization, width, sensors=None, id=None, aux_path=False, speed_limit=60):
         self.parametrization = parametrization
         self.width = width
         self.start = self.parametrization.get_pos(0) # Starting coordinates
@@ -18,9 +18,10 @@ class Path:
         self.street = None
         self.sensors: List[Sensor] = sensors if sensors else []
         self.id = id #TODO - make this a id related to the street or intersection that the path is part of
-        self.aux_path = aux_path
-        self.sub_path = False
+        self.aux_path: bool = aux_path
+        self.sub_path: bool = False
         self.color = None
+        self.speed_limit: float = speed_limit # feet per sec (1ft/sec = .68 mph)
 
     def __repr__(self):
         return f"Path with id {self.id}"

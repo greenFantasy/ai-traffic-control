@@ -31,7 +31,19 @@ class World:
         self.traffic_lights: List[TrafficLight] = []
         self.controllers: List[Controller] = []
         self.car_id_counter: int = 0
+        self.generator = None
+        self.spawnable_paths = []
         logger.init(self, enable=True)
+
+    def set_spawnable_paths(self):
+        self.spawnable_paths = []
+        for s in self.streets:
+            for p in s.paths:
+                if not p.aux_path:
+                    self.spawnable_paths.append(p)
+    
+    def add_generator(self, generator) -> None:
+        self.generator = generator
 
     def set_path_ids(self) -> None:
         """
@@ -81,6 +93,8 @@ class World:
         if self.time % 2 == 0:
             for c in self.controllers:
                 c.control()
+        if self.generator:
+            self.generator.generate() # Add cars to screen according to generator
         logger.logger.logVehicleMovement(self.vehicles)
 
     def get_current_time(self):
@@ -217,7 +231,7 @@ class DedicatedLeftTurnIntersectionWorld(World):
 
         self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
-        self.controllers.append(Controller(self, self.intersection, [1.] * 4))
+        self.controllers.append(Controller(self, self.intersection, [20.] * 4))
 
         for s in self.streets:
             for p in s.paths:

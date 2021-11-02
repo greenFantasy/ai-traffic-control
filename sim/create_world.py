@@ -4,21 +4,26 @@ import time
 import random
 import sys
 sys.path.append('../data')
+sys.path.append('../generator')
+from generator import SimpleGenerator
 
 world = SimpleIntersectionWorld()
+world.set_spawnable_paths()
+print(world.spawnable_paths)
+world.add_generator(SimpleGenerator(world, {"p": 0.01}))
 #print(len(world.sensors))
 
-world.add_vehicle_to_path(world.inner_north_lane_i, id = "carA")
-# world.add_vehicle_to_path(world.inner_south_lane_i, id = "carB")
+# world.add_vehicle_to_path(world.inner_north_lane_i, id = "carA")
+# # world.add_vehicle_to_path(world.inner_south_lane_i, id = "carB")
 
 streets = world.streets[::2]
 
 for i in range(1000):
     world.play()
-    if i % 20 == 0:
-        r1 = random.randint(0, 3)
-        r2 = random.randint(0, 1)
-        world.add_vehicle_to_path(streets[r1].paths[r2], id = f"car{i}")
+    # if i % 20 == 0:
+    #     r1 = random.randint(0, 3)
+    #     r2 = random.randint(0, 1)
+    #     world.add_vehicle_to_path(streets[r1].paths[r2], id = f"car{i}")
 
 # world.intersection.traffic_lights[('0', MovementOptions.through)].red_to_green()
 # world.intersection.traffic_lights[('0', MovementOptions.left)].red_to_green()
