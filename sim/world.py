@@ -34,6 +34,10 @@ class World:
         self.generator = None
         self.spawnable_paths = []
         logger.init(self, enable=True)
+        self.setup_streets()
+        self.set_path_ids()
+        self.setup_intersections()
+        self.setup_sensors()
 
     def set_spawnable_paths(self):
         self.spawnable_paths = []
@@ -105,6 +109,15 @@ class World:
 
     def log_world(self):
         logger.logger.logSaveWorld(self)
+    
+    def setup_streets(self):
+        pass
+
+    def setup_intersections(self):
+        pass
+
+    def setup_sensors(self):
+        pass
 
     # def build_path_w_left_turn(self, parametrization: Parametrization, width, sensors=None) -> List[Path]:
     #     commonPara = copy.deepcopy(parametrization)
@@ -115,6 +128,12 @@ class World:
 class SimpleIntersectionWorld(World):
     def __init__(self):
         super().__init__()
+        self.controllers.append(RLController(self, self.intersection, num_snapshots=5, reward_window=0))
+        model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
+        self.controllers[0].set_model(model)
+        self.log_world()
+    
+    def setup_streets(self):
         self.inner_north_lane_i = Path(LinearParam((6, -100), (6, -24)), width = STANDARD_LANE_WIDTH)# Lane(Direction.north, STANDARD_LANE_WIDTH/2, STANDARD_LANE_WIDTH)
         self.outer_north_lane_i = Path(LinearParam((18, -100), (18, -24)), width = STANDARD_LANE_WIDTH)
         self.streets.append(Street("north_incoming", [self.inner_north_lane_i, self.outer_north_lane_i]))
@@ -142,38 +161,34 @@ class SimpleIntersectionWorld(World):
         self.inner_west_lane_o = Path(LinearParam((-24, 6), (-100, 6)), width = STANDARD_LANE_WIDTH)
         self.outer_west_lane_o = Path(LinearParam((-24, 18), (-100, 18)), width = STANDARD_LANE_WIDTH)
         self.streets.append(Street("west_outgoing", [self.inner_west_lane_o, self.outer_west_lane_o]))
-
-        self.set_path_ids() # Set ids for all the paths created above.
-
+    
+    def setup_intersections(self):
         self.paths_to_connect = [(self.inner_north_lane_i, self.inner_north_lane_o, MovementOptions.through),
-                                (self.outer_north_lane_i, self.outer_north_lane_o, MovementOptions.through),
-                                (self.inner_north_lane_i, self.inner_west_lane_o, MovementOptions.left),
-                                (self.outer_north_lane_i, self.outer_east_lane_o, MovementOptions.right),
-                                (self.inner_south_lane_i, self.inner_south_lane_o, MovementOptions.through),
-                                (self.outer_south_lane_i, self.outer_south_lane_o, MovementOptions.through),
-                                (self.inner_south_lane_i, self.inner_east_lane_o, MovementOptions.left),
-                                (self.outer_south_lane_i, self.outer_west_lane_o, MovementOptions.right),
-                                (self.inner_west_lane_i, self.inner_west_lane_o, MovementOptions.through),
-                                (self.outer_west_lane_i, self.outer_west_lane_o, MovementOptions.through),
-                                (self.inner_west_lane_i, self.inner_south_lane_o, MovementOptions.left),
-                                (self.outer_west_lane_i, self.outer_north_lane_o, MovementOptions.right),
-                                (self.inner_east_lane_i, self.inner_east_lane_o, MovementOptions.through),
-                                (self.outer_east_lane_i, self.outer_east_lane_o, MovementOptions.through),
-                                (self.inner_east_lane_i, self.inner_north_lane_o, MovementOptions.left),
-                                (self.outer_east_lane_i, self.outer_south_lane_o, MovementOptions.right),]
+                        (self.outer_north_lane_i, self.outer_north_lane_o, MovementOptions.through),
+                        (self.inner_north_lane_i, self.inner_west_lane_o, MovementOptions.left),
+                        (self.outer_north_lane_i, self.outer_east_lane_o, MovementOptions.right),
+                        (self.inner_south_lane_i, self.inner_south_lane_o, MovementOptions.through),
+                        (self.outer_south_lane_i, self.outer_south_lane_o, MovementOptions.through),
+                        (self.inner_south_lane_i, self.inner_east_lane_o, MovementOptions.left),
+                        (self.outer_south_lane_i, self.outer_west_lane_o, MovementOptions.right),
+                        (self.inner_west_lane_i, self.inner_west_lane_o, MovementOptions.through),
+                        (self.outer_west_lane_i, self.outer_west_lane_o, MovementOptions.through),
+                        (self.inner_west_lane_i, self.inner_south_lane_o, MovementOptions.left),
+                        (self.outer_west_lane_i, self.outer_north_lane_o, MovementOptions.right),
+                        (self.inner_east_lane_i, self.inner_east_lane_o, MovementOptions.through),
+                        (self.outer_east_lane_i, self.outer_east_lane_o, MovementOptions.through),
+                        (self.inner_east_lane_i, self.inner_north_lane_o, MovementOptions.left),
+                        (self.outer_east_lane_i, self.outer_south_lane_o, MovementOptions.right),]
 
         self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
-
+    
+    def setup_sensors(self):
         for s in self.streets:
             for p in s.paths:
                 if len(p.connecting_paths) > 0: # only add sensors for incoming paths
                     p.add_sensor()
                     self.sensors.extend(p.sensors)
-        self.controllers.append(RLController(self, self.intersection, num_snapshots=5, reward_window=0))
-        model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
-        self.controllers[0].set_model(model)
-        self.log_world()
 
 class DedicatedLeftTurnIntersectionWorld(World):
     def __init__(self):
