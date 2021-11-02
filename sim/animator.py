@@ -27,7 +27,7 @@ fig = plt.figure()
 ax = plt.axes(xlim=(-110, 110), ylim=(-110, 110))
 ax.set_aspect('equal')
 cars, = ax.plot([], [], "bo", lw=2)
-timeArtist = ax.annotate('Time @ 0', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
+timeArtist = ax.annotate('', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
 
 # store the paths in a dict
 paths = dict()
@@ -112,7 +112,7 @@ def animate(i):
                 (artis, _) = subpathArtists[changing_path.id]
                 artis.set_color(color)
                 subpathArtists[changing_path.id] = (artis, color)
-    artists = [cars]# , timeArtist]
+    artists = [cars, timeArtist]
     for (artis, _) in subpathArtists.values():
        artists.append(artis)
     return artists
@@ -120,7 +120,7 @@ def animate(i):
 print("Animating...")
 # call the animator.  blit=True means only re-draw the parts that have changed.
 anim = animation.FuncAnimation(fig, animate, init_func=init,
-                            frames=len(dfVehicles), interval=5, blit=True)
+                            frames=len(dfVehicles), interval=100, blit=True)
 
 # save the animation as an mp4.  This requires ffmpeg or mencoder to be
 # installed.  The extra_args ensure that the x264 codec is used, so that
