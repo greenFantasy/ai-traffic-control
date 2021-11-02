@@ -24,7 +24,8 @@ dfTrafficLight = pd.read_csv(filename)
 fig = plt.figure()
 ax = plt.axes(xlim=(-110, 110), ylim=(-110, 110))
 ax.set_aspect('equal')
-line, = ax.plot([], [], "bo", lw=2)
+cars, = ax.plot([], [], "bo", lw=2)
+timeArtist = ax.annotate('Time @ 0', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
 
 # store the paths in a dict
 paths = dict()
@@ -81,7 +82,8 @@ for key in subpaths.keys():
 # initialization function: plot the background of each frame
 def init():
     cars.set_data([], [])
-    artists = [cars]
+    timeArtist.set_text('Time @ 0')
+    artists = [cars, timeArtist]
     for key in subpathArtists.keys():
         (artis, color) = subpathArtists[key]
         (xs, ys) = subpaths[key]
@@ -98,7 +100,7 @@ def animate(i):
     x = [coord[0] for coord in coords]
     y = [coord[1] for coord in coords]
     cars.set_data(x, y)
-    timeArtist = ax.annotate(f'Time @ {time}', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
+    timeArtist.set_text(f'Time @ {time}')
     if time in tlcHashmap:
         for (tlID, color) in tlcHashmap[time]:
             #get pathIDs from tlIDs
