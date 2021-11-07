@@ -1,3 +1,4 @@
+from posixpath import split
 from consts import *
 from street import Street
 from intersection import Intersection
@@ -38,6 +39,7 @@ class World:
         self.set_path_ids()
         self.setup_intersections()
         self.setup_sensors()
+        self.set_spawnable_paths()
         self.log_world()
 
     def set_spawnable_paths(self):
@@ -191,9 +193,9 @@ class SimpleIntersectionWorld(World):
                     self.sensors.extend(p.sensors)
 
 class DedicatedLeftTurnIntersectionWorld(World):
-    def __init__(self):
+    def __init__(self, split_times=[20.] * 4):
         super().__init__()
-        self.controllers.append(Controller(self, self.intersection, [20.] * 4))
+        self.controllers.append(Controller(self, self.intersection, split_times))
     
     def setup_streets(self):
         self.outer_north_lane_i_common = Path(LinearParam((18, -100), (18, -44)), width = STANDARD_LANE_WIDTH)

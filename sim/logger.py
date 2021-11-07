@@ -4,6 +4,7 @@ import csv
 import sys
 import numpy as np
 import dill
+import os
 sys.path.append('../data')
 
 # https://stackoverflow.com/questions/41888080/python-efficient-way-to-add-rows-to-dataframe
@@ -12,7 +13,7 @@ def init(world, enable):
     global logger
     logger = Logger(world, enable)
 
-dataPathPrefix = '../data/'
+dataPathPrefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/') # TODO (rajatmittal, shyamsai): Fix ugliness
 roundingPrecision = 3
 
 class Logger:
