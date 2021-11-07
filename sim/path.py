@@ -5,9 +5,10 @@ from trafficlight import TrafficLight
 from sensor import Sensor
 from parametrization import *
 import logger
+import warnings
 
 class Path:
-    def __init__(self, parametrization: Parametrization, width, sensors=None, id=None, aux_path=False, speed_limit=60):
+    def __init__(self, parametrization: Parametrization, width, sensors=None, id=None, aux_path=False, default_spawn_p = 0, speed_limit=60):
         self.parametrization = parametrization
         self.width = width
         self.start = self.parametrization.get_pos(0) # Starting coordinates
@@ -20,6 +21,7 @@ class Path:
         self.id = id #TODO - make this a id related to the street or intersection that the path is part of
         self.aux_path: bool = aux_path
         self.sub_path: bool = False
+        self.default_spawn_p = default_spawn_p
         self.color = None
         self.speed_limit: float = speed_limit # feet per sec (1ft/sec = .68 mph)
 
@@ -42,11 +44,14 @@ class Path:
         end = endP if endP else self.parametrization.max_pos
         return [vehicle for vehicle in self.vehicles if end>=vehicle.p_value>=start]
 
-    def add_vehicle(self, vehicle, pos=0):
+    def add_vehicle(self, vehicle, pos=None):
+        if pos is None:
+            pos = self.default_spawn_p
         # Set path in vehicle so it knows where it is.
         if len(self.vehicles) > 0 and isclose(self.vehicles[0].p_value,pos, abs_tol=0.001): # self.vehicles[0].height:
-            print("Failed to add vehicle")
-            return False
+            warnings.warn(f"Added vehicle {vehicle.id} 10 feet behind last car in path {self.id}")
+            self.add_vehicle(vehicle, self.vehicles[0].p_value,pos - 10)
+            return True
         vehicle.setPath(self)
         vehicle.setPValue(pos)
         # Ensure vehicle is in the path boundaries - TODO: vehicles don't have position anymore??
