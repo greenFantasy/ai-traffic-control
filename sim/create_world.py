@@ -16,7 +16,7 @@ world.add_generator(SimpleGenerator(world, {"p": 0.01}))
 # world.add_vehicle_to_path(world.inner_north_lane_i, id = "carA")
 # # world.add_vehicle_to_path(world.inner_south_lane_i, id = "carB")
 
-streets = world.streets[::2]
+# streets = world.streets[::2]
 
 for i in range(1000):
     world.play()

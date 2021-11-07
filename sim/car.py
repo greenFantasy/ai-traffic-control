@@ -84,8 +84,6 @@ class Car (Vehicle):
             # Also log - Average Speed on Path (Time_spent_on_path / path_length (maxPos))
             # TODO(sssai): log when car changes paths (car.id, intersection.id, incoming_path, outgoing_path, wait_time, arrived_on_green, timestamp, etc)
             # TODO(sssai): Recursively determine if waiting for red light based on car in front
-            elif len(connecting_paths.values()) == 1:
-                nextPath = list(connecting_paths.values())[0]
             else:
                 nextMoveOp = self.plan.pop(0)
                 assert nextMoveOp in connecting_paths, "No path specified for planned move op"
@@ -108,7 +106,7 @@ class Car (Vehicle):
             logger.logger.logVehicleSpawn(self)
         self.path = path
         if len(self.plan) == 0:
-            curr_path = path
+            curr_path = path # Path that car is being placed on
             while len(curr_path.connecting_paths) > 0:
                 idx = random.randint(0, len(curr_path.connecting_paths) - 1)
                 self.plan.append(list(curr_path.connecting_paths.keys())[idx])
@@ -141,8 +139,12 @@ class Car (Vehicle):
             assert distclosestVehicle!=0, f"Cars {carInFront} and {self} are are the exact same position. Undefined behaivior"
             assert distclosestVehicle > 0, f"negative distance {distclosestVehicle}, {vehiclesinPath[0].p_value, self.p_value, vehiclePos}"
         # Second, traffic lights
-        nextMove = self.plan[0]
-        if not currPath.traffic_light[nextMove]:
+        if not self.plan:
+            distclosestTrafficLight =  float("inf")
+            nextMove = None
+        else:
+            nextMove = self.plan[0]
+        if not currPath.traffic_light.get(nextMove):
             # No traffic light at end of path
             distclosestTrafficLight =  float("inf")
         elif currPath.traffic_light[nextMove].state == TrafficLightStates.red:
@@ -158,11 +160,9 @@ class Car (Vehicle):
         distclosestVehicleinNextPath = float("inf")
         if not len(connecting_paths.values())>0:
             nextPath = None
-        elif len(connecting_paths.values()) == 1:
-            nextPath = list(connecting_paths.values())[0]
         else:
             assert nextMove in connecting_paths, "No path specified for planned move op"
-            nextPath = connecting_paths[nextMove]
+            nextPath = connecting_paths.get(nextMove)
         if nextPath and len(nextPath.get_vehicles())>0:
             # get first vehicle in path
             firstVehicle = nextPath.get_vehicles()[0]

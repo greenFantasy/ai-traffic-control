@@ -43,3 +43,4 @@ class SimpleGenerator(Generator):
         for path in self.world.spawnable_paths:
             if random.random() < self.p:
                 self.world.add_vehicle_to_path(path)
+                print(f"Adding car to {path}")

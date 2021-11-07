@@ -40,10 +40,9 @@ class World:
         self.setup_sensors()
 
     def set_spawnable_paths(self):
-        self.spawnable_paths = []
         for s in self.streets:
             for p in s.paths:
-                if not p.aux_path:
+                if not p.aux_path and len(p.connecting_paths) > 0:
                     self.spawnable_paths.append(p)
     
     def add_generator(self, generator) -> None:
