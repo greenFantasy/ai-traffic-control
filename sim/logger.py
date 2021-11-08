@@ -53,7 +53,8 @@ class Logger:
         if dataName not in self.csv_writer_dict:
             # Initialize
             filename = dataPathPrefix+dataName+".csv"
-            csvwriter = csv.writer(open(filename,'w', newline=''))
+            f = open(filename,'w', newline='')
+            csvwriter = csv.writer(f)
             fields = ["Vehicle_ID","Time_Despawn"]
             csvwriter.writerow(fields)
             self.csv_writer_dict[dataName] = csvwriter

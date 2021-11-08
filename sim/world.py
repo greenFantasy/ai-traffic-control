@@ -79,7 +79,7 @@ class World:
         if not id:
             id = f"car{self.car_id_counter}"
         car = Car(path.start, 15, 6, 5, id = id) # TODO: set the size dynamically as a parameter
-        result = path.add_vehicle(car)
+        result = path.add_vehicle(car, spawn=True)
         if result:
             self.vehicles.append(car)
 

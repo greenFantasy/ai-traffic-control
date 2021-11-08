@@ -7,7 +7,8 @@ class Parametrization:
         name: str,
         coor_func, # Callable[[float], Tuple[float, float]],
         max_pos: float,
-        starting_coors: Tuple[float, float]=(0, 0)
+        starting_coors: Tuple[float, float]=(0, 0),
+        infinite_beginning=False
     ):
 
         assert(len(coor_func(0)) == 2) # coor_func must return a length 2 tuple
@@ -15,6 +16,7 @@ class Parametrization:
         self.coor_func: Callable[[float], Tuple[float, float]] = coor_func
         self.max_pos: float = max_pos # cannot feed in pos > max_pos into coor_func
         self.starting_coors = starting_coors
+        self.infinite_beginning = infinite_beginning
 
     def get_pos(self, p) -> Tuple[float, float]:
         # get position associated with p

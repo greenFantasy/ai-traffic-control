@@ -40,17 +40,17 @@ class Path:
         traffic_light.add_path(self, movementOp)
 
     def get_vehicles(self, startP: Optional[float] = None, endP: Optional[float] = None):
-        start = startP if startP else 0
+        start = startP if startP else -float("inf")
         end = endP if endP else self.parametrization.max_pos
         return [vehicle for vehicle in self.vehicles if end>=vehicle.p_value>=start]
 
-    def add_vehicle(self, vehicle, pos=None):
+    def add_vehicle(self, vehicle, pos=None, spawn=False):
         if pos is None:
             pos = self.default_spawn_p
         # Set path in vehicle so it knows where it is.
-        if len(self.vehicles) > 0 and isclose(self.vehicles[0].p_value,pos, abs_tol=0.001): # self.vehicles[0].height:
-            warnings.warn(f"Added vehicle {vehicle.id} 10 feet behind last car in path {self.id}")
-            self.add_vehicle(vehicle, self.vehicles[0].p_value,pos - 10)
+        if spawn and len(self.vehicles) > 0 and self.vehicles[0].p_value < pos + 8: # self.vehicles[0].height:
+            # warnings.warn(f"Added vehicle {vehicle.id} 10 feet behind last car in path {self.id}")
+            self.add_vehicle(vehicle, self.vehicles[0].p_value - 10)
             return True
         vehicle.setPath(self)
         vehicle.setPValue(pos)
