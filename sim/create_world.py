@@ -25,6 +25,8 @@ for i in range(1000):
     #     r2 = random.randint(0, 1)
     #     world.add_vehicle_to_path(streets[r1].paths[r2], id = f"car{i}")
 
+world.close()
+
 # world.intersection.traffic_lights[('0', MovementOptions.through)].red_to_green()
 # world.intersection.traffic_lights[('0', MovementOptions.left)].red_to_green()
 # world.intersection.traffic_lights[('0', MovementOptions.right)].red_to_green()
