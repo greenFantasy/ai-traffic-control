@@ -147,9 +147,19 @@ class Car (Vehicle):
         self.p_value = p_value
         self.findBoundaries()
     
-    def distance_to_nearest_intersection(self) -> Tuple(float, int): # distance to nearest intersection, id of intersection
-        pass
-
+    def distance_to_nearest_intersection(self) -> Tuple[float, int]: # distance to nearest intersection, id of intersection
+        total_distance, i = 0, 0
+        currpath = self.path
+        while not any(currpath.traffic_light.values()):
+            if i >= len(self.plan):
+                return float("inf")
+            total_distance += currpath.parametrization.max_pos
+            nextMove = self.plan[i]
+            currpath = currpath.connecting_paths[nextMove]
+            i += 1
+        intersection_id = [x for x in currpath.traffic_light.values() if x][0].intersection.id
+        return total_distance - self.p_value, intersection_id
+    
     def distance2nearestobstacle(self) -> float:
         # Cars can have two obstacles -
         #   - cars on the same path
