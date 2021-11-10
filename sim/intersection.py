@@ -75,6 +75,7 @@ class Intersection:
             subPath = Path(parametrization = LinearParam(inboundEnd, outboundStart), width = STANDARD_LANE_WIDTH, speed_limit=20)
             subPath.set_id(f"{moveOp}_CONNECTING--{inbound.id}--{outbound.id}")
             self.sub_paths.append(subPath)
+            subPath._set_sub_path()
             inbound.add_connecting_path(subPath, moveOp)
             subPath.add_connecting_path(outbound, MovementOptions.through)
             self.sub_paths.append(subPath)

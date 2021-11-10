@@ -26,6 +26,7 @@ class Logger:
         self.list_storage_dict = {}
         
     def close(self):
+        print("Closing the logger.")
         for dataName in self.csv_writer_dict.keys():
             filehandler = self.filehandler_dict[dataName]
             filehandler.close()
@@ -169,11 +170,11 @@ class Logger:
             self.list_storage_dict[dataName] = []
         self.list_storage_dict[dataName].append((round(self.world.time, roundingPrecision), snapshot))
 
-    def log_vehicle_at_intersection(self, intersection_id, enter_time, leave_time):
+    def log_vehicle_at_intersection(self, vehicle, intersection_id, enter_time, leave_time):
         if not self.enabled:
             return
         dataName = 'vehicle_intersection_times'
         if dataName not in self.list_storage_dict:
             self.list_storage_dict[dataName] = []
-        self.list_storage_dict[dataName].append((intersection_id, enter_time, leave_time))
+        self.list_storage_dict[dataName].append((vehicle.id, intersection_id, enter_time, leave_time))
 

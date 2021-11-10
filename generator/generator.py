@@ -39,8 +39,9 @@ class SimpleGenerator(Generator):
         super().__init__(world, params)
         assert 1 >= self.p >= 0
 
-    def generate(self) -> None:
+    def generate(self, verbose=False) -> None:
         for path in self.world.spawnable_paths:
             if random.random() < self.p:
                 self.world.add_vehicle_to_path(path)
-                print(f"Adding car to {path}")
+                if verbose:
+                    print(f"Adding car to {path}")

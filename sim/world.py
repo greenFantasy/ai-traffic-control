@@ -44,12 +44,13 @@ class World:
 
     def close(self):
         # Close world
+        print("Closing the world.")
         logger.logger.close()
         
     def set_spawnable_paths(self):
         for s in self.streets:
             for p in s.paths:
-                if not p.aux_path and len(p.connecting_paths) > 0:
+                if p.spawnable:
                     self.spawnable_paths.append(p)
     
     def add_generator(self, generator) -> None:
@@ -199,9 +200,10 @@ class SimpleIntersectionWorld(World):
 class DedicatedLeftTurnIntersectionWorld(World):
     def __init__(self, split_times=[20.] * 4):
         super().__init__()
-        self.controllers.append(RLController(self, self.intersection, num_snapshots=5, reward_window=0))
-        model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
-        self.controllers[0].set_model(model)
+        self.controllers.append(Controller(self, self.intersection, split_times))
+        # self.controllers.append(RLController(self, self.intersection, num_snapshots=5, reward_window=0))
+        # model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
+        # self.controllers[0].set_model(model)
     
     def setup_streets(self):
         self.outer_north_lane_i_common = Path(LinearParam((18, -100), (18, -44)), width = STANDARD_LANE_WIDTH, spawnable=True)

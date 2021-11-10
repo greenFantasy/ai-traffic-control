@@ -16,7 +16,7 @@ world.add_generator(SimpleGenerator(world, {"p": 0.01}))
 
 # streets = world.streets[::2]
 
-for i in range(10000):
+for i in range(1000):
     world.play()
     # if i % 40 == 0:
     #     add_car = False

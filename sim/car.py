@@ -26,6 +26,7 @@ class Car (Vehicle):
         self.despawned = False
         self.p_value = None
         self.id = id
+        self.wait_time_data = None
 
     # Efficiency matters - so we define each of the cmp functions
     # TODO(sssai): Not sure if necessary, but should the comparisons make sure the cars are on the same path
@@ -84,7 +85,7 @@ class Car (Vehicle):
 
     def move(self, time_step, world):
         if not self.wait_time_data: # Check if we are entering an intersection if we aren't already in one.
-            self.is_entering_intersection()
+            self.is_entering_intersection(world)
         if self.despawned:
             return
         #Recalculate speed at time step depending on distance2nearestobstacle
@@ -123,7 +124,7 @@ class Car (Vehicle):
                 # If sub_path is True, we are entering the middle of an intersection, 
                 # which for us is equivalent to leaving the queue leading up the intersection.
                 if nextPath.sub_path: 
-                    self.leaving_intersection()
+                    self.leaving_intersection(world)
             else:
                 return
         else:
@@ -148,17 +149,18 @@ class Car (Vehicle):
         self.findBoundaries()
     
     def distance_to_nearest_intersection(self) -> Tuple[float, int]: # distance to nearest intersection, id of intersection
-        total_distance, i = 0, 0
+        total_distance= self.path.parametrization.max_pos - self.p_value
         currpath = self.path
+        i = 0
         while not any(currpath.traffic_light.values()):
             if i >= len(self.plan):
-                return float("inf")
-            total_distance += currpath.parametrization.max_pos
+                return float("inf"), None
             nextMove = self.plan[i]
             currpath = currpath.connecting_paths[nextMove]
+            total_distance += currpath.parametrization.max_pos
             i += 1
         intersection_id = [x for x in currpath.traffic_light.values() if x][0].intersection.id
-        return total_distance - self.p_value, intersection_id
+        return total_distance, intersection_id
     
     def distance2nearestobstacle(self) -> float:
         # Cars can have two obstacles -
