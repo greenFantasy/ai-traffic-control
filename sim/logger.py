@@ -167,7 +167,13 @@ class Logger:
         dataName = 'snapshot_data'
         if dataName not in self.list_storage_dict:
             self.list_storage_dict[dataName] = []
-        currList = self.list_storage_dict[dataName]
-        currList.append((round(self.world.time, roundingPrecision), snapshot))
-        self.list_storage_dict[dataName] = currList
+        self.list_storage_dict[dataName].append((round(self.world.time, roundingPrecision), snapshot))
+
+    def log_vehicle_at_intersection(self, intersection_id, enter_time, leave_time):
+        if not self.enabled:
+            return
+        dataName = 'vehicle_intersection_times'
+        if dataName not in self.list_storage_dict:
+            self.list_storage_dict[dataName] = []
+        self.list_storage_dict[dataName].append((intersection_id, enter_time, leave_time))
 
