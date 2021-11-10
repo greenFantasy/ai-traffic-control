@@ -148,7 +148,7 @@ class Car (Vehicle):
         self.p_value = p_value
         self.findBoundaries()
     
-    def distance_to_nearest_intersection(self) -> Tuple[float, int]: # distance to nearest intersection, id of intersection
+    def distance_to_nearest_intersection(self): # distance to nearest intersection, id of intersection
         total_distance= self.path.parametrization.max_pos - self.p_value
         currpath = self.path
         i = 0
