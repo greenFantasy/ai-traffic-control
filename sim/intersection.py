@@ -1,20 +1,24 @@
 from consts import *
 from street import Street
 from trafficlight import TrafficLight
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 from path import Path
 from parametrization import *
+
+global id_counter 
+id_counter = 1
 
 class Intersection:
     def __init__(self,
                  world,
                  streets, # in a clockwise order
                  paths_to_connect, # triples, incoming, outgoing, movementOption
+                 id: Optional[int] = None # identifier for intersection must be int or None
                  ):
-
         self.world = world
         self.streets = streets
         self.paths = []
+        self.set_id(id)
         self._populate_paths()
         self.paths_to_connect: List[Tuple[Path, Path, MovementOptions]] = paths_to_connect
         self.incoming_paths = self._get_incoming_paths()
@@ -26,6 +30,13 @@ class Intersection:
         self.sub_paths = []
         self._create_paths_in_intersection()
         self._determine_boundaries()
+
+    def set_id(self, id): # Every time a new intersection is created, it is given an id that is one larger than the last intersection
+        self.id = id
+        if id is None:
+            global id_counter
+            self.id = id_counter
+            id_counter += 1
 
     def _get_incoming_paths(self):
         # TODO (rajatmittal): Document assumption that incomcing path is in path_to_connect

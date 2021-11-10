@@ -8,6 +8,9 @@ import torch
 import random
 import logger
 
+# TODO: Move this global to a better location (i.e. this is a parameter of the reward function so defining it here is bad practice).
+INTERSECTION_ENTRANCE_THRESHOLD = 50 
+
 class Car (Vehicle):
     def __init__(self, center: Tuple[float], height: float, width: float, init_speed: float, id: str) -> None:
         super().__init__()
@@ -59,7 +62,29 @@ class Car (Vehicle):
         self.front_left = tuple((center_vec + 0.5 * forward_vec - 0.5 * right_vec).tolist())
         self.front_right = tuple((center_vec + 0.5 * forward_vec + 0.5 * right_vec).tolist())
 
+    def is_entering_intersection(self, world):
+        """
+        Checks if the car is inside an intersection so that we can log it. 
+        """
+        distance, intersection_id = self.distance_to_nearest_intersection()
+        if distance <= INTERSECTION_ENTRANCE_THRESHOLD:
+            self.wait_time_data = (intersection_id, world.get_current_time())
+            return True
+        return False
+    
+    def leaving_intersection(self, world):
+        """
+        Logs that a car is leaving an intersection (also logs data about when the car entered that intersection).
+        """
+        assert self.wait_time_data, "Car was not recorded entering intersection but is being recorded leaving it"
+        intersection_id, enter_time = self.wait_time_data
+        leave_time: float = world.get_current_time()
+        logger.logger.log_vehicle_at_intersection(self, intersection_id, enter_time, leave_time)
+        self.wait_time_data = None
+
     def move(self, time_step, world):
+        if not self.wait_time_data: # Check if we are entering an intersection if we aren't already in one.
+            self.is_entering_intersection()
         if self.despawned:
             return
         #Recalculate speed at time step depending on distance2nearestobstacle
@@ -93,7 +118,12 @@ class Car (Vehicle):
             assert self.path.get_vehicles()[-1].id == self.id, f"Car {self.id} is not last in path list: {self.path.get_vehicles()}"
             self.path.vehicles.pop(-1) # Make sure this works
             if nextPath:
+                # Car is changing paths
                 nextPath.add_vehicle(self, (self.p_value + self.speed*time_step) - old_path.parametrization.max_pos)
+                # If sub_path is True, we are entering the middle of an intersection, 
+                # which for us is equivalent to leaving the queue leading up the intersection.
+                if nextPath.sub_path: 
+                    self.leaving_intersection()
             else:
                 return
         else:
@@ -116,6 +146,9 @@ class Car (Vehicle):
     def setPValue(self, p_value):
         self.p_value = p_value
         self.findBoundaries()
+    
+    def distance_to_nearest_intersection(self) -> Tuple(float, int): # distance to nearest intersection, id of intersection
+        pass
 
     def distance2nearestobstacle(self) -> float:
         # Cars can have two obstacles -
