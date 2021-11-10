@@ -3,6 +3,7 @@ from intersection import Intersection
 from consts import *
 from typing import List
 import torch
+import logger
 
 class Controller:
 
@@ -99,6 +100,7 @@ class RLController(Controller):
         """
         In the future, will need to add more to state (time since last light change, time of day, etc)
         """
+        logger.logger.logSnapshots(self.get_current_snapshot())
         self.snapshots.append(self.get_current_snapshot())
         self.snapshots = self.snapshots[1:]
         return torch.hstack(self.snapshots)
