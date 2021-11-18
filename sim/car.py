@@ -54,14 +54,14 @@ class Car (Vehicle):
 
     def findBoundaries(self):
         self.center: Tuple[float, float] = self.path.parametrization.get_pos(self.p_value)
-        center_vec = torch.tensor(self.center)
-        forward_vec = torch.tensor(self.path.parametrization.get_direction_vector(self.p_value))
-        right_vec = torch.tensor(self.path.parametrization.get_perp_vector(self.p_value))
-        # TODO: Boundaries may not be correct?
-        self.rear_left = tuple((center_vec - 0.5 * forward_vec - 0.5 * right_vec).tolist())
-        self.rear_right = tuple((center_vec - 0.5 * forward_vec + 0.5 * right_vec).tolist())
-        self.front_left = tuple((center_vec + 0.5 * forward_vec - 0.5 * right_vec).tolist())
-        self.front_right = tuple((center_vec + 0.5 * forward_vec + 0.5 * right_vec).tolist())
+        # center_vec = torch.tensor(self.center)
+        # forward_vec = torch.tensor(self.path.parametrization.get_direction_vector(self.p_value))
+        # right_vec = torch.tensor(self.path.parametrization.get_perp_vector(self.p_value))
+        # # TODO: Boundaries may not be correct?
+        # self.rear_left = tuple((center_vec - 0.5 * forward_vec - 0.5 * right_vec).tolist())
+        # self.rear_right = tuple((center_vec - 0.5 * forward_vec + 0.5 * right_vec).tolist())
+        # self.front_left = tuple((center_vec + 0.5 * forward_vec - 0.5 * right_vec).tolist())
+        # self.front_right = tuple((center_vec + 0.5 * forward_vec + 0.5 * right_vec).tolist())
 
     def is_entering_intersection(self, world):
         """

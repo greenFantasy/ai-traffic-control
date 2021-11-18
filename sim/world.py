@@ -44,7 +44,6 @@ class World:
 
     def close(self):
         # Close world
-        print("Closing the world.")
         logger.logger.close()
         
     def set_spawnable_paths(self):

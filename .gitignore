@@ -134,3 +134,4 @@ data/
 !**.gitkeep
 .vscode/
 **.npy
+**.dat
