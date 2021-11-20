@@ -8,7 +8,7 @@ import logger
 import warnings
 
 class Path:
-    def __init__(self, parametrization: Parametrization, width, sensors=None, id=None, aux_path=False, spawnable=False, speed_limit=60):
+    def __init__(self, parametrization: Parametrization, width, sensors=None, id=None, aux_path=False, spawnable=False, speed_limit=60, sensor=None):
         self.parametrization = parametrization
         self.width = width
         self.start = self.parametrization.get_pos(0) # Starting coordinates
@@ -24,6 +24,8 @@ class Path:
         self.spawnable = spawnable
         self.color = None
         self.speed_limit: float = speed_limit # feet per sec (1ft/sec = .68 mph)
+        if sensor:
+            self.add_sensor(p_min=self.parametrization.max_pos - sensor[0], p_max=self.parametrization.max_pos - sensor[0] + sensor[1])
 
     def __repr__(self):
         return f"Path with id {self.id}"

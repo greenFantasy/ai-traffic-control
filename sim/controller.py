@@ -90,8 +90,10 @@ class RLController(Controller):
         self.model = model
 
     def get_action(self, env_state):
-        input = env_state.unsqueeze(0)
-        return int(torch.argmax(self.model.forward(input).squeeze(0)))
+        model_input = env_state.unsqueeze(0)
+        next_state = int(torch.argmax(self.model.forward(model_input).squeeze(0)))
+        logger.logger.log_action(self.world.get_current_time(), next_state, self.intersection.id)
+        return next_state
     
     def get_current_snapshot(self):
         return torch.tensor([s.get_data() for s in self.world.sensors]).float()
