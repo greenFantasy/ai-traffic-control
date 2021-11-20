@@ -28,5 +28,5 @@ for i in range(2400):
     #         if not path.aux_path:
     #             world.add_vehicle_to_path(path, id = f"car{i}")
     #             add_car = True
-
+print("Simulation complete")
 world.close()

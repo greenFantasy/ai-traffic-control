@@ -133,3 +133,5 @@ data/
 **.mp4
 !**.gitkeep
 .vscode/
+**.npy
+**.dat

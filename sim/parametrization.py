@@ -39,7 +39,10 @@ class LinearParam(Parametrization):
         start_tensor, end_tensor = torch.tensor(start_coor, dtype=float), torch.tensor(end_coor, dtype=float)
         norm = torch.norm(end_tensor - start_tensor)
         self.direction_vector = (end_tensor - start_tensor) / norm
-        coor_func = lambda p: tuple((p * self.direction_vector).tolist())
+        self.x_dir = float(self.direction_vector[0])
+        self.y_dir = float(self.direction_vector[1])
+        #coor_func = lambda p: tuple((p * self.direction_vector).tolist())
+        coor_func = lambda p: (p*self.x_dir, p*self.y_dir)
         max_pos = float(norm)
         super().__init__(name, coor_func, max_pos, start_coor)
 

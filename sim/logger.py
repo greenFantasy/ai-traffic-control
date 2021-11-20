@@ -26,7 +26,6 @@ class Logger:
         self.list_storage_dict = {}
         
     def close(self):
-        print("Closing the logger.")
         for dataName in self.csv_writer_dict.keys():
             filehandler = self.filehandler_dict[dataName]
             filehandler.close()
