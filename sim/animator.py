@@ -24,7 +24,7 @@ dfTrafficLight = pd.read_csv(filename)
 
 # First set up the figure, the axis, and the plot elements we want to animate
 fig = plt.figure()
-ax = plt.axes(xlim=(-200, 200), ylim=(-200, 200))
+ax = plt.axes(xlim=(-120, 120), ylim=(-120, 120))
 ax.set_aspect('equal')
 cars, = ax.plot([], [], "bo", lw=2)
 timeArtist = ax.annotate('', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')

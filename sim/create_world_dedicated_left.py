@@ -7,7 +7,7 @@ sys.path.append('../data')
 sys.path.append('../generator')
 from generator import SimpleGenerator
 
-world = DedicatedLeftTurnIntersectionWorld()
+world = DedicatedLeftTurnIntersectionWorld(split_times=[8.,8.,8.,8.])
 world.set_spawnable_paths()
 world.add_generator(SimpleGenerator(world, {"p": 0.01}))
 # random.seed(0)
@@ -16,9 +16,10 @@ world.add_generator(SimpleGenerator(world, {"p": 0.01}))
 
 # streets = world.streets[::2]
 
-for i in range(1000):
+for i in range(2400):
     world.play()
-    # if i % 40 == 0:
+    if i % 100 == 0:
+        print(i)
     #     add_car = False
     #     while (not add_car):
     #         r1 = random.randint(0, 3)

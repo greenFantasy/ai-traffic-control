@@ -176,4 +176,12 @@ class Logger:
         if dataName not in self.list_storage_dict:
             self.list_storage_dict[dataName] = []
         self.list_storage_dict[dataName].append((vehicle.id, intersection_id, enter_time, leave_time))
+    
+    def log_action(self, time, action, intersection_id):
+        if not self.enabled:
+            return
+        dataName = 'controller_actions'
+        if dataName not in self.list_storage_dict:
+            self.list_storage_dict[dataName] = []
+        self.list_storage_dict[dataName].append((time, action, intersection_id))
 
