@@ -217,22 +217,6 @@ class Car (Vehicle):
             return self.car_in_front.p_value - self.p_value
         else:
             return float("inf")
-        assert self.path, "Cars must have a path in order to move."
-        currPath = self.path
-        vehiclesinPath = currPath.get_vehicles(startP=self.p_value) 
-        try:
-            vehiclePos = vehiclesinPath.index(self) #TODO(sssai): change to binary search i.e. vehiclePos = bisect_left(vehiclesinPath, self)
-        except ValueError:
-            raise AssertionError(f"Car {self.id} is not in the path's vehicle list: {[(vehicle.id,vehicle.p_value) for vehicle in vehiclesinPath]}")
-        if vehiclePos==len(vehiclesinPath)-1:
-            # This is the last vehicle in the path
-            distclosestVehicle = float("inf")
-        else:
-            carInFront = vehiclesinPath[vehiclePos+1]
-            distclosestVehicle = carInFront.p_value - self.p_value
-            assert distclosestVehicle!=0, f"Cars {carInFront} and {self} are are the exact same position. Undefined behaivior"
-            assert distclosestVehicle > 0, f"negative distance {distclosestVehicle}, {vehiclesinPath[0].p_value, self.p_value, vehiclePos}"
-        return distclosestVehicle
 
     def distance2nearestobstacle(self) -> float:
         """
