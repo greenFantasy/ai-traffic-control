@@ -11,11 +11,14 @@ directory.
 ## Profiling Code
 
 If not already installed, first, install snakeviz:
+```
   pip install snakeviz
-
+```
 Then, run the program you want to profile with cProfile and store the generated data in temp.dat
+```
   python -m cProfile -o temp.dat create_world_dedicated_left.py
-  
+```
 Visualize with:
+```
   snakeviz temp.dat
-
+```
