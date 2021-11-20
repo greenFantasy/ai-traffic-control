@@ -29,8 +29,6 @@ class Car (Vehicle):
         self.wait_time_data = None
 
     # Efficiency matters - so we define each of the cmp functions
-    # TODO(sssai): Not sure if necessary, but should the comparisons make sure the cars are on the same path
-    # and for eq
     def __eq__(self, other):
         return self.p_value == other.p_value and self.id == other.id
 
@@ -94,7 +92,7 @@ class Car (Vehicle):
         desired_speed = max(min(min((d - 10) / 2.0, self.top_speed), self.path.speed_limit), 0)
         ap = 0.9 if desired_speed < 10 else self.accel_param * time_step
         self.speed = self.speed + ap * (desired_speed - self.speed)
-
+        # Move to the next path or despawn
         if (self.p_value + self.speed*time_step) >= self.path.parametrization.max_pos:
             #First, log the the path exit
             logger.logger.logVehiclePathExit(self, self.path, self.time_path_entered)
@@ -106,18 +104,17 @@ class Car (Vehicle):
                 logger.logger.logVehicleDespawn(self)
                 self.despawned = True
                 world.vehicles.remove(self)
-            # Wait Time - instead, just measure time spent on path (Time_spent_on_path)
-            # Also log - Average Speed on Path (Time_spent_on_path / path_length (maxPos))
-            # TODO(sssai): log when car changes paths (car.id, intersection.id, incoming_path, outgoing_path, wait_time, arrived_on_green, timestamp, etc)
-            # TODO(sssai): Recursively determine if waiting for red light based on car in front
             else:
                 nextMoveOp = self.plan.pop(0)
                 assert nextMoveOp in connecting_paths, "No path specified for planned move op"
                 nextPath = connecting_paths[nextMoveOp]
-            # Remove from current path # Assuming that our vehicle is the top of the heap
+            # Remove from current path 
             old_path = self.path
             assert self.path.get_vehicles()[-1].id == self.id, f"Car {self.id} is not last in path list: {self.path.get_vehicles()}"
             self.path.vehicles.pop(-1) # Make sure this works
+            # set the car_in_front of the vehicle behind to None
+            if self.path.vehicles:
+                self.path.vehicles[-1].setCarInFront(None)
             if nextPath:
                 # Car is changing paths
                 nextPath.add_vehicle(self, (self.p_value + self.speed*time_step) - old_path.parametrization.max_pos)
@@ -143,6 +140,21 @@ class Car (Vehicle):
                 self.plan.append(list(curr_path.connecting_paths.keys())[idx])
                 curr_path = curr_path.connecting_paths[self.plan[-1]]
         self.time_path_entered = logger.logger.world.time
+        # When setting the currentPath, set the next path as well
+        self.setNextPath()
+    
+    def setNextPath(self):
+        connecting_paths = self.path.connecting_paths
+        if len(self.plan) <= 0:
+            self.nextpath = None
+        elif not len(connecting_paths.values())>0:
+            self.nextpath = None
+        else:
+            next_move_op = self.plan[0]
+            self.nextpath = connecting_paths[next_move_op]
+
+    def setCarInFront(self, vehicle):
+        self.car_in_front = vehicle
 
     def setPValue(self, p_value):
         self.p_value = p_value
@@ -162,28 +174,11 @@ class Car (Vehicle):
         intersection_id = [x for x in currpath.traffic_light.values() if x][0].intersection.id
         return total_distance, intersection_id
     
-    def distance2nearestobstacle(self) -> float:
-        # Cars can have two obstacles -
-        #   - cars on the same path
-        #   - traffic light on the same path
-        # First, cars
-        assert self.path, "Cars must have a path in order to move."
+    def get_distance_to_nearest_traffic_light(self) -> float:
+        """
+        Returns the distance to the nearest traffic light
+        """
         currPath = self.path
-        vehiclesinPath = currPath.get_vehicles() # TODO(sssai): optimize by using get_vehicles to just get the vehicles in front of the car (smaller p-value)
-        vehiclesinPath.sort(key= lambda x: x.p_value) # TODO(sssai): why isn't it sorted by default??
-        try:
-            vehiclePos = vehiclesinPath.index(self) #TODO(sssai): change to binary search i.e. vehiclePos = bisect_left(vehiclesinPath, self)
-        except ValueError:
-            raise AssertionError(f"Car {self.id} is not in the path's vehicle list: {[(vehicle.id,vehicle.p_value) for vehicle in vehiclesinPath]}")
-        if vehiclePos==len(vehiclesinPath)-1:
-            # This is the last vehicle in the path
-            distclosestVehicle = float("inf")
-        else:
-            carInFront = vehiclesinPath[vehiclePos+1]
-            distclosestVehicle = carInFront.p_value - self.p_value
-            assert distclosestVehicle!=0, f"Cars {carInFront} and {self} are are the exact same position. Undefined behaivior"
-            assert distclosestVehicle > 0, f"negative distance {distclosestVehicle}, {vehiclesinPath[0].p_value, self.p_value, vehiclePos}"
-        # Second, traffic lights
         if not self.plan:
             distclosestTrafficLight =  float("inf")
             nextMove = None
@@ -198,18 +193,55 @@ class Car (Vehicle):
         else:
             # No traffic light at end of path
             distclosestTrafficLight =  float("inf")
-        # Third, check the paths ahead for cars
-        connecting_paths = self.path.connecting_paths
-        nextPath = None
-        distEndPath = currPath.parametrization.max_pos - self.p_value
-        distclosestVehicleinNextPath = float("inf")
-        if not len(connecting_paths.values())>0:
-            nextPath = None
+        return distclosestTrafficLight
+    
+    def get_distance_to_car_on_next_path(self) -> float:
+        """
+        Returns the distance to the nearest car on the next path
+        """
+        # get first car on next path
+        if not self.nextpath:
+            return float("inf")
+        distEndPath = self.path.parametrization.max_pos - self.p_value
+        vehiclesOnNextPath = self.nextpath.get_vehicles()
+        if len(vehiclesOnNextPath) <= 0:
+            return float("inf")
         else:
-            assert nextMove in connecting_paths, "No path specified for planned move op"
-            nextPath = connecting_paths.get(nextMove)
-        if nextPath and len(nextPath.get_vehicles())>0:
-            # get first vehicle in path
-            firstVehicle = nextPath.get_vehicles()[0]
-            distclosestVehicleinNextPath = distEndPath + firstVehicle.p_value
-        return min([distclosestVehicle, distclosestTrafficLight, distclosestVehicleinNextPath])
+            return distEndPath + vehiclesOnNextPath[0].p_value
+
+    def get_distance_to_nearest_car(self) -> float:
+        """
+        Returns the distance to the nearest car
+        """
+        if self.car_in_front:
+            return self.car_in_front.p_value - self.p_value
+        else:
+            return float("inf")
+        assert self.path, "Cars must have a path in order to move."
+        currPath = self.path
+        vehiclesinPath = currPath.get_vehicles(startP=self.p_value) 
+        try:
+            vehiclePos = vehiclesinPath.index(self) #TODO(sssai): change to binary search i.e. vehiclePos = bisect_left(vehiclesinPath, self)
+        except ValueError:
+            raise AssertionError(f"Car {self.id} is not in the path's vehicle list: {[(vehicle.id,vehicle.p_value) for vehicle in vehiclesinPath]}")
+        if vehiclePos==len(vehiclesinPath)-1:
+            # This is the last vehicle in the path
+            distclosestVehicle = float("inf")
+        else:
+            carInFront = vehiclesinPath[vehiclePos+1]
+            distclosestVehicle = carInFront.p_value - self.p_value
+            assert distclosestVehicle!=0, f"Cars {carInFront} and {self} are are the exact same position. Undefined behaivior"
+            assert distclosestVehicle > 0, f"negative distance {distclosestVehicle}, {vehiclesinPath[0].p_value, self.p_value, vehiclePos}"
+        return distclosestVehicle
+
+    def distance2nearestobstacle(self) -> float:
+        """
+        Returns the distance to the nearest obstacle.
+        """
+        # First, get the cars on the same path
+        distance2caronpath = self.get_distance_to_nearest_car()
+        # Second, traffic lights
+        distance2trafficLight = self.get_distance_to_nearest_traffic_light()
+        # Third, check the paths ahead for cars
+        distance2caronnextpath = self.get_distance_to_car_on_next_path()
+        return min([distance2caronpath, distance2trafficLight, distance2caronnextpath])        

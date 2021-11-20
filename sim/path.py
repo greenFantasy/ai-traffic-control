@@ -40,6 +40,7 @@ class Path:
         traffic_light.add_path(self, movementOp)
 
     def get_vehicles(self, startP: Optional[float] = None, endP: Optional[float] = None):
+        return self.vehicles
         if self.spawnable:
             start = startP if startP else -float("inf")
         else:
@@ -59,11 +60,10 @@ class Path:
             return True
         vehicle.setPath(self)
         vehicle.setPValue(pos)
-        # Ensure vehicle is in the path boundaries - TODO: vehicles don't have position anymore??
-        # Add vehicle to vehicle list
-        # self.vehicles.append(vehicle)
-        self.vehicles.insert(0, vehicle)
-        #self.vehicles.sort(key = lambda x: x.p_value)
+        # Ensure vehicle is in the path boundaries - TODO(sssai)
+        self.vehicles.insert(0, vehicle) #TODO(sssai): possible bug here - cars always added to the beginning of list
+        carInFront = self.vehicles[1] if len(self.vehicles) > 1 else None
+        vehicle.setCarInFront(carInFront)
         return True
 
     def add_sensor(self, p_min=None, p_max=None, sensor_type='binary'):
