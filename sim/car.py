@@ -77,7 +77,7 @@ class Car (Vehicle):
         """
         assert self.wait_time_data, "Car was not recorded entering intersection but is being recorded leaving it"
         intersection_id, enter_time = self.wait_time_data
-        leave_time: float = world.get_current_time()
+        leave_time = None if world.ended else world.get_current_time()
         logger.logger.log_vehicle_at_intersection(self, intersection_id, enter_time, leave_time)
         self.wait_time_data = None
 

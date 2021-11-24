@@ -29,6 +29,7 @@ class Logger:
         for dataName in self.csv_writer_dict.keys():
             filehandler = self.filehandler_dict[dataName]
             filehandler.close()
+        print(self.list_storage_dict.keys())
         for dataName in self.list_storage_dict.keys():
             savePath = dataPathPrefix + dataName + ".pkl"
             with open(savePath, 'wb') as filehandler:
@@ -167,7 +168,7 @@ class Logger:
         dataName = 'snapshot_data'
         if dataName not in self.list_storage_dict:
             self.list_storage_dict[dataName] = []
-        self.list_storage_dict[dataName].append((round(self.world.time, roundingPrecision), snapshot))
+        self.list_storage_dict[dataName].append((self.world.get_current_time(), snapshot))
 
     def log_vehicle_at_intersection(self, vehicle, intersection_id, enter_time, leave_time):
         if not self.enabled:

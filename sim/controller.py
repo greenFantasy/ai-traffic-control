@@ -4,6 +4,7 @@ from consts import *
 from typing import List
 import torch
 import logger
+import random
 
 class Controller:
 
@@ -51,7 +52,7 @@ class Controller:
             l.red_to_green()
         self.in_termination = False
         self.state_start_time = self.world.get_current_time()
-        #print(f"Switching controller to state {self.state}")
+        print(f"Switching controller to state {self.state}")
 
     def get_state_split_time(self) -> float:
         return self.split_times[self.state]

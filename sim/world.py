@@ -34,6 +34,7 @@ class World:
         self.car_id_counter: int = 0
         self.generator = None
         self.spawnable_paths = []
+        self.ended: bool = False # True when the simulation is complete, set to True in the close() function
         logger.init(self, enable=True)
         self.setup_streets()
         self.set_path_ids()
@@ -44,6 +45,10 @@ class World:
 
     def close(self):
         # Close world
+        self.ended = True
+        for v in self.vehicles:
+            if v.wait_time_data:
+                v.leaving_intersection(self)
         logger.logger.close()
         
     def set_spawnable_paths(self):
