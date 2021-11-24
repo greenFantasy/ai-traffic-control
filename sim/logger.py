@@ -9,21 +9,24 @@ sys.path.append('../data')
 
 # https://stackoverflow.com/questions/41888080/python-efficient-way-to-add-rows-to-dataframe
 
-def init(world, enable):
+def init(world, enable, dataFolder):
     global logger
-    logger = Logger(world, enable)
+    logger = Logger(world, enable, dataFolder=dataFolder)
 
-dataPathPrefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/') # TODO (rajatmittal, shyamsai): Fix ugliness
 roundingPrecision = 3
 
 class Logger:
-    def __init__(self, world, enable) -> None:
+    def __init__(self, world, enable, dataFolder) -> None:
         self.world = world
         self.enabled = enable
         self.csv_writer_dict = {}
         self.filehandler_dict = {}
         self.np_array_dict = {}
         self.list_storage_dict = {}
+        dataFolder = dataFolder + "/"
+        self.dataPathPrefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/'+dataFolder) 
+        if not os.path.exists(self.dataPathPrefix):
+            os.makedirs(self.dataPathPrefix)
         
     def close(self):
         for dataName in self.csv_writer_dict.keys():
@@ -31,7 +34,7 @@ class Logger:
             filehandler.close()
         print(self.list_storage_dict.keys())
         for dataName in self.list_storage_dict.keys():
-            savePath = dataPathPrefix + dataName + ".pkl"
+            savePath = self.dataPathPrefix + dataName + ".pkl"
             with open(savePath, 'wb') as filehandler:
                 dill.dump(self.list_storage_dict[dataName], filehandler)
             
@@ -45,7 +48,7 @@ class Logger:
         dataName = 'vehicle_spawn' # HERE
         if dataName not in self.csv_writer_dict:
             # Initialize
-            filename = dataPathPrefix+dataName+".csv"
+            filename = self.dataPathPrefix+dataName+".csv"
             filehandler = open(filename,'w', newline='')
             csvwriter = csv.writer(filehandler)
             fields = ["Vehicle_ID","Time_Spawn"] # HERE
@@ -66,7 +69,7 @@ class Logger:
         dataName = 'vehicle_despawn'
         if dataName not in self.csv_writer_dict:
             # Initialize
-            filename = dataPathPrefix+dataName+".csv"
+            filename = self.dataPathPrefix+dataName+".csv"
             filehandler = open(filename,'w', newline='')
             csvwriter = csv.writer(filehandler)
             fields = ["Vehicle_ID","Time_Despawn"]
@@ -87,7 +90,7 @@ class Logger:
         dataName = 'vehicle_movement' # HERE
         if dataName not in self.csv_writer_dict:
             # Initialize
-            filename = dataPathPrefix+dataName+".csv"
+            filename = self.dataPathPrefix+dataName+".csv"
             filehandler = open(filename,'w', newline='')
             csvwriter = csv.writer(filehandler)
             fields = ["Vehicle_Coords","TimeStamp"] # HERE
@@ -108,7 +111,7 @@ class Logger:
         dataName = 'traffic_light_change' # HERE
         if dataName not in self.csv_writer_dict:
             # Initialize
-            filename = dataPathPrefix+dataName+".csv"
+            filename = self.dataPathPrefix+dataName+".csv"
             filehandler = open(filename,'w', newline='')
             csvwriter = csv.writer(filehandler)
             fields = ["Traffic_Light_ID","State_Old","State_New", "TimeStamp"] # HERE
@@ -125,7 +128,7 @@ class Logger:
         dataName = 'path_exit'
         if dataName not in self.csv_writer_dict:
             # Initialize
-            filename = dataPathPrefix+dataName+'.csv'
+            filename = self.dataPathPrefix+dataName+'.csv'
             filehandler = open(filename,'w', newline='')
             csvwriter = csv.writer(filehandler)
             fields = ["Path_ID","Vehicle_ID","Time_Spent","Average_Speed"]
@@ -146,7 +149,7 @@ class Logger:
         dataName = 'sensor_data'
         if dataName not in self.csv_writer_dict:
             # Initialize
-            filename = dataPathPrefix+dataName+".csv"
+            filename = self.dataPathPrefix+dataName+".csv"
             filehandler = open(filename,'w', newline='')
             csvwriter = csv.writer(filehandler)
             fields = ["Sensor_ID","SensorData","TimeStamp"]
@@ -158,7 +161,7 @@ class Logger:
         csvwriter.writerow(data)
 
     def logSaveWorld(self, world):
-        worldSavePath = dataPathPrefix + "worldsave" + ".pkl"
+        worldSavePath = self.dataPathPrefix + "worldsave" + ".pkl"
         with open(worldSavePath, 'wb') as filehandler:
             dill.dump(world, filehandler)
     

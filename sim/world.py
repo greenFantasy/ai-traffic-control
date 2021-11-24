@@ -23,7 +23,7 @@ sys.path.append('../data')
 from modelcreator import StateActionNetwork
 
 class World:
-    def __init__(self):
+    def __init__(self, dataFolder=''):
         self.streets: List[Street] = []
         self.time: float = 0.0
         self.time_step: float = 0.1
@@ -35,7 +35,7 @@ class World:
         self.generator = None
         self.spawnable_paths = []
         self.ended: bool = False # True when the simulation is complete, set to True in the close() function
-        logger.init(self, enable=True)
+        logger.init(self, enable=True, dataFolder=dataFolder)
         self.setup_streets()
         self.set_path_ids()
         self.setup_intersections()
@@ -137,8 +137,8 @@ class World:
 
 
 class SimpleIntersectionWorld(World):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, dataFolder=''):
+        super().__init__(dataFolder)
         self.controllers.append(RLController(self, self.intersection, num_snapshots=5, reward_window=0))
         model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
         self.controllers[0].set_model(model)
@@ -202,8 +202,8 @@ class SimpleIntersectionWorld(World):
                     self.sensors.extend(p.sensors)
 
 class DedicatedLeftTurnIntersectionWorld(World):
-    def __init__(self, split_times=[20.] * 4):
-        super().__init__()
+    def __init__(self, split_times=[20.] * 4, dataFolder=''):
+        super().__init__(dataFolder)
         # self.controllers.append(Controller(self, self.intersection, split_times))
         self.controllers.append(RLController(self, self.intersection, num_snapshots=5, reward_window=0))
         model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
