@@ -9,8 +9,11 @@ import pandas as pd
 import ast
 import dill 
 sys.path.append('../data')
+dataFolder = None
+if len(sys.argv)>1:
+    dataFolder = sys.argv[1]
 
-dataPathPrefix = '../data/'
+dataPathPrefix = '../data/'+dataFolder+'/' if dataFolder else '../data/' 
 animateData = 'vehicle_movement'
 trafficLightData = 'traffic_light_change'
 filename = dataPathPrefix+animateData+".csv"
