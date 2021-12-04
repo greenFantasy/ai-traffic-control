@@ -35,20 +35,6 @@ def get_env_state(action_time, snapshot_data, snapshot_time_to_index):
     else:
         return torch.hstack([x[1] for x in snapshot_data[i-4:i+1]])
 
-<<<<<<< HEAD
-all_sars = []
-state = get_env_state(actions[0][0], snapshot_data, snapshot_time_to_index)
-for a in actions[1:]: # why actions[1:] instead of just actions?
-    next_state = get_env_state(a[0], snapshot_data, snapshot_time_to_index)
-    action = a[1]
-    reward = get_reward(a[0], vehicle_intersection_times)
-    print(reward)
-    all_sars.append((state, action, reward, next_state))
-    state = next_state
-
-with open(save_path, 'wb') as filehandler:           
-    dill.dump(all_sars, filehandler)
-=======
 # all_sars = []
 # state = get_env_state(actions[0][0], snapshot_data, snapshot_time_to_index)
 # for a in actions[1:]:
@@ -81,4 +67,3 @@ def postProcess(dataFolder):
 
     with open(save_path, 'wb') as filehandler:           
         dill.dump(all_sars, filehandler)
->>>>>>> 374594a19d9795f9cf2a414b0d040b33980f2260
