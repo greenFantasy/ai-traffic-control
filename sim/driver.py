@@ -6,7 +6,9 @@ import random
 import sys
 sys.path.append('../data')
 sys.path.append('../generator')
+sys.path.append('../RL')
 from generator import SimpleGenerator
+import postprocessor
 
 def runSim(dataFolder):
     world = DedicatedLeftTurnIntersectionWorld(split_times=[8.,8.,8.,8.], dataFolder=dataFolder)
@@ -18,7 +20,9 @@ def runSim(dataFolder):
         #     print(i)
     print("Simulation complete")
     world.close()
-    # run processor here TODO(sssai)
+    # run postprocessing
+    postprocessor.postProcess(dataFolder)
+
 
 def runTraining():
     #TODO(rajatmittal)

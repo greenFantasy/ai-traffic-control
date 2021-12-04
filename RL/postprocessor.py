@@ -7,14 +7,14 @@ import torch
 import os
 import datetime
 
-save_path = os.path.join("traindata", f"{str(datetime.datetime.now()).replace(' ', '_')}.pkl")
+# save_path = os.path.join("traindata", f"{str(datetime.datetime.now()).replace(' ', '_')}.pkl")
 
-vehicle_intersection_times = dill.load(open("../data/vehicle_intersection_times.pkl", "rb"))
-actions = dill.load(open("../data/controller_actions.pkl", "rb"))
-snapshot_data = dill.load(open("../data/snapshot_data.pkl", "rb"))
+# vehicle_intersection_times = dill.load(open("../data/vehicle_intersection_times.pkl", "rb"))
+# actions = dill.load(open("../data/controller_actions.pkl", "rb"))
+# snapshot_data = dill.load(open("../data/snapshot_data.pkl", "rb"))
 
-snapshot_data = [(-1.0, torch.zeros(8)) for _ in range(4)] + snapshot_data
-snapshot_time_to_index = {t[0]:i for i,t in enumerate(snapshot_data)}
+# snapshot_data = [(-1.0, torch.zeros(8)) for _ in range(4)] + snapshot_data
+# snapshot_time_to_index = {t[0]:i for i,t in enumerate(snapshot_data)}
 
 REWARD_INTERVAL = 10
 
@@ -35,14 +35,35 @@ def get_env_state(action_time, snapshot_data, snapshot_time_to_index):
     else:
         return torch.hstack([x[1] for x in snapshot_data[i-4:i+1]])
 
-all_sars = []
-state = get_env_state(actions[0][0], snapshot_data, snapshot_time_to_index)
-for a in actions[1:]:
-    next_state = get_env_state(a[0], snapshot_data, snapshot_time_to_index)
-    action = a[1]
-    reward = get_reward(a[0], vehicle_intersection_times)
-    all_sars.append((state, action, reward, next_state))
-    state = next_state
+# all_sars = []
+# state = get_env_state(actions[0][0], snapshot_data, snapshot_time_to_index)
+# for a in actions[1:]:
+#     next_state = get_env_state(a[0], snapshot_data, snapshot_time_to_index)
+#     action = a[1]
+#     reward = get_reward(a[0], vehicle_intersection_times)
+#     all_sars.append((state, action, reward, next_state))
+#     state = next_state
 
-with open(save_path, 'wb') as filehandler:           
-    dill.dump(all_sars, filehandler)
+# with open(save_path, 'wb') as filehandler:           
+#     dill.dump(all_sars, filehandler)
+
+def postProcess(dataFolder):
+    save_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "traindata", f"{dataFolder}.pkl")
+    dataFolder = dataFolder + "/"
+    dataPathPrefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data', dataFolder)
+    vehicle_intersection_times = dill.load(open(dataPathPrefix + 'vehicle_intersection_times' + ".pkl", "rb"))
+    actions = dill.load(open(dataPathPrefix + 'controller_actions' + ".pkl", "rb"))
+    snapshot_data = dill.load(open(dataPathPrefix + 'snapshot_data' + ".pkl", "rb"))
+    snapshot_data = [(-1.0, torch.zeros(8)) for _ in range(4)] + snapshot_data
+    snapshot_time_to_index = {t[0]:i for i,t in enumerate(snapshot_data)}
+    all_sars = []
+    state = get_env_state(actions[0][0], snapshot_data, snapshot_time_to_index)
+    for a in actions[1:]:
+        next_state = get_env_state(a[0], snapshot_data, snapshot_time_to_index)
+        action = a[1]
+        reward = get_reward(a[0], vehicle_intersection_times)
+        all_sars.append((state, action, reward, next_state))
+        state = next_state
+
+    with open(save_path, 'wb') as filehandler:           
+        dill.dump(all_sars, filehandler)

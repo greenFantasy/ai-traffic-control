@@ -24,7 +24,7 @@ class Logger:
         self.np_array_dict = {}
         self.list_storage_dict = {}
         dataFolder = dataFolder + "/"
-        self.dataPathPrefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/'+dataFolder) 
+        self.dataPathPrefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data', dataFolder) 
         if not os.path.exists(self.dataPathPrefix):
             os.makedirs(self.dataPathPrefix)
         
