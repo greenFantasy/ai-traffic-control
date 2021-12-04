@@ -164,7 +164,7 @@ class StateActionNetwork(nn.Module):
                     running_loss += (loss * batch_size).item()
                     total_data += batch_size
                 
-                if train_params.get('verbose', 1) >= 1:
+                if train_params.get('verbose', 1) >= 1 and epoch % 100 == 0:
                     print(f"Epoch {epoch} Training Loss: {running_loss / total_data}")
             
             self.save_model()

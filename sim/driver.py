@@ -8,6 +8,8 @@ sys.path.append('../data')
 sys.path.append('../generator')
 sys.path.append('../RL')
 from generator import SimpleGenerator
+import torch
+from modelcreator import StateActionNetwork
 import postprocessor
 
 def runSim(dataFolder):
@@ -25,9 +27,8 @@ def runSim(dataFolder):
 
 
 def runTraining():
-    #TODO(rajatmittal)
-    while True:
-        pass
+    model = torch.load('../RL/model.pt')
+    model.train_all("../RL/traindata", "../RL/trainparams.txt")
 
 def simDriver(num_cores, train_cores, nSims):
 
@@ -38,6 +39,7 @@ def simDriver(num_cores, train_cores, nSims):
         print("running training process %d" % i)
         trainWorkers.append(multiprocessing.Process(target=runTraining))
         trainWorkers[i].start()
+    
     batchSize = num_cores-train_cores
     nSims = list(range(nSims))
     for simID in range(0, len(nSims), batchSize):
