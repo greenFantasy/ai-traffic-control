@@ -24,7 +24,7 @@ class Logger:
         self.np_array_dict = {}
         self.list_storage_dict = {}
         dataFolder = dataFolder + "/"
-        self.dataPathPrefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/'+dataFolder) 
+        self.dataPathPrefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data', dataFolder) 
         if not os.path.exists(self.dataPathPrefix):
             os.makedirs(self.dataPathPrefix)
         
@@ -32,11 +32,12 @@ class Logger:
         for dataName in self.csv_writer_dict.keys():
             filehandler = self.filehandler_dict[dataName]
             filehandler.close()
-        print(self.list_storage_dict.keys())
+        #print(self.list_storage_dict.keys())
         for dataName in self.list_storage_dict.keys():
             savePath = self.dataPathPrefix + dataName + ".pkl"
             with open(savePath, 'wb') as filehandler:
                 dill.dump(self.list_storage_dict[dataName], filehandler)
+        print(savePath)
             
     def logVehicleSpawn(self, vehicle) -> None:
         '''
