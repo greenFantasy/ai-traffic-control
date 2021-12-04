@@ -1,0 +1,3 @@
+epochs=10000
+optim=Adam
+learning_rate=0.0001

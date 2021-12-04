@@ -47,7 +47,7 @@ class World:
         # Close world
         self.ended = True
         for v in self.vehicles:
-            if v.wait_time_data:
+            if v.wait_time_data: # Is the vehicle in an intersection?
                 v.leaving_intersection(self)
         logger.logger.close()
         

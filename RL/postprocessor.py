@@ -37,10 +37,11 @@ def get_env_state(action_time, snapshot_data, snapshot_time_to_index):
 
 all_sars = []
 state = get_env_state(actions[0][0], snapshot_data, snapshot_time_to_index)
-for a in actions[1:]:
+for a in actions[1:]: # why actions[1:] instead of just actions?
     next_state = get_env_state(a[0], snapshot_data, snapshot_time_to_index)
     action = a[1]
     reward = get_reward(a[0], vehicle_intersection_times)
+    print(reward)
     all_sars.append((state, action, reward, next_state))
     state = next_state
 
