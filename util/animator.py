@@ -9,6 +9,7 @@ import pandas as pd
 import ast
 import dill 
 sys.path.append('../data')
+sys.path.append('../sim')
 dataFolder = None
 if len(sys.argv)>1:
     dataFolder = sys.argv[1]

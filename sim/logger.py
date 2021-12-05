@@ -37,7 +37,6 @@ class Logger:
             savePath = self.dataPathPrefix + dataName + ".pkl"
             with open(savePath, 'wb') as filehandler:
                 dill.dump(self.list_storage_dict[dataName], filehandler)
-        print(savePath)
             
     def logVehicleSpawn(self, vehicle) -> None:
         '''
