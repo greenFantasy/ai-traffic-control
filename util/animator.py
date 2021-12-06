@@ -1,5 +1,4 @@
 from datetime import time
-
 import matplotlib
 import numpy as np
 from matplotlib import artist, pyplot as plt
@@ -8,11 +7,23 @@ import sys
 import pandas as pd
 import ast
 import dill 
+import re
+import os
+
 sys.path.append('../data')
 sys.path.append('../sim')
 dataFolder = None
 if len(sys.argv)>1:
-    dataFolder = sys.argv[1]
+    runNumber = sys.argv[1]
+    reg_compile = re.compile(f".*{runNumber}")
+    for dirpath, dirnames, filenames in os.walk('../data'):
+        if len(dirnames)==0:
+            continue
+        dirs = [dirname for dirname in dirnames if  reg_compile.match(dirname)]
+        if len(dirs)<=0:
+            raise AssertionError( 'No matching directory found')
+        else:
+            dataFolder = dirs[0]
 
 dataPathPrefix = '../data/'+dataFolder+'/' if dataFolder else '../data/' 
 animateData = 'vehicle_movement'

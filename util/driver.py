@@ -10,6 +10,7 @@ import torch
 from modelcreator import StateActionNetwork
 import postprocessor
 import sim_driver
+import datetime
 
 def runSim(dataFolder):
     sim_driver.run_simulation(dataFolder)
@@ -37,7 +38,8 @@ def driver(num_cores, train_cores):
             simNumber += 1
         workers = []
         for i in currSims:
-            dataFolder = f"run{i}"
+            timestamp = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+            dataFolder = f"{timestamp}_run{i}"
             workers.append(multiprocessing.Process(target=runSim, args=(dataFolder,)))
             print("running sim process %d" % i)
         for worker in workers:
