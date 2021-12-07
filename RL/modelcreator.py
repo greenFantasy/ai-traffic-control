@@ -13,6 +13,7 @@ from typing import Optional, List
 import os
 import dill
 import time
+import datetime
 
 class StateActionValueDataset(Dataset):
     def __init__(self, sars):
@@ -200,6 +201,24 @@ class StateActionNetwork(nn.Module):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         torch.save(self, os.path.join(dir_path, 'model.pt'))
         print("Saved new copy of model.")
+
+    def archive_data(self, filename):
+        # Assuming these are accurate
+        archive_data_dir = "../RL/archivedata"
+        train_data_dir = "../RL/traindata"
+        old_filepath = os.path.join(train_data_dir, filename)
+        new_filepath = os.path.join(archive_data_dir, filename)
+        os.replace(old_filepath, new_filepath)
+
+    def sort_files(self, file_list):
+        # Assume files have the format "'%Y_%m_%d_%H_%M_%S_run#'.pkl"
+        sort_list = []
+        for filename in file_list:
+            split_filename = filename.split("_")[:-1]
+            date_time = datetime.datetime(split_filename[0], split_filename[1], split_filename[2], split_filename[3], split_filename[4], split_filename[5])
+            sort_list.append((date_time, filename))
+        sort_list.sort(lambda x: x[0])
+        return [x[1] for x in sort_list]
                 
 if __name__ == '__main__':
     model = StateActionNetwork(loss_function=nn.MSELoss(), input_size=40, output_size=4, init_low=-20.0, init_high=20.0)

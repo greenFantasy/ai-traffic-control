@@ -129,10 +129,12 @@ dmypy.json
 .pyre/
 
 data/
+sim/archivedata/
+RL/traindata/
+RL/archivedata/
 **.DS_Store
 **.mp4
-!**.gitkeep
 .vscode/
 **.npy
 **.dat
-RL/traindata/
+!**.gitkeep
