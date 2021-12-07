@@ -70,29 +70,31 @@ class Controller:
 
 class RLController(Controller):
 
-    def __init__(self, world, intersection, num_snapshots: int, reward_window: float):
+    def __init__(self, world, intersection, num_snapshots: int, greedy_prob: float):
         super().__init__(world, intersection, [])
 
         self.min_wait_time = 5.0
 
-        self.mode='eval' # Can be train or eval
-        self.reward_prep = [] # list of tuples, (time, reward)
-        self.previous_actions = [] # list of (time, state, action) or (time, state, action, next_state)
-        self.sars_to_save = [] # list of (state, action, reward, next_state) tuples
+        self.greedy_prob = greedy_prob # When training, probability with which to take "optimal" actions (as opposed to random actions)
+
+        self.mode='train' # Can be train or eval
 
         # State calculation
         self.total_snapshots: int = num_snapshots
         self.snapshots: List[torch.tensor] = [self.get_current_snapshot() for _ in range(num_snapshots)]
 
-        # Reward Calculation
-        self.reward_window: float = reward_window # number of seconds after action which we use to compute the reward
+    def is_training(self):
+        return self.mode == 'train'
 
     def set_model(self, model):
         self.model = model
 
     def get_action(self, env_state):
-        model_input = env_state.unsqueeze(0)
-        next_state = int(torch.argmax(self.model.forward(model_input).squeeze(0)))
+        if (not self.is_training()) or random.random() < self.greedy_prob:
+            model_input = env_state.unsqueeze(0)
+            next_state = int(torch.argmax(self.model.forward(model_input).squeeze(0)))
+        else:
+            next_state = random.randint(0, self.num_states - 1)
         logger.logger.log_action(self.world.get_current_time(), next_state, self.intersection.id)
         return next_state
     
@@ -108,48 +110,14 @@ class RLController(Controller):
         self.snapshots = self.snapshots[1:]
         return torch.hstack(self.snapshots)
 
-    def prepare_reward(self):
-        """
-        Avg wait time for cars WHILE they are at the intersection during the n second window of this action.
-        As such, max wait time per car will be n seconds, if the reward period is n seconds.
-        Compute distance2nearestintersection to compute rewards outside of simulation
-        """
-        self.reward_prep.append((self.world.get_current_time(), set(self.intersection.get_approaching_vehicle_ids())))
-
-    def compute_reward(self, action_time):
-        wait_times = []
-        incoming_time: dict[str][float] = {}
-        curr_cars = set()
-        for time, vehicles in self.reward_prep:
-            if rp[0] < action_time:
-                continue
-            new_curr_cars = curr_cars
-            for v in curr_cars:
-                if v not in rp[1]:
-                    incoming_time[v] - rp[0]
-                else:
-                    new_curr_cars.append(v)
-
-    def update_saved_sars(self):
-        # For all tuples in previous_actions with a next_state and a computable reward remove from previous actions
-        if len(self.previous_actions[-1]) == 4: # contains (time, env_state, action, next_env_state)
-            if reward_prep[-1][0] >= self.reward_window + self.previous_actions[-1][0]:
-                # Enough time has passed so we can compute the reward
-                pass
-
     def control(self) -> None:
-        # self.prepare_reward() # appends to rewards
-        # self.update_saved_sars() # removes action from previous_actions and puts it into sars_to_save with the next_state and reward both updated
         environment_state = self.get_environment_state()
         if self.in_termination:
             if self.is_state_finished():
                 self.start_next_state()
         else:
             if self.world.get_current_time() - self.state_start_time > self.min_wait_time:
-                # if self.previous_actions:
-                #    self.previous_actions[0] = tuple(list(self.previous_actions[0]) + [environment_state])
                 self.next_state = self.get_action(environment_state)
-                # self.previous_actions = [(self.world.get_current_time(), environment_state, self.next_states)] + self.previous_actions
                 if self.next_state != self.state:
                     self.in_termination = True
                     for l in self.lights[self.state]:
