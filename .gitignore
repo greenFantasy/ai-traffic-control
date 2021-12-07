@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 data/
+sim/archivedata/
 RL/traindata/
 RL/archivedata/
 **.DS_Store
