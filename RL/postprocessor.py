@@ -47,7 +47,7 @@ def get_env_state(action_time, snapshot_data, snapshot_time_to_index):
 # with open(save_path, 'wb') as filehandler:           
 #     dill.dump(all_sars, filehandler)
 
-def postProcess(dataFolder):
+def post_process(dataFolder):
     save_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "traindata", f"{dataFolder}.pkl")
     dataFolder = dataFolder + "/"
     dataPathPrefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data', dataFolder)

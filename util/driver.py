@@ -1,36 +1,26 @@
 import multiprocessing
-from consts import *
-from world import *
 import time
 import random
 import sys
 sys.path.append('../data')
 sys.path.append('../generator')
 sys.path.append('../RL')
-from generator import SimpleGenerator
+sys.path.append('../sim')
 import torch
 from modelcreator import StateActionNetwork
 import postprocessor
+import sim_driver
+import datetime
 
 def runSim(dataFolder):
-    world = DedicatedLeftTurnIntersectionWorld(split_times=[8.,8.,8.,8.], dataFolder=dataFolder)
-    world.set_spawnable_paths()
-    world.add_generator(SimpleGenerator(world, {"p": 0.01}))
-    for i in range(1000):
-        world.play()
-        # if i % 100 == 0:
-        #     print(i)
-    print("Simulation complete")
-    world.close()
-    # run postprocessing
-    postprocessor.postProcess(dataFolder)
-
+    sim_driver.run_simulation(dataFolder)
+    postprocessor.post_process(dataFolder)
 
 def runTraining():
     model = torch.load('../RL/model.pt')
     model.train_all("../RL/traindata", "../RL/trainparams.txt")
 
-def simDriver(num_cores, train_cores, nSims):
+def driver(num_cores, train_cores):
 
     print('using %d threads' % num_cores)
 
@@ -40,14 +30,18 @@ def simDriver(num_cores, train_cores, nSims):
         trainWorkers.append(multiprocessing.Process(target=runTraining))
         trainWorkers[i].start()
     
-    batchSize = num_cores-train_cores
-    nSims = list(range(nSims))
-    for simID in range(0, len(nSims), batchSize):
-        currSims = nSims[simID:simID+batchSize]
+    simNumber = 0
+    while True:
+        currSims = []
+        for i in range(num_cores - train_cores): # number of simulation processes
+            currSims.append(simNumber)
+            simNumber += 1
         workers = []
         for i in currSims:
-            dataFolder = f"run{i}"
+            timestamp = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+            dataFolder = f"{timestamp}_run{i}"
             workers.append(multiprocessing.Process(target=runSim, args=(dataFolder,)))
+            print("running sim process %d" % i)
         for worker in workers:
             worker.start()
         for worker in workers:
@@ -57,5 +51,5 @@ def simDriver(num_cores, train_cores, nSims):
         worker.join()
 
 if __name__ == "__main__":
-    simDriver(num_cores=4, train_cores=1, nSims=10)
-    print("Simulation Driver Complete")
+    driver(num_cores=4, train_cores=1)
+    print("Driver Complete")
