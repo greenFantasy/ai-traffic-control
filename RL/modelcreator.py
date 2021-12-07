@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from typing import Optional, List
 # import torchvision
 # from torchvision import models
@@ -38,6 +38,19 @@ def print_children_nan(model):
             else:
                 print('NO WEIGHT', c)
 
+def get_geometric_sequence_tensor(ratio, length, descending=True):
+    """
+    if descending, that value at start of tensor is 1 and then value at end of tensor is ratio^(length - 1), otherwise reverse
+    """
+    sequence = torch.ones(length)
+    if descending:
+        for i in range(1, length):
+            sequence[i] = ratio * sequence[i-1]
+    else:
+        for i in range(length - 2, -1, -1):
+            sequence[i] = ratio * sequence[i+1]
+    return sequence
+
 class StateActionNetwork(nn.Module):
     def __init__(self,
                  loss_function,
@@ -71,18 +84,30 @@ class StateActionNetwork(nn.Module):
     def forward(self, state):
         return self.forward_block(state)
     
+    def archive_data(self, train_data_dir) -> None:
+        filenames = self.sort_files(os.listdir(train_data_dir))
+
+    
     def load_data(self, train_data_dir, train_params) -> Optional[DataLoader]:
-        filenames = os.listdir(train_data_dir)
+        filenames = self.sort_files(os.listdir(train_data_dir))
         sars = []
+        lengths = []
         for filename in filenames:
             if filename.split(".")[-1] != 'pkl':
                 continue
             with open(os.path.join(train_data_dir, filename), "rb") as file:
-                sars.extend(dill.load(file))
+                single_sim_sars = dill.load(file)
+                lengths.append(len(single_sim_sars))
+                sars.extend(single_sim_sars)
         if not sars:
             return None
+        batch_size = train_params.get('batch_size', 32)
+        weights = torch.repeat_interleave(get_geometric_sequence_tensor(train_params['ratio'], len(filenames), descending=False), \
+            torch.tensor(lengths))
+        batch_sampler = WeightedRandomSampler(weights, batch_size, replacement=False)
+        print(batch_sampler)
         train_ds = StateActionValueDataset(sars)
-        train_dl = DataLoader(train_ds, train_params.get('batch_size', 32), shuffle=True)
+        train_dl = DataLoader(train_ds, batch_size, sampler=batch_sampler)
         return train_dl
     
     def get_optim(self, train_params):
@@ -168,7 +193,7 @@ class StateActionNetwork(nn.Module):
                     print(f"Epoch {epoch} Training Loss: {running_loss / total_data}")
             
             self.save_model()
-
+            self.archive_data(train_data_dir)
             round += 1
     
     def save_model(self):
