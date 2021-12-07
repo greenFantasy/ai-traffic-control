@@ -175,6 +175,15 @@ class StateActionNetwork(nn.Module):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         torch.save(self, os.path.join(dir_path, 'model.pt'))
         print("Saved new copy of model.")
+
+    def archive_data(self, filename):
+        # Assuming these are accurate
+        archive_data_dir = "../RL/archivedata"
+        train_data_dir = "../RL/traindata"
+        old_filepath = os.path.join(train_data_dir, filename)
+        new_filepath = os.path.join(archive_data_dir, filename)
+        os.replace(old_filepath, new_filepath)
+
                 
 if __name__ == '__main__':
     model = StateActionNetwork(loss_function=nn.MSELoss(), input_size=40, output_size=4, init_low=-20.0, init_high=20.0)

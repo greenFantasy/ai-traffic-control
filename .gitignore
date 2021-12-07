@@ -136,3 +136,4 @@ data/
 **.npy
 **.dat
 RL/traindata/
+RL/archivedata/
