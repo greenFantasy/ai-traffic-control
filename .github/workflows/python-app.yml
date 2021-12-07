@@ -26,6 +26,5 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test create_world
       run: |
-        # test create_world.py
-        python create_world.py
+        python create_world_dedicated_left.py 
       working-directory: ${{env.working-directory}}
