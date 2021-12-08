@@ -1,4 +1,7 @@
-epochs=1000
-optim=Adam
+epochs=40
+optim=SGD
 learning_rate=0.0001
 sampling_ratio=0.8
+print_every=5
+batch_size=4
+momentum=0.8

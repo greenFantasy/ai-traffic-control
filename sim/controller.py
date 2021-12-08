@@ -9,6 +9,7 @@ import random
 class Controller:
 
     def __init__(self, world, intersection, split_times):
+        self.verbose = False
         self.num_states: int = 4
         self.world = world
         self.state_start_time: float = 0
@@ -52,7 +53,8 @@ class Controller:
             l.red_to_green()
         self.in_termination = False
         self.state_start_time = self.world.get_current_time()
-        #print(f"Switching controller to state {self.state}")
+        if self.verbose:
+            print(f"Switching controller to state {self.state}")
 
     def get_state_split_time(self) -> float:
         return self.split_times[self.state]
@@ -92,14 +94,23 @@ class RLController(Controller):
     def get_action(self, env_state):
         if (not self.is_training()) or random.random() < self.greedy_prob:
             model_input = env_state.unsqueeze(0)
-            next_state = int(torch.argmax(self.model.forward(model_input).squeeze(0)))
+            model_output = self.model.forward(model_input).squeeze(0)
+            if self.verbose:
+                print(f"Model Predictions: {model_output}")
+            next_state = torch.argmax(model_output).item()
+            if self.verbose:
+                print(f"Greedy Action: {next_state}")
         else:
             next_state = random.randint(0, self.num_states - 1)
+            if self.verbose:
+                print(f"Random Action: {next_state}")
         logger.logger.log_action(self.world.get_current_time(), next_state, self.intersection.id)
         return next_state
     
     def get_current_snapshot(self):
-        return torch.tensor([s.get_data() for s in self.world.sensors]).float()
+        time_since_last_change: float = self.world.get_current_time() - self.state_start_time
+        extra_data = [time_since_last_change, self.state]
+        return torch.tensor([s.get_data() for s in self.world.sensors] + extra_data).float()
 
     def get_environment_state(self):
         """
@@ -108,7 +119,10 @@ class RLController(Controller):
         logger.logger.logSnapshots(self.get_current_snapshot())
         self.snapshots.append(self.get_current_snapshot())
         self.snapshots = self.snapshots[1:]
-        return torch.hstack(self.snapshots)
+        env_state = torch.hstack(self.snapshots)
+        if self.verbose:
+            print(f"Env State: {env_state}")
+        return env_state
 
     def control(self) -> None:
         environment_state = self.get_environment_state()

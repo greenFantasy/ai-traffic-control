@@ -202,10 +202,10 @@ class SimpleIntersectionWorld(World):
                     self.sensors.extend(p.sensors)
 
 class DedicatedLeftTurnIntersectionWorld(World):
-    def __init__(self, split_times=[20.] * 4, dataFolder=''):
+    def __init__(self, greedy_prob, split_times=[20.] * 4, dataFolder=''):
         super().__init__(dataFolder)
         # self.controllers.append(Controller(self, self.intersection, split_times))
-        self.controllers.append(RLController(self, self.intersection, num_snapshots=5, greedy_prob=0.8))
+        self.controllers.append(RLController(self, self.intersection, num_snapshots=20, greedy_prob=greedy_prob))
         model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
         self.controllers[0].set_model(model)
     

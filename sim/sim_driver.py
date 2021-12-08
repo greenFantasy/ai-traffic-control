@@ -20,7 +20,7 @@ def get_sim_parameters(filename):
 def run_simulation(dataFolder):
     sim_params_filename = "../sim/simsettings.txt"
     sim_params = get_sim_parameters(sim_params_filename)
-    world = DedicatedLeftTurnIntersectionWorld(split_times=[8.,8.,8.,8.], dataFolder=dataFolder)
+    world = DedicatedLeftTurnIntersectionWorld(float(sim_params['greedy_prob']), split_times=[8.,8.,8.,8.], dataFolder=dataFolder)
     world.set_spawnable_paths()
     world.add_generator(SimpleGenerator(world, {"p": 0.01}))
     for i in range(sim_params['iterations']):

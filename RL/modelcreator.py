@@ -14,6 +14,11 @@ import os
 import dill
 import time
 import datetime
+import itertools
+
+def construct_sequential(layer_sizes):
+    return nn.Sequential(*([nn.Flatten()] + list(itertools.chain(*[[nn.Linear(l1, l2), nn.ReLU()] \
+        for l1,l2 in zip(layer_sizes[:-1], layer_sizes[1:])]))[:-1]))
 
 class StateActionValueDataset(Dataset):
     def __init__(self, sars):
@@ -71,10 +76,10 @@ class StateActionNetwork(nn.Module):
         self.init_low = init_low
         self.init_high = init_high
 
-        layers = [nn.Flatten(), nn.Linear(self.input_size, 20), 
-                    nn.ReLU(), nn.Linear(20, 10), 
-                    nn.ReLU(), nn.Linear(10, self.output_size)]
+        layers = construct_sequential([self.input_size, 512, 256, 256, 256, 256, self.output_size])
         self.forward_block = nn.Sequential(*layers)
+
+        self.optim = None
 
         self.init_parameters(init_low, init_high)
 
@@ -128,15 +133,27 @@ class StateActionNetwork(nn.Module):
             torch.tensor(lengths))
         batch_sampler = WeightedRandomSampler(weights, batch_size, replacement=False)
         train_ds = StateActionValueDataset(sars)
-        train_dl = DataLoader(train_ds, batch_size, shuffle=False) # sampler=batch_sampler)
+        train_dl = DataLoader(train_ds, batch_size, shuffle=True) # sampler=batch_sampler)
         return train_dl
     
     def get_optim(self, train_params):
         learning_rate = train_params.get("learning_rate", 0.001)
+        momentum = train_params.get('momentum', 0.0)
         if train_params['optim'] == "Adam":
-            return optim.Adam(self.parameters(), lr=learning_rate)
+            if isinstance(self.optim, optim.Adam):
+                self.optim.lr = learning_rate
+            else:
+                self.optim = optim.Adam(self.parameters(), lr=learning_rate)
+            return self.optim
+        elif train_params['optim'] == "SGD":
+            if isinstance(self.optim, optim.SGD):
+                self.optim.lr = learning_rate
+                self.optim.momentum = momentum
+            else:
+                self.optim = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+            return self.optim
         else:
-            raise ValueError("optim must be Adam currently")
+            raise ValueError("optim must be Adam or SGD currently")
 
     def get_train_params(self, filename):
         train_params = {}
@@ -152,10 +169,17 @@ class StateActionNetwork(nn.Module):
             train_params['learning_rate'] = float(train_params['learning_rate'])
         if 'epochs' in train_params:
             train_params['epochs'] = int(train_params['epochs'])
+        if 'batch_size' in train_params:
+            train_params['batch_size'] = int(train_params['batch_size'])
         if 'sampling_ratio' in train_params:
             train_params['sampling_ratio'] = float(train_params['sampling_ratio'])
+        if 'momentum' in train_params:
+            train_params['momentum'] = float(train_params['momentum'])
         if 'keep_training' in train_params:
             train_params['keep_training'] = bool(train_params['keep_training'])
+        if 'print_every' in train_params:
+            train_params['print_every'] = int(train_params['print_every'])
+        
         
         train_params['optim'] = self.get_optim(train_params)        
         return train_params
@@ -185,7 +209,7 @@ class StateActionNetwork(nn.Module):
 
             train_dl = self.load_data(train_data_dir, train_params)
             if train_dl is None:
-                wait_time = train_params.get("wait_time", 10)
+                wait_time = train_params.get("wait_time", 2)
                 print(f"Found no data in file, waiting now for {wait_time} seconds")
                 time.sleep(wait_time)
                 continue 
@@ -210,7 +234,7 @@ class StateActionNetwork(nn.Module):
                     running_loss += (loss * batch_size).item()
                     total_data += batch_size
                 
-                if train_params.get('verbose', 1) >= 1 and epoch % 200 == 0:
+                if train_params.get('verbose', 1) >= 1 and epoch % train_params.get('print_every', 200) == 0:
                     print(f"Epoch {epoch} Training Loss: {running_loss / total_data}")
             
             self.save_model()
@@ -223,7 +247,7 @@ class StateActionNetwork(nn.Module):
         # print("Saved new copy of model.")
                 
 if __name__ == '__main__':
-    model = StateActionNetwork(loss_function=nn.MSELoss(), input_size=40, output_size=4, init_low=-20.0, init_high=20.0)
+    model = StateActionNetwork(loss_function=nn.MSELoss(), input_size=20*10, output_size=4, init_low=-0.1, init_high=0.1)
     print(torch.__version__)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     torch.save(model, os.path.join(dir_path, 'model.pt'))
