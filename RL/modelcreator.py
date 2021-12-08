@@ -85,9 +85,30 @@ class StateActionNetwork(nn.Module):
     def forward(self, state):
         return self.forward_block(state)
     
+    def archive_filename(self, train_data_dir, filename):
+        # Assuming these are accurate
+        archive_data_dir = "../RL/archivedata"
+        old_filepath = os.path.join(train_data_dir, filename)
+        new_filepath = os.path.join(archive_data_dir, filename)
+        os.replace(old_filepath, new_filepath)
+
+    def sort_files(self, file_list, reverse=False):
+        # Assume files have the format "'%Y_%m_%d_%H_%M_%S_run#'.pkl"
+        sort_list = []
+        for filename in file_list:
+            split_filename = filename.split("_")[:-1]
+            if len(split_filename) != 6:
+                continue
+            date_time = datetime.datetime(*list(map(int, split_filename)))
+            sort_list.append((date_time, filename))
+        sort_list.sort(key=lambda x: x[0], reverse=reverse)
+        return [x[1] for x in sort_list]
+    
     def archive_data(self, train_data_dir) -> None:
         filenames = self.sort_files(os.listdir(train_data_dir))
-
+        to_archive = filenames[:-10]
+        for filename in to_archive:
+            self.archive_filename(train_data_dir, filename)
     
     def load_data(self, train_data_dir, train_params) -> Optional[DataLoader]:
         filenames = self.sort_files(os.listdir(train_data_dir))
@@ -103,12 +124,11 @@ class StateActionNetwork(nn.Module):
         if not sars:
             return None
         batch_size = train_params.get('batch_size', 32)
-        weights = torch.repeat_interleave(get_geometric_sequence_tensor(train_params['ratio'], len(filenames), descending=False), \
+        weights = torch.repeat_interleave(get_geometric_sequence_tensor(train_params['sampling_ratio'], len(filenames), descending=False), \
             torch.tensor(lengths))
         batch_sampler = WeightedRandomSampler(weights, batch_size, replacement=False)
-        print(batch_sampler)
         train_ds = StateActionValueDataset(sars)
-        train_dl = DataLoader(train_ds, batch_size, sampler=batch_sampler)
+        train_dl = DataLoader(train_ds, batch_size, shuffle=False) # sampler=batch_sampler)
         return train_dl
     
     def get_optim(self, train_params):
@@ -132,13 +152,12 @@ class StateActionNetwork(nn.Module):
             train_params['learning_rate'] = float(train_params['learning_rate'])
         if 'epochs' in train_params:
             train_params['epochs'] = int(train_params['epochs'])
+        if 'sampling_ratio' in train_params:
+            train_params['sampling_ratio'] = float(train_params['sampling_ratio'])
         if 'keep_training' in train_params:
             train_params['keep_training'] = bool(train_params['keep_training'])
         
-        train_params['optim'] = self.get_optim(train_params)
-
-        print(train_params)
-        
+        train_params['optim'] = self.get_optim(train_params)        
         return train_params
     
     def compute_loss(self, preds, actuals):
@@ -161,7 +180,8 @@ class StateActionNetwork(nn.Module):
             epochs, optimizer = train_params.get('epochs', 1), train_params['optim']
 
             if train_params.get('verbose', 1) >= 1:
-                print(f"Starting round {round}")
+                pass
+                # print(f"Starting round {round}")
 
             train_dl = self.load_data(train_data_dir, train_params)
             if train_dl is None:
@@ -190,7 +210,7 @@ class StateActionNetwork(nn.Module):
                     running_loss += (loss * batch_size).item()
                     total_data += batch_size
                 
-                if train_params.get('verbose', 1) >= 1 and epoch % 100 == 0:
+                if train_params.get('verbose', 1) >= 1 and epoch % 200 == 0:
                     print(f"Epoch {epoch} Training Loss: {running_loss / total_data}")
             
             self.save_model()
@@ -200,25 +220,7 @@ class StateActionNetwork(nn.Module):
     def save_model(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         torch.save(self, os.path.join(dir_path, 'model.pt'))
-        print("Saved new copy of model.")
-
-    def archive_data(self, filename):
-        # Assuming these are accurate
-        archive_data_dir = "../RL/archivedata"
-        train_data_dir = "../RL/traindata"
-        old_filepath = os.path.join(train_data_dir, filename)
-        new_filepath = os.path.join(archive_data_dir, filename)
-        os.replace(old_filepath, new_filepath)
-
-    def sort_files(self, file_list):
-        # Assume files have the format "'%Y_%m_%d_%H_%M_%S_run#'.pkl"
-        sort_list = []
-        for filename in file_list:
-            split_filename = filename.split("_")[:-1]
-            date_time = datetime.datetime(split_filename[0], split_filename[1], split_filename[2], split_filename[3], split_filename[4], split_filename[5])
-            sort_list.append((date_time, filename))
-        sort_list.sort(lambda x: x[0])
-        return [x[1] for x in sort_list]
+        # print("Saved new copy of model.")
                 
 if __name__ == '__main__':
     model = StateActionNetwork(loss_function=nn.MSELoss(), input_size=40, output_size=4, init_low=-20.0, init_high=20.0)
