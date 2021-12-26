@@ -202,12 +202,14 @@ class SimpleIntersectionWorld(World):
                     self.sensors.extend(p.sensors)
 
 class DedicatedLeftTurnIntersectionWorld(World):
-    def __init__(self, greedy_prob, split_times=[20.] * 4, dataFolder=''):
+    def __init__(self, greedy_prob, split_times=[20.] * 4, dataFolder='', rl=True):
         super().__init__(dataFolder)
-        # self.controllers.append(Controller(self, self.intersection, split_times))
-        self.controllers.append(RLController(self, self.intersection, num_snapshots=20, greedy_prob=greedy_prob))
-        model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
-        self.controllers[0].set_model(model)
+        if rl:
+            self.controllers.append(RLController(self, self.intersection, num_snapshots=20, greedy_prob=greedy_prob))
+            model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
+            self.controllers[0].set_model(model)
+        else:
+            self.controllers.append(Controller(self, self.intersection, split_times))
     
     def setup_streets(self):
         self.outer_north_lane_i_common = Path(LinearParam((18, -100), (18, -44)), width = STANDARD_LANE_WIDTH, spawnable=True, sensor=[50, 10])

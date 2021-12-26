@@ -23,9 +23,10 @@ if len(sys.argv)>1:
         if len(dirs)<=0:
             raise AssertionError( 'No matching directory found')
         else:
-            dataFolder = dirs[0]
+            dataFolder = min(dirs, key=lambda x: int(x.split("run")[-1]))
 
 dataPathPrefix = '../data/'+dataFolder+'/' if dataFolder else '../data/' 
+print(dataPathPrefix)
 animateData = 'vehicle_movement'
 trafficLightData = 'traffic_light_change'
 filename = dataPathPrefix+animateData+".csv"
@@ -93,7 +94,7 @@ for key in paths.keys():
 subpathArtists = dict()
 for key in subpaths.keys():
     (xs, ys) = subpaths[key]
-    artis, = ax.plot([], [], 'red')
+    artis, = ax.plot([], [], 'red', linewidth=2.5)
     subpathArtists[key] = (artis, 'red')
 
 # initialization function: plot the background of each frame
@@ -125,6 +126,8 @@ def animate(i):
             for (path, moveOp) in currtl.controlling_paths:
                 changing_path = path.connecting_paths[moveOp]
                 (artis, _) = subpathArtists[changing_path.id]
+                if color == 'green':
+                    color = "#7EBDC2"
                 artis.set_color(color)
                 subpathArtists[changing_path.id] = (artis, color)
     artists = [cars, timeArtist]

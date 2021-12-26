@@ -2,25 +2,47 @@ import matplotlib.pyplot as plt
 import sys
 import os
 import numpy as np
+import dill
+import pandas as pd
 # sys.path.append("/Users/rajatmittal/Documents/Projects/ai-traffic-control/RL")
 # from modelcreator import StateActionNetwork
 
 sim_data_dir = "../data"
 dirnames = os.listdir(sim_data_dir)
 plotting_tups = []
+plotting_tups_fail = []
+plotting_tups_all = []
 for dirname in dirnames:
     if "." in dirname:
         continue
     idx = int(dirname.split("_")[-1][3:])
-    filepath = os.path.join(sim_data_dir, dirname, "vehicle_despawn.csv")
-    f = open(filepath, "r")
-    numCars = len(f.readlines())
-    f.close()
-    plotting_tups.append((idx, numCars))
+    try:
+        filepath = os.path.join(sim_data_dir, dirname, "vehicle_intersection_times.pkl")
+        vehicle_intersection_times = dill.load(open(filepath, "rb"))
+        vehicle_spawn = pd.read_csv(os.path.join(sim_data_dir, dirname, "vehicle_spawn.csv"))
+        vehicle_spawn_dict = {car: spawn_time for car, spawn_time in vehicle_spawn.itertuples(index=False)}
+        max_t = 80.0
+        total_spawned = len([c for c in vehicle_spawn_dict if vehicle_spawn_dict[c] < max_t])
+        total_through = len([c for c, its, ent, ext in vehicle_intersection_times if ext is not None and vehicle_spawn_dict[c] < max_t])
+        plotting_tups.append((idx, total_through))
+        plotting_tups_fail.append((idx, total_spawned - total_through))
+        plotting_tups_all.append((idx, total_spawned))
+    except FileNotFoundError:
+       print(f"No data for {idx}")
+       pass
+    
 plotting_tups.sort(key=lambda x: x[0])
+plotting_tups_fail.sort(key=lambda x: x[0])
+plotting_tups_all.sort(key=lambda x: x[0])
 plt.plot([elem[0] for elem in plotting_tups], [elem[1] for elem in plotting_tups])
+# plt.plot([elem[0] for elem in plotting_tups_all], [elem[1] for elem in plotting_tups_all])
 # plt.show()
-plt.plot([elem[0] for elem in plotting_tups], np.convolve([elem[1] for elem in plotting_tups], np.ones(10)/10, mode='same'), "r")
+d = 40
+plt.plot(np.convolve([elem[1] for elem in plotting_tups], np.ones(d)/d, mode='valid'), "r")
+plt.plot(np.convolve([elem[1] for elem in plotting_tups_fail], np.ones(d)/d, mode='valid'), "orange")
+plt.plot(np.convolve([elem[1] for elem in plotting_tups_all], np.ones(d)/d, mode='valid'), "g")
+plt.yticks(range(0,30,1))
+plt.title("Cars allowed through intersection")
 plt.show()
 
 # import torch

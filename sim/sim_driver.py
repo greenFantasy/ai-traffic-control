@@ -22,7 +22,7 @@ def run_simulation(dataFolder):
     sim_params = get_sim_parameters(sim_params_filename)
     world = DedicatedLeftTurnIntersectionWorld(float(sim_params['greedy_prob']), split_times=[8.,8.,8.,8.], dataFolder=dataFolder)
     world.set_spawnable_paths()
-    world.add_generator(SimpleGenerator(world, {"p": 0.01}))
+    world.add_generator(SimpleGenerator(world, {"p": 0.003}))
     for i in range(sim_params['iterations']):
         world.play()
     world.close()

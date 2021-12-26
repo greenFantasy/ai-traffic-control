@@ -31,6 +31,7 @@ def driver(num_cores, train_cores):
         trainWorkers[i].start()
     
     simNumber = 0
+    count = 0
     while True:
         currSims = []
         for i in range(num_cores - train_cores): # number of simulation processes
@@ -41,11 +42,14 @@ def driver(num_cores, train_cores):
             timestamp = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
             dataFolder = f"{timestamp}_run{i}"
             workers.append(multiprocessing.Process(target=runSim, args=(dataFolder,)))
-            print("running sim process %d" % i)
+            # print("running sim process %d" % i)
         for worker in workers:
             worker.start()
         for worker in workers:
             worker.join()
+        # sleep_time = 5
+        # print(f"Sleeping sims for {sleep_time} seconds")
+        count += 1
     
     for worker in trainWorkers:
         worker.join()

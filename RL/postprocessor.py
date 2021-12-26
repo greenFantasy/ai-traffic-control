@@ -36,7 +36,10 @@ def get_reward_v2(action_time, vehicle_intersection_times):
             start_time: float = car_entrance_time # max(car_entrance_time, action_time - REWARD_INTERVAL)
             end_time: float = car_exit_time # min(car_exit_time, action_time + REWARD_INTERVAL)
             wait_times.append(end_time - start_time)
-    return (len(wait_times) - 5) / 10 if wait_times else 0.0 # Not negative, reward is wait time of all cars that action lets through
+    return len(wait_times) / 10 if wait_times else 0.0 # Not negative, reward is wait time of all cars that action lets through
+
+def fake_reward(x, y):
+    return 1.0
 
 def get_env_state(action_time, snapshot_data, snapshot_time_to_index, num_snapshots):
     i = snapshot_time_to_index[action_time]

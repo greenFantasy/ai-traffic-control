@@ -1,7 +1,8 @@
-epochs=40
-optim=SGD
+epochs=41
+optim=Adam
 learning_rate=0.0001
 sampling_ratio=0.8
-print_every=5
-batch_size=4
-momentum=0.8
+weight_decay=0.0
+print_every=20
+batch_size=32
+momentum=0.2
