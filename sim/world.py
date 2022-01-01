@@ -31,6 +31,7 @@ class World:
         self.sensors = []
         self.traffic_lights: List[TrafficLight] = []
         self.controllers: List[Controller] = []
+        self.intersections = []
         self.car_id_counter: int = 0
         self.generator = None
         self.spawnable_paths = []
@@ -193,6 +194,7 @@ class SimpleIntersectionWorld(World):
 
         self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
+        self.intersections.append(self.intersection)
     
     def setup_sensors(self):
         for s in self.streets:
@@ -262,13 +264,130 @@ class DedicatedLeftTurnIntersectionWorld(World):
 
         self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
+        self.intersections.append(self.intersection)
 
     def setup_sensors(self):
         for s in self.streets:
             for p in s.paths:
                 self.sensors.extend(p.sensors)
-        # for s in self.streets:
-        #     for p in s.paths:
-        #         if p.spawnable:
-        #             # add sensor 50 feet back
-        #         elif p
+
+class TwoIntersectionWorld(World):
+    def __init__(self, split_times=[20.] * 4, dataFolder=''):
+        super().__init__(dataFolder)
+        self.controllers.append(Controller(self, self.intersection, split_times))
+        self.controllers.append(Controller(self, self.intersection_2, split_times))
+        # self.controllers.append(RLController(self, self.intersection, num_snapshots=5, greedy_prob=0.8))
+        # model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
+        # self.controllers[0].set_model(model)
+    
+    def setup_streets(self):
+        # Common lanes between the intesection are street 6 and street 5
+
+        self.outer_north_lane_i_common = Path(LinearParam((18, -100), (18, -44)), width = STANDARD_LANE_WIDTH, spawnable=True, sensor=[50, 10])
+        self.outer_north_lane_i_left = Path(LinearParam((18, -44), (6, -24)), width = STANDARD_LANE_WIDTH, aux_path=True, sensor=[10, 10])
+        self.outer_north_lane_i_straight = Path(LinearParam((18, -44), (18, -24)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_north_lane_i_common.add_connecting_path(self.outer_north_lane_i_left, MovementOptions.left)
+        self.outer_north_lane_i_common.add_connecting_path(self.outer_north_lane_i_straight, MovementOptions.through)
+        self.streets.append(Street("0", [self.outer_north_lane_i_common, self.outer_north_lane_i_left, self.outer_north_lane_i_straight]))
+        self.outer_north_lane_o = Path(LinearParam((18, 24), (18, 100)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street("1", [self.outer_north_lane_o]))
+
+        self.outer_south_lane_i_common = Path(LinearParam((-18, 100), (-18, 44)), width = STANDARD_LANE_WIDTH, spawnable=True, sensor=[50, 10])
+        self.outer_south_lane_i_left = Path(LinearParam((-18, 44), (-6, 24)), width = STANDARD_LANE_WIDTH, aux_path=True, sensor=[10, 10])
+        self.outer_south_lane_i_straight = Path(LinearParam((-18, 44), (-18, 24)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_south_lane_i_common.add_connecting_path(self.outer_south_lane_i_left, MovementOptions.left)
+        self.outer_south_lane_i_common.add_connecting_path(self.outer_south_lane_i_straight, MovementOptions.through)
+        self.streets.append(Street("2", [self.outer_south_lane_i_common, self.outer_south_lane_i_left, self.outer_south_lane_i_straight]))
+        self.outer_south_lane_o = Path(LinearParam((-18, -24), (-18, -100)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street("3", [self.outer_south_lane_o]))
+
+        self.outer_east_lane_i_common = Path(LinearParam((-100, -18), (-44, -18)), width = STANDARD_LANE_WIDTH, spawnable=True, sensor=[50, 10])
+        self.outer_east_lane_i_left = Path(LinearParam((-44, -18), (-24, -6)), width = STANDARD_LANE_WIDTH, aux_path=True, sensor=[10, 10])
+        self.outer_east_lane_i_straight = Path(LinearParam((-44, -18), (-24, -18)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_east_lane_i_common.add_connecting_path(self.outer_east_lane_i_left, MovementOptions.left)
+        self.outer_east_lane_i_common.add_connecting_path(self.outer_east_lane_i_straight, MovementOptions.through)
+        self.streets.append(Street("4", [self.outer_east_lane_i_common, self.outer_east_lane_i_left, self.outer_east_lane_i_straight]))
+        
+        self.outer_east_lane_o_common = Path(LinearParam((24, -18), (100, -18)), width = STANDARD_LANE_WIDTH)
+        self.outer_east_lane_o_left = Path(LinearParam((100, -18), (120, -6)), width = STANDARD_LANE_WIDTH, aux_path=True, sensor=[10, 10])
+        self.outer_east_lane_o_straight = Path(LinearParam((100, -18), (120, -18)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_east_lane_o_common.add_connecting_path(self.outer_east_lane_o_left, MovementOptions.left)
+        self.outer_east_lane_o_common.add_connecting_path(self.outer_east_lane_o_straight, MovementOptions.through)
+        self.streets.append(Street("5", [self.outer_east_lane_o_common, self.outer_east_lane_o_left, self.outer_east_lane_o_straight]))
+        
+        self.outer_west_lane_i_common = Path(LinearParam((120, 18), (44, 18)), width = STANDARD_LANE_WIDTH, sensor=[50, 10])
+        self.outer_west_lane_i_left = Path(LinearParam((44, 18), (24, 6)), width = STANDARD_LANE_WIDTH, aux_path=True, sensor=[10, 10])
+        self.outer_west_lane_i_straight = Path(LinearParam((44, 18), (24, 18)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_west_lane_i_common.add_connecting_path(self.outer_west_lane_i_left, MovementOptions.left)
+        self.outer_west_lane_i_common.add_connecting_path(self.outer_west_lane_i_straight, MovementOptions.through)
+        self.streets.append(Street("6", [self.outer_west_lane_i_common, self.outer_west_lane_i_left, self.outer_west_lane_i_straight]))
+        self.outer_west_lane_o = Path(LinearParam((-24, 18), (-100, 18)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street("7", [self.outer_west_lane_o]))
+
+        self.outer_north_lane_i_2_common = Path(LinearParam((168, -100), (168, -44)), width = STANDARD_LANE_WIDTH, spawnable=True, sensor=[50, 10])
+        self.outer_north_lane_i_2_left = Path(LinearParam((168, -44), (156, -24)), width = STANDARD_LANE_WIDTH, aux_path=True, sensor=[10, 10])
+        self.outer_north_lane_i_2_straight = Path(LinearParam((168, -44), (168, -24)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_north_lane_i_2_common.add_connecting_path(self.outer_north_lane_i_2_left, MovementOptions.left)
+        self.outer_north_lane_i_2_common.add_connecting_path(self.outer_north_lane_i_2_straight, MovementOptions.through)
+        self.streets.append(Street("8", [self.outer_north_lane_i_2_common, self.outer_north_lane_i_2_left, self.outer_north_lane_i_2_straight]))
+        self.outer_north_lane_o_2 = Path(LinearParam((168, 24), (168, 100)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street("9", [self.outer_north_lane_o_2]))
+
+        self.outer_south_lane_i_2_common = Path(LinearParam((132, 100), (132, 44)), width = STANDARD_LANE_WIDTH, spawnable=True, sensor=[50, 10])
+        self.outer_south_lane_i_2_left = Path(LinearParam((132, 44), (144, 24)), width = STANDARD_LANE_WIDTH, aux_path=True, sensor=[10, 10])
+        self.outer_south_lane_i_2_straight = Path(LinearParam((132, 44), (132, 24)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_south_lane_i_2_common.add_connecting_path(self.outer_south_lane_i_2_left, MovementOptions.left)
+        self.outer_south_lane_i_2_common.add_connecting_path(self.outer_south_lane_i_2_straight, MovementOptions.through)
+        self.streets.append(Street("10", [self.outer_south_lane_i_2_common, self.outer_south_lane_i_2_left, self.outer_south_lane_i_2_straight]))
+        self.outer_south_lane_o_2 = Path(LinearParam((132, -24), (132, -100)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street("11", [self.outer_south_lane_o_2]))
+
+        self.outer_west_lane_i_2_common = Path(LinearParam((250, 18), (194, 18)), width = STANDARD_LANE_WIDTH, spawnable=True, sensor=[50, 10])
+        self.outer_west_lane_i_2_left = Path(LinearParam((194, 18), (174, 6)), width = STANDARD_LANE_WIDTH, aux_path=True, sensor=[10, 10])
+        self.outer_west_lane_i_2_straight = Path(LinearParam((194, 18), (174, 18)), width = STANDARD_LANE_WIDTH, aux_path=True)
+        self.outer_west_lane_i_2_common.add_connecting_path(self.outer_west_lane_i_2_left, MovementOptions.left)
+        self.outer_west_lane_i_2_common.add_connecting_path(self.outer_west_lane_i_2_straight, MovementOptions.through)
+        self.streets.append(Street("12", [self.outer_west_lane_i_2_common, self.outer_west_lane_i_2_left, self.outer_west_lane_i_2_straight]))
+        
+        self.outer_east_lane_o_2 = Path(LinearParam((174, -18), (250, -18)), width = STANDARD_LANE_WIDTH)
+        self.streets.append(Street("13", [self.outer_east_lane_o_2]))
+
+    def setup_intersections(self):
+        self.paths_to_connect = [(self.outer_north_lane_i_straight, self.outer_north_lane_o, MovementOptions.through),
+                                (self.outer_north_lane_i_left, self.outer_west_lane_o, MovementOptions.left),
+                                (self.outer_north_lane_i_straight, self.outer_east_lane_o_common, MovementOptions.right),
+                                (self.outer_south_lane_i_straight, self.outer_south_lane_o, MovementOptions.through),
+                                (self.outer_south_lane_i_left, self.outer_east_lane_o_common, MovementOptions.left), 
+                                (self.outer_south_lane_i_straight, self.outer_west_lane_o, MovementOptions.right),
+                                (self.outer_west_lane_i_straight, self.outer_west_lane_o, MovementOptions.through),
+                                (self.outer_west_lane_i_left, self.outer_south_lane_o, MovementOptions.left),
+                                (self.outer_west_lane_i_straight, self.outer_north_lane_o, MovementOptions.right),
+                                (self.outer_east_lane_i_straight, self.outer_east_lane_o_common, MovementOptions.through),
+                                (self.outer_east_lane_i_left, self.outer_north_lane_o, MovementOptions.left),
+                                (self.outer_east_lane_i_straight, self.outer_south_lane_o, MovementOptions.right),]
+        self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
+
+        self.paths_to_connect_2 = [(self.outer_north_lane_i_2_straight, self.outer_north_lane_o_2, MovementOptions.through),
+                                (self.outer_north_lane_i_2_left, self.outer_west_lane_i_common, MovementOptions.left),
+                                (self.outer_north_lane_i_2_straight, self.outer_east_lane_o_2, MovementOptions.right),
+                                (self.outer_south_lane_i_2_straight, self.outer_south_lane_o_2, MovementOptions.through),
+                                (self.outer_south_lane_i_2_left, self.outer_east_lane_o_2, MovementOptions.left),
+                                (self.outer_south_lane_i_2_straight, self.outer_west_lane_i_common, MovementOptions.right),
+                                (self.outer_west_lane_i_2_straight, self.outer_west_lane_i_common, MovementOptions.through), 
+                                (self.outer_west_lane_i_2_left, self.outer_south_lane_o_2, MovementOptions.left), 
+                                (self.outer_west_lane_i_2_straight, self.outer_north_lane_o_2, MovementOptions.right), 
+                                (self.outer_east_lane_o_straight, self.outer_east_lane_o_2, MovementOptions.through),
+                                (self.outer_east_lane_o_left, self.outer_north_lane_o_2, MovementOptions.left),
+                                (self.outer_east_lane_o_straight, self.outer_south_lane_o_2, MovementOptions.right),]
+
+        self.intersection_2: Intersection = Intersection(self, self.streets, self.paths_to_connect_2)
+
+        self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
+        self.traffic_lights.extend(list(self.intersection_2.traffic_lights.values()))
+        self.intersections.append(self.intersection)
+        self.intersections.append(self.intersection_2)
+
+    def setup_sensors(self):
+        for s in self.streets:
+            for p in s.paths:
+                self.sensors.extend(p.sensors)

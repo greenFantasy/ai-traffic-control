@@ -39,7 +39,7 @@ dfTrafficLight = pd.read_csv(filename)
 
 # First set up the figure, the axis, and the plot elements we want to animate
 fig = plt.figure()
-ax = plt.axes(xlim=(-120, 120), ylim=(-120, 120))
+ax = plt.axes(xlim=(-240, 240), ylim=(-240, 240))
 ax.set_aspect('equal')
 cars, = ax.plot([], [], "bo", lw=2)
 timeArtist = ax.annotate('', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
@@ -55,17 +55,17 @@ for street in world.streets:
             xs.append(pos[0])
             ys.append(pos[1])
         paths[path.id] = (xs, ys)
-inter = world.intersection
 # store the generated paths in a dict as well
 subpaths = dict()
-for path in inter.sub_paths:
-    xs = []
-    ys = []
-    for i in range(int(path.parametrization.max_pos)):
-        pos = path.parametrization.get_pos(i)
-        xs.append(pos[0])
-        ys.append(pos[1])
-    subpaths[path.id] = (xs, ys) 
+for inter in world.intersections:
+    for path in inter.sub_paths:
+        xs = []
+        ys = []
+        for i in range(int(path.parametrization.max_pos)):
+            pos = path.parametrization.get_pos(i)
+            xs.append(pos[0])
+            ys.append(pos[1])
+        subpaths[path.id] = (xs, ys) 
 
 # Load up traffic light changes - store in a hashmap for easy access
 tlcHashmap = dict()
