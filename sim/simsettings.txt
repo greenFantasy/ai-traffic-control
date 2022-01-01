@@ -1,2 +1,2 @@
 iterations=1000
-greedy_prob=0.8
+greedy_prob=0.95

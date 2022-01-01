@@ -1,41 +1,42 @@
-from posixpath import split
 import sys
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
 sys.path.append("../ai-traffic-control/sim")
 sys.path.append("../ai-traffic-control/RL")
 sys.path.append("../ai-traffic-control/generator")
-sys.path.append("../ai-traffic-control/data")
 import world
 import generator
-import pandas as pd
-import time
-import logger
-import numpy as np
-import matplotlib.pyplot as plt
+from util.analyze import analyze
 
-# print(pd.read_csv("data/vehicle_despawn.csv"))
+num_trials = 1000
+max_split = 10
+iterations = 1000
+rl = True
 
-all_splits = [[i] * 4 for i in range(1, 21)]
-# trials = []
-# for _ in range(10):
-#     iterations = 10000
-#     performances = []
-#     for split_times in all_splits:
-#         w = world.DedicatedLeftTurnIntersectionWorld(split_times)
-#         w.add_generator(generator.SimpleGenerator(w, {"p": 0.01}))
-#         for i in range(iterations):
-#             w.play()
-#         w.close()
-#         f = open("data/vehicle_despawn.csv", "r")
-#         performances.append(len(f.readlines())) # len(pd.read_csv("data/vehicle_despawn.csv"))
-#         f.close()
-#         print(f"Test with {split_times[0]} complete")
-#     for p, st in zip(performances, all_splits):    
-#         print(st, p)
-#     trials.append(performances)
+all_splits = [[i] * 4 for i in range(1, max_split+1)]
+trials = {}
+
+for split_times in (all_splits if not rl else [(1,)]):
+    trials[tuple(split_times)] = []
+    for _ in range(num_trials):
+        w = world.DedicatedLeftTurnIntersectionWorld(1.0, split_times=split_times, rl=rl)
+        w.add_generator(generator.SimpleGenerator(w, {"p": 0.003}))
+        for i in range(iterations):
+            w.play()
+        w.close()
+        results = analyze('data')
+        trials[tuple(split_times)].append(results)
+    print(split_times[0], ": ", np.mean([x['mean_wait_time'] for x in trials[tuple(split_times)]]))
+    
+# print(trials)
+
 # np.save("trials10_performance_split_times.npy", trials)
-trials = np.load("trials10_performance_split_times.npy")
-perfLists = [[trials[i][j] for i in range(len(trials))] for j in range(len(trials[0]))]
-perfAvg = [np.mean(perfLists[i]) for i in range(len(perfLists))]
-#performances = np.load("performance_split_times.npy")
-plt.plot([elem[0] for elem in all_splits], perfAvg)
-plt.show()
+# trials = np.load("trials10_performance_split_times.npy")
+# perfLists = [[trials[i][j] for i in range(len(trials))] for j in range(len(trials[0]))]
+# perfAvg = [np.mean(perfLists[i]) for i in range(len(perfLists))]
+# #performances = np.load("performance_split_times.npy")
+# plt.plot([elem[0] for elem in all_splits], perfAvg)
+# plt.show()

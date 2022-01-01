@@ -14,7 +14,7 @@ import copy
 import sys
 import os
 
-RL_DIR = "../RL"
+RL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../RL")
 MODEL_FILE = "model.pt"
 
 sys.path.append(RL_DIR)
