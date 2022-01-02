@@ -23,5 +23,17 @@ Visualize with:
   snakeviz temp.dat
 ```
 
+## Launch Dashboard
+
+If not already installed, first, install streamlist:
+```
+  conda install -c conda-forge streamlit
+```
+Go into the util/ directory, and launch dashboard with:
+```
+  streamlit run dashboard.py
+```
+Click the resulting localhost link to view dashboard. 
+
 ## Google Drive Folder
 https://drive.google.com/drive/folders/1SbjJa9zi4Zx_dCfpG5t4CzzoCA89aYzk
