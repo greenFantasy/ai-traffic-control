@@ -104,7 +104,7 @@ class World:
                 logger.logger.logSensorData(s)
         # Turn traffic lights from yellow to red as needed
         for tl in self.traffic_lights:
-            tl.check_yellow_to_red()
+            tl.check_yellow_to_red(self.get_current_time())
         if self.time % 2 == 0:
             for c in self.controllers:
                 c.control()
@@ -191,7 +191,7 @@ class SimpleIntersectionWorld(World):
                         (self.inner_east_lane_i, self.inner_north_lane_o, MovementOptions.left),
                         (self.outer_east_lane_i, self.outer_south_lane_o, MovementOptions.right),]
 
-        self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
+        self.intersection: Intersection = Intersection(self.streets, self.paths_to_connect)
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
     
     def setup_sensors(self):
@@ -262,7 +262,7 @@ class DedicatedLeftTurnIntersectionWorld(World):
                                 (self.outer_east_lane_i_left, self.outer_north_lane_o, MovementOptions.left),
                                 (self.outer_east_lane_i_straight, self.outer_south_lane_o, MovementOptions.right),]
 
-        self.intersection: Intersection = Intersection(self, self.streets, self.paths_to_connect)
+        self.intersection: Intersection = Intersection(self.streets, self.paths_to_connect)
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
 
     def setup_sensors(self):

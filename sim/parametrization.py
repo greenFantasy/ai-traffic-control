@@ -18,12 +18,13 @@ class Parametrization:
         self.starting_coors = starting_coors
         self.infinite_beginning = infinite_beginning
 
-    def get_pos(self, p) -> Tuple[float, float]:
+    def get_pos(self, p, neg=False) -> Tuple[float, float]:
         # get position associated with p
+        # neg is like a negative index in python, it gets the position from the end of the street
         if p > self.max_pos:
             raise ValueError(f'p = {p} > {self.max_pos} allowed for {self.name} parametrization')
 
-        (x, y) = self.coor_func(p)
+        (x, y) = self.coor_func(p) if not neg else self.coor_func(self.max_pos - p)
         return (x + self.starting_coors[0], y + self.starting_coors[1])
 
     def get_direction_vector(self, p) -> Tuple[float, float]:
@@ -36,6 +37,8 @@ class Parametrization:
 
 class LinearParam(Parametrization):
     def __init__(self, start_coor: Tuple[float, float], end_coor: Tuple[float, float], name=None):
+        self.start_coor = start_coor
+        self.end_coor = end_coor
         start_tensor, end_tensor = torch.tensor(start_coor, dtype=float), torch.tensor(end_coor, dtype=float)
         norm = torch.norm(end_tensor - start_tensor)
         self.direction_vector = (end_tensor - start_tensor) / norm

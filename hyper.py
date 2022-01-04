@@ -11,7 +11,7 @@ import world
 import generator
 from util.analyze import analyze
 
-num_trials = 1000
+num_trials = 1
 max_split = 10
 iterations = 1000
 rl = True
@@ -23,7 +23,8 @@ for split_times in (all_splits if not rl else [(1,)]):
     trials[tuple(split_times)] = []
     for _ in range(num_trials):
         w = world.DedicatedLeftTurnIntersectionWorld(1.0, split_times=split_times, rl=rl)
-        w.add_generator(generator.SimpleGenerator(w, {"p": 0.003}))
+        # w.add_generator(generator.SimpleGenerator(w, {"p": 0.003}))
+        w.add_generator(generator.MarkovGenerator(w, {"car2car": 0.06, 'nocar2nocar': 0.995}))
         for i in range(iterations):
             w.play()
         w.close()

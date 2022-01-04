@@ -10,12 +10,10 @@ id_counter = 1
 
 class Intersection:
     def __init__(self,
-                 world,
                  streets, # in a clockwise order
                  paths_to_connect, # triples, incoming, outgoing, movementOption
                  id: Optional[int] = None # identifier for intersection must be int or None
                  ):
-        self.world = world
         self.streets = streets
         self.paths = []
         self.set_id(id)

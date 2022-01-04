@@ -50,7 +50,7 @@ class Controller:
     def start_next_state(self) -> None:
         self.state = self.next_state
         for l in self.lights[self.state]:
-            l.red_to_green()
+            l.red_to_green(self.world.get_current_time())
         self.in_termination = False
         self.state_start_time = self.world.get_current_time()
         if self.verbose:
@@ -66,7 +66,7 @@ class Controller:
         else:
             if self.world.get_current_time() - self.state_start_time > self.get_state_split_time():
                 for l in self.lights[self.state]:
-                    l.green_to_yellow()
+                    l.green_to_yellow(self.world.get_current_time())
                 self.in_termination = True
                 self.next_state = (self.state + 1) % self.num_states
 
@@ -135,4 +135,4 @@ class RLController(Controller):
                 if self.next_state != self.state:
                     self.in_termination = True
                     for l in self.lights[self.state]:
-                        l.green_to_yellow()
+                        l.green_to_yellow(self.world.get_current_time())
