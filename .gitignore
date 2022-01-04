@@ -132,6 +132,7 @@ data/
 sim/archivedata/
 RL/traindata/
 RL/archivedata/
+util/cached_animations/
 RL/model.pt
 **.DS_Store
 **.mp4
