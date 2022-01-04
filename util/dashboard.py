@@ -61,15 +61,18 @@ for dirname in dirs:
 metrics = graph_datanames
 final_fig = make_subplots(rows=len(metrics) // 2 + len(metrics) % 2, cols=2, subplot_titles=metrics)
 for i, metric in enumerate(graph_datanames):
+    sorted_data = sorted(list(graph_data[metric].items()) , key=lambda x: x[0])
+    x_data = [x[0] for x in sorted_data]
+    y_data = [x[1] for x in sorted_data]
     fig_metric = go.Scatter(
-        x=list(graph_data[metric].keys()), 
-        y=list(graph_data[metric].values()),
+        x=list(x_data), 
+        y=list(y_data),
         line=dict(color='royalblue'),)
     final_fig.append_trace(fig_metric, row=i // 2 + 1, col=i % 2 + 1)
     if metric in dash_params['thresholds']:
         fig_thresh = go.Scatter(
-            x=list(graph_data[metric].keys()), 
-            y=list([dash_params["thresholds"][metric]]*len(graph_data[metric].values())),
+            x=list(x_data), 
+            y=list([dash_params["thresholds"][metric]]*len(y_data)),
             line=dict(color='firebrick', dash='dash'),)
         final_fig.append_trace(fig_thresh, row=i // 2 + 1, col=i % 2 + 1)
 final_fig.update_layout(
