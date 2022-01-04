@@ -29,7 +29,7 @@ class Parametrization:
 
     def get_direction_vector(self, p) -> Tuple[float, float]:
         # TODO: get direction vector associated with a specific position along the path, to determine which angle the vehicle should be facing
-        pass
+        raise NotImplementedError
 
     def get_perp_vector(self, p) -> Tuple[float, float]:
         x, y = self.get_direction_vector(p)

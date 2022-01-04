@@ -43,7 +43,7 @@ plotting_tups_wait.sort(key=lambda x: x[0])
 plt.plot([elem[0] for elem in plotting_tups], [elem[1] for elem in plotting_tups])
 # plt.plot([elem[0] for elem in plotting_tups_all], [elem[1] for elem in plotting_tups_all])
 # plt.show()
-d = 500
+d = 20
 plt.plot(np.convolve([elem[1] for elem in plotting_tups], np.ones(d)/d, mode='valid'), "r")
 plt.plot(np.convolve([elem[1] for elem in plotting_tups_fail], np.ones(d)/d, mode='valid'), "orange")
 plt.plot(np.convolve([elem[1] for elem in plotting_tups_all], np.ones(d)/d, mode='valid'), "g")
