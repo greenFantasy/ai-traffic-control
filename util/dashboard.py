@@ -9,9 +9,31 @@ import os
 import re
 import analyze 
 import pandas as pd
+import ast
+import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 sys.path.append('../data')
 sys.path.append('../sim')
+
+# Get settings
+settings_file = "dashboard_settings.txt"
+dash_params = {}
+with open(settings_file, "r") as dash_params_file:
+    for line in dash_params_file.readlines():
+        split_line = line.strip().split("=")
+        if len(split_line) != 2:
+            print(f"Encountered bad line while loading train_params: {line}, skipping for now")
+        else:
+            dash_params[split_line[0]] = split_line[1]
+
+if 'stepsize' in dash_params:
+    dash_params['stepsize'] = int(dash_params['stepsize'])
+if 'thresholds' in dash_params:
+    dash_params['thresholds'] =  ast.literal_eval(dash_params['thresholds'])
+if 'data_to_graph' in dash_params:
+    dash_params['data_to_graph'] =  ast.literal_eval(dash_params['data_to_graph'])
 
 # Get the directories of runs and the number of runs
 num_runs = 0
@@ -23,31 +45,40 @@ for dirpath, dirnames, filenames in os.walk('../data'):
     num_runs = len(dirs)-1
 
 # Display the graphs 
-graph_datanames = ['total_spawned', 'total_through', 'mean_wait_time']
+graph_datanames = dash_params['data_to_graph']
 graph_data = {}
 for dataname in graph_datanames:
     graph_data[dataname] = {}
 for dirname in dirs:
     run_num = int(dirname.split("run")[-1])
-    results = analyze.analyze(os.path.join('../data', dirname))
+    try:
+        results = analyze.analyze(os.path.join('../data', dirname))
+    except FileNotFoundError:
+        continue
     for dataname in graph_datanames:
         graph_data[dataname][run_num] = results[dataname]
 
-# Create a dummy text file with the baseline data and plot a horizontal dashed baseline on the graphs 
-# caching animations 
-# making ui pretty 
+metrics = graph_datanames
+final_fig = make_subplots(rows=len(metrics) // 2 + len(metrics) % 2, cols=2, subplot_titles=metrics)
+for i, metric in enumerate(graph_datanames):
+    fig_metric = go.Scatter(
+        x=list(graph_data[metric].keys()), 
+        y=list(graph_data[metric].values()),
+        line=dict(color='royalblue'),)
+    final_fig.append_trace(fig_metric, row=i // 2 + 1, col=i % 2 + 1)
+    if metric in dash_params['thresholds']:
+        fig_thresh = go.Scatter(
+            x=list(graph_data[metric].keys()), 
+            y=list([dash_params["thresholds"][metric]]*len(graph_data[metric].values())),
+            line=dict(color='firebrick', dash='dash'),)
+        final_fig.append_trace(fig_thresh, row=i // 2 + 1, col=i % 2 + 1)
+final_fig.update_layout(
+            height=300 * (len(metrics) // 2 + len(metrics) % 2),
+            width=1000,
+            showlegend=False,
+        )
+st.plotly_chart(final_fig)
 
-for dataname in graph_datanames:
-    st.header(dataname)
-    dataframe = pd.DataFrame.from_dict({"iterations": graph_data[dataname].keys(), dataname: graph_data[dataname].values()})
-    st.vega_lite_chart(dataframe, 
-        {"mark": {"type": "line", "tooltip": True}, 
-        "width": 800,
-        "height": 400,
-        "encoding": {
-            "x": {"field": "iterations", "type": "quantitative"},
-            "y": {"field": dataname, "type": "quantitative"}
-        }})
 cached_animation_path = "cached_animations/"
 for dirpath, dirnames, filenames in os.walk(cached_animation_path):
     files = filenames
