@@ -1,0 +1,3 @@
+stepsize=10
+thresholds={'total_through': 30, 'total_spawned': 70, 'mean_wait_time': 30}
+data_to_graph=['total_through','total_spawned','mean_wait_time']
