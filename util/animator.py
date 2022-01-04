@@ -12,6 +12,7 @@ import os
 
 sys.path.append('../data')
 sys.path.append('../sim')
+plt.rcParams["savefig.dpi"] = 100
 dataFolder = None
 arg = None
 if len(sys.argv)>1:
