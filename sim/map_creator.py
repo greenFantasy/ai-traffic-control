@@ -107,9 +107,9 @@ class DynamicWorld(World):
         self.int_list = [
             IntersectionTuple(id='1', street1='horizontal', street2='vertical', num_left_lanes=1),
             IntersectionTuple(id='2', street1='horizontal_top', street2='vertical', num_left_lanes=1),
-            IntersectionTuple(id='2', street1='horizontal_bot', street2='vertical', num_left_lanes=1),
-            IntersectionTuple(id='2', street1='horizontal', street2='vertical_r', num_left_lanes=1), 
-            IntersectionTuple(id='2', street1='horizontal', street2='vertical_l', num_left_lanes=1)
+            IntersectionTuple(id='3', street1='horizontal_bot', street2='vertical', num_left_lanes=1),
+            IntersectionTuple(id='4', street1='horizontal', street2='vertical_r', num_left_lanes=1), 
+            IntersectionTuple(id='5', street1='horizontal', street2='vertical_l', num_left_lanes=1)
             ]
         super().__init__(dataFolder)
         model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
