@@ -1,5 +1,4 @@
 from consts import *
-from map_creator import DynamicWorld
 from world import *
 import numpy as np
 import time
