@@ -264,6 +264,7 @@ class DedicatedLeftTurnIntersectionWorld(World):
 
         self.intersection: Intersection = Intersection(self.streets, self.paths_to_connect)
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
+        self.intersections = [self.intersection]
 
     def setup_sensors(self):
         for s in self.streets:

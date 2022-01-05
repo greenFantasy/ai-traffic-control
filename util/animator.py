@@ -64,6 +64,10 @@ def main(run_name):
     # inter = world.intersection
     # store the generated paths in a dict as well
     subpaths = dict()
+    try:
+        world.intersections
+    except:
+        world.intersections = [world.intersection]
     for intersection in world.intersections:
         for path in intersection.sub_paths:
             xs = []
