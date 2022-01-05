@@ -112,7 +112,7 @@ def main(run_name):
             (artis, color) = subpathArtists[key]
             (xs, ys) = subpaths[key]
             artis.set_data(xs, ys)
-            artis.set_color(color)
+            artis.set_color('red')
             artists.append(artis)
         return artists
 
