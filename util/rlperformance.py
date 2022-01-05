@@ -40,7 +40,7 @@ plotting_tups.sort(key=lambda x: x[0])
 plotting_tups_fail.sort(key=lambda x: x[0])
 plotting_tups_all.sort(key=lambda x: x[0])
 plotting_tups_wait.sort(key=lambda x: x[0])
-plt.plot([elem[0] for elem in plotting_tups], [elem[1] for elem in plotting_tups])
+# plt.plot([elem[0] for elem in plotting_tups], [elem[1] for elem in plotting_tups])
 # plt.plot([elem[0] for elem in plotting_tups_all], [elem[1] for elem in plotting_tups_all])
 # plt.show()
 d = 20

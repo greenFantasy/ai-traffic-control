@@ -51,7 +51,7 @@ class MapStreet:
             return tuple(np.array(loc) + (STANDARD_LANE_WIDTH * (1 + lane_num)) * np.array(main_param.get_perp_vector(0)))
         for i in range(self.num_lanes):
             full_param = LinearParam(get_lane_pos(start, i), get_lane_pos(end, i))
-            common_param = LinearParam(full_param.get_pos(0), full_param.get_pos(44, neg=True)) # Replace magic number with constant
+            common_param = LinearParam(full_param.get_pos(24), full_param.get_pos(44, neg=True)) # Replace magic number with constant
             straight_param = LinearParam(full_param.get_pos(44, neg=True), full_param.get_pos(24, neg=True))
             
             common_path = Path(common_param, width = STANDARD_LANE_WIDTH, id=f"{self.id}_{name}_lane_{i}_common", spawnable=spawnable, sensor=[50, 10] if left_turn else None)
@@ -94,22 +94,29 @@ class MapStreet:
 IntersectionTuple = namedtuple('IntersectionTuple', ['id', 'street1', 'street2', 'num_left_lanes'])
 
 class DynamicWorld(World):
-    def __init__(self, dataFolder, greedy_prob):
+    def __init__(self, dataFolder=''):
         self.s_list = [
-            MapStreet(id='horizontal', start=(-100, 0), end=(100, 0), num_lanes=1), 
-            MapStreet(id='horizontal2', start=(-100, 225), end=(100, 225), num_lanes=1), 
-            MapStreet(id='vertical', start=(0, -400), end=(0, 400), num_lanes=1)
+            MapStreet(id='horizontal', start=(-400, 0), end=(400, 0), num_lanes=1), 
+            MapStreet(id='horizontal_top', start=(-150, 150), end=(150, 150), num_lanes=1), 
+            MapStreet(id='horizontal_bot', start=(-150, -150), end=(150, -150), num_lanes=1), 
+            MapStreet(id='vertical', start=(0, -500), end=(0, 500), num_lanes=1),
+            MapStreet(id='vertical_r', start=(200, -150), end=(200, 150), num_lanes=1),
+            MapStreet(id='vertical_l', start=(-200, -150), end=(-200, 150), num_lanes=1),
             ]
         self.s_dict = {s.id: s for s in self.s_list}
         self.int_list = [
             IntersectionTuple(id='1', street1='horizontal', street2='vertical', num_left_lanes=1),
-            IntersectionTuple(id='1', street1='horizontal2', street2='vertical', num_left_lanes=1)
+            IntersectionTuple(id='2', street1='horizontal_top', street2='vertical', num_left_lanes=1),
+            IntersectionTuple(id='2', street1='horizontal_bot', street2='vertical', num_left_lanes=1),
+            IntersectionTuple(id='2', street1='horizontal', street2='vertical_r', num_left_lanes=1), 
+            IntersectionTuple(id='2', street1='horizontal', street2='vertical_l', num_left_lanes=1)
             ]
-        super().__init__(dataFolder, greedy_prob)
+        super().__init__(dataFolder)
         model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
         for intersection in self.intersections:
-            self.controllers.append(RLController(self, intersection, num_snapshots=20, greedy_prob=greedy_prob))
-            self.controllers[-1].set_model(model)
+            self.controllers.append(Controller(self, intersection, [5.] * 4))
+            # self.controllers.append(RLController(self, intersection, num_snapshots=20, greedy_prob=greedy_prob))
+            # self.controllers[-1].set_model(model)
         
     def setup_streets(self):
         for i in self.int_list:
@@ -130,18 +137,20 @@ class DynamicWorld(World):
             s1 = self.s_dict[i.street1].get_streets_for_intersection(i)
             s2 = self.s_dict[i.street2].get_streets_for_intersection(i)
             paths_to_connect = [(s1[0].paths[1], s1[1].paths[0], MovementOptions.through),
-                                (s1[0].paths[2], s2[3].paths[0], MovementOptions.left),
-                                (s1[0].paths[1], s2[1].paths[0], MovementOptions.right),
+                                (s1[0].paths[1], s2[3].paths[0], MovementOptions.right),
+                                (s1[0].paths[2], s2[1].paths[0], MovementOptions.left),
                                 (s1[2].paths[1], s1[3].paths[0], MovementOptions.through),
-                                (s1[2].paths[2], s2[1].paths[0], MovementOptions.left),
-                                (s1[2].paths[1], s2[3].paths[0], MovementOptions.right),
+                                (s1[2].paths[1], s2[1].paths[0], MovementOptions.right),
+                                (s1[2].paths[2], s2[3].paths[0], MovementOptions.left),
                                 (s2[2].paths[1], s2[3].paths[0], MovementOptions.through),
-                                (s2[2].paths[2], s1[3].paths[0], MovementOptions.left),
-                                (s2[2].paths[1], s1[1].paths[0], MovementOptions.right),
+                                (s2[2].paths[1], s1[3].paths[0], MovementOptions.right),
+                                (s2[2].paths[2], s1[1].paths[0], MovementOptions.left),
                                 (s2[0].paths[1], s2[1].paths[0], MovementOptions.through),
-                                (s2[0].paths[2], s1[1].paths[0], MovementOptions.left),
-                                (s2[0].paths[1], s1[3].paths[0], MovementOptions.right),]
+                                (s2[0].paths[1], s1[1].paths[0], MovementOptions.right),
+                                (s2[0].paths[2], s1[3].paths[0], MovementOptions.left),]
             self.intersections.append(Intersection(s1 + s2, paths_to_connect))
+        for intersection in self.intersections:    
+            self.traffic_lights.extend(list(intersection.traffic_lights.values()))
 
     def setup_sensors(self):
         for s in self.streets:

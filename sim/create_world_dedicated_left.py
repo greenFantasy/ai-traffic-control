@@ -1,4 +1,5 @@
 from consts import *
+from map_creator import DynamicWorld
 from world import *
 import numpy as np
 import time
@@ -7,14 +8,15 @@ import sys
 sys.path.append('../data')
 sys.path.append('../generator')
 from generator import SimpleGenerator
+from map_creator import DynamicWorld
 
 despawned = []
 
 # for i in range(100):
-world = DedicatedLeftTurnIntersectionWorld(0.8, split_times=[1.,1.,1.,1.], rl=True)
-world.set_spawnable_paths()
+world = DynamicWorld()# 0.8, split_times=[1.,1.,1.,1.], rl=True)
+# world.set_spawnable_paths()
 world.add_generator(SimpleGenerator(world, {"p": 0.01}))
-world.controllers[0].verbose = True
+world.controllers[1].verbose = True
 # random.seed(0)
 # world.add_vehicle_to_path(world.outer_north_lane_i_common, id = "carA")
 # world.add_vehicle_to_path(world.outer_south_lane_i_common, id = "carB")
@@ -36,10 +38,10 @@ for i in range(1000):
 print("Simulation complete")
 world.close()
 
-with open("../data/vehicle_despawn.csv", "r") as file:
-    despawned.append(len(file.readlines()))
+# with open("../data/vehicle_despawn.csv", "r") as file:
+#     despawned.append(len(file.readlines()))
 
-print("Mean: ", np.mean(despawned))
+# print("Mean: ", np.mean(despawned))
 # print("Min: ", min(despawned))
 # print("Max: ", max(despawned))
 # print("Std: ", np.std(despawned))

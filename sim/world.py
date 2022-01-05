@@ -122,13 +122,13 @@ class World:
         logger.logger.logSaveWorld(self)
     
     def setup_streets(self):
-        pass
+        raise NotImplementedError
 
     def setup_intersections(self):
-        pass
+        raise NotImplementedError
 
     def setup_sensors(self):
-        pass
+        raise NotImplementedError
 
     # def build_path_w_left_turn(self, parametrization: Parametrization, width, sensors=None) -> List[Path]:
     #     commonPara = copy.deepcopy(parametrization)
