@@ -13,6 +13,7 @@ import ast
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import numpy as np
 
 sys.path.append('../data')
 sys.path.append('../sim')
@@ -58,12 +59,18 @@ for dirname in dirs:
     for dataname in graph_datanames:
         graph_data[dataname][run_num] = results[dataname]
 
+smooth = st.sidebar.checkbox("Smooth Graphs?", False)
+if smooth:
+    d = st.sidebar.slider("Smoothness Parameter", 1, 50, 1)
+
 metrics = graph_datanames
 final_fig = make_subplots(rows=len(metrics) // 2 + len(metrics) % 2, cols=2, subplot_titles=metrics)
 for i, metric in enumerate(graph_datanames):
     sorted_data = sorted(list(graph_data[metric].items()) , key=lambda x: x[0])
     x_data = [x[0] for x in sorted_data]
     y_data = [x[1] for x in sorted_data]
+    if smooth:
+        y_data = np.convolve(y_data, np.ones(d)/d, mode='valid')
     fig_metric = go.Scatter(
         x=list(x_data), 
         y=list(y_data),
@@ -104,6 +111,6 @@ def render_animation(run_num):
 # # with st.expander("Open to see simulation animations"): # To add an expander
 # Animate the simulations 
 import animator 
-stepsize = 10
+stepsize = dash_params['stepsize']
 x = st.slider('Choose which simulation to animate', min_value=0, max_value=num_runs, step=stepsize)
 components.html(render_animation(x), width = 800, height=1000) 

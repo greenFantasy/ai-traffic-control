@@ -64,6 +64,10 @@ def main(run_name):
     # inter = world.intersection
     # store the generated paths in a dict as well
     subpaths = dict()
+    try:
+        world.intersections
+    except:
+        world.intersections = [world.intersection]
     for intersection in world.intersections:
         for path in intersection.sub_paths:
             xs = []
@@ -112,7 +116,7 @@ def main(run_name):
             (artis, color) = subpathArtists[key]
             (xs, ys) = subpaths[key]
             artis.set_data(xs, ys)
-            artis.set_color(color)
+            artis.set_color('red')
             artists.append(artis)
         return artists
 
