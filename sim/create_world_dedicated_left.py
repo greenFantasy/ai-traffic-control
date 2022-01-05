@@ -6,7 +6,7 @@ import random
 import sys
 sys.path.append('../data')
 sys.path.append('../generator')
-from generator import SimpleGenerator
+from generator import MarkovGenerator
 from map_creator import DynamicWorld
 
 despawned = []
@@ -14,15 +14,15 @@ despawned = []
 # for i in range(100):
 world = DynamicWorld()# 0.8, split_times=[1.,1.,1.,1.], rl=True)
 # world.set_spawnable_paths()
-world.add_generator(SimpleGenerator(world, {"p": 0.01}))
-world.controllers[1].verbose = True
+world.add_generator(MarkovGenerator(world, {"car2car": 0.03, "nocar2nocar": 0.99}))
+# world.controllers[1].verbose = True
 # random.seed(0)
 # world.add_vehicle_to_path(world.outer_north_lane_i_common, id = "carA")
 # world.add_vehicle_to_path(world.outer_south_lane_i_common, id = "carB")
 
 # streets = world.streets[::2]
 
-for i in range(1000):
+for i in range(5000):
     world.play()
     if i % 100 == 0:
         print(i)

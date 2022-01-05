@@ -113,8 +113,8 @@ class DynamicWorld(World):
             ]
         super().__init__(dataFolder)
         model = torch.load(os.path.join(RL_DIR, MODEL_FILE))
-        for intersection in self.intersections:
-            self.controllers.append(Controller(self, intersection, [5.] * 4))
+        for i, intersection in enumerate(self.intersections):
+            self.controllers.append(Controller(self, intersection, [3.] * 4))
             # self.controllers.append(RLController(self, intersection, num_snapshots=20, greedy_prob=greedy_prob))
             # self.controllers[-1].set_model(model)
         
