@@ -14,14 +14,14 @@ despawned = []
 # for i in range(100):
 world = DynamicWorld()# 0.8, split_times=[1.,1.,1.,1.], rl=True)
 # world.set_spawnable_paths()
-world.add_generator(MarkovGenerator(world, {"car2car": 0.03, "nocar2nocar": 0.99}))
+world.add_generator(MarkovGenerator(world, {"car2car": 0.03, "nocar2nocar": 0.995}))
 # world.controllers[1].verbose = True
 # random.seed(0)
 # world.add_vehicle_to_path(world.outer_north_lane_i_common, id = "carA")
 # world.add_vehicle_to_path(world.outer_south_lane_i_common, id = "carB")
 
 # streets = world.streets[::2]
-
+s = time.time()
 for i in range(5000):
     world.play()
     if i % 100 == 0:
@@ -36,6 +36,8 @@ for i in range(5000):
     #             add_car = True
 print("Simulation complete")
 world.close()
+e = time.time()
+print(f"Took {e-s} seconds")
 
 # with open("../data/vehicle_despawn.csv", "r") as file:
 #     despawned.append(len(file.readlines()))

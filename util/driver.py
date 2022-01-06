@@ -6,8 +6,8 @@ sys.path.append('../data')
 sys.path.append('../generator')
 sys.path.append('../RL')
 sys.path.append('../sim')
-import torch
 from modelcreator import StateActionNetwork
+import torch
 import postprocessor
 import sim_driver
 import datetime

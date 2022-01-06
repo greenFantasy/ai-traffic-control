@@ -83,7 +83,7 @@ class Intersection:
 
     def _create_traffic_lights(self):
         for street in self.streets[::2]:
-            # TODO: Includes outbound streets, which we don't want
+            # [::2] excludes outbound streets, as we only want traffic lights on inbound streets
             self.traffic_lights[(street.id, MovementOptions.left)] = TrafficLight(MovementOptions.left, street.id, self, traffic_light_id=f"Left_{street.id}")
             self.traffic_lights[(street.id, MovementOptions.through)] = TrafficLight(MovementOptions.through, street.id, self, traffic_light_id=f"Through_{street.id}")
             self.traffic_lights[(street.id, MovementOptions.right)] = TrafficLight(MovementOptions.right, street.id, self, traffic_light_id=f"Right_{street.id}")

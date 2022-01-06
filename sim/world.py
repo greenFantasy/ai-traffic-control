@@ -262,7 +262,7 @@ class DedicatedLeftTurnIntersectionWorld(World):
                                 (self.outer_east_lane_i_left, self.outer_north_lane_o, MovementOptions.left),
                                 (self.outer_east_lane_i_straight, self.outer_south_lane_o, MovementOptions.right),]
 
-        self.intersection: Intersection = Intersection(self.streets, self.paths_to_connect)
+        self.intersection: Intersection = Intersection(self.streets, self.paths_to_connect, id='1')
         self.traffic_lights.extend(list(self.intersection.traffic_lights.values()))
         self.intersections = [self.intersection]
 

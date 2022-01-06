@@ -148,7 +148,7 @@ class DynamicWorld(World):
                                 (s2[0].paths[1], s2[1].paths[0], MovementOptions.through),
                                 (s2[0].paths[1], s1[1].paths[0], MovementOptions.right),
                                 (s2[0].paths[2], s1[3].paths[0], MovementOptions.left),]
-            self.intersections.append(Intersection(s1 + s2, paths_to_connect))
+            self.intersections.append(Intersection(s1 + s2, paths_to_connect, id=i.id))
         for intersection in self.intersections:    
             self.traffic_lights.extend(list(intersection.traffic_lights.values()))
 

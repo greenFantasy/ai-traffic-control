@@ -4,6 +4,7 @@ import os
 import numpy as np
 import dill
 import pandas as pd
+from analyze import analyze
 # sys.path.append("/Users/rajatmittal/Documents/Projects/ai-traffic-control/RL")
 # from modelcreator import StateActionNetwork
 
@@ -25,8 +26,8 @@ for dirname in dirnames:
         max_t = 90.0
 
         total_spawned = len([c for c in vehicle_spawn_dict if vehicle_spawn_dict[c] < max_t])
-        total_through = len([c for c, its, ent, ext in vehicle_intersection_times if ext is not None and vehicle_spawn_dict[c] < max_t])
-        wait_time = np.max([(ext if ext else 100.0) - ent for c, its, ent, ext in vehicle_intersection_times])
+        total_through = len([c for c, its, ent, ext, aog in vehicle_intersection_times if ext is not None and vehicle_spawn_dict[c] < max_t])
+        wait_time = np.max([(ext if ext else 100.0) - ent for c, its, ent, ext, aog in vehicle_intersection_times])
 
         plotting_tups.append((idx, total_through))
         plotting_tups_fail.append((idx, total_spawned - total_through))

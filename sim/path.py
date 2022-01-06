@@ -54,11 +54,11 @@ class Path:
         if pos is None:
             pos = 0
         # Set path in vehicle so it knows where it is.
-        if spawn and len(self.vehicles) > 0 and self.vehicles[0].p_value < pos + 8: 
+        if spawn and len(self.vehicles) > 0 and self.vehicles[0].p_value < pos + 20: 
             if not self.spawnable:
                 warnings.warn(f"Added vehicle {vehicle.id} to unspawnable path {self.id}")
             # warnings.warn(f"Added vehicle {vehicle.id} 10 feet behind last car in path {self.id}")
-            self.add_vehicle(vehicle, self.vehicles[0].p_value - 10)
+            self.add_vehicle(vehicle, self.vehicles[0].p_value - 20)
             return True
         vehicle.setPath(self)
         vehicle.setPValue(pos)

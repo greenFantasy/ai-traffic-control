@@ -173,13 +173,13 @@ class Logger:
             self.list_storage_dict[dataName] = []
         self.list_storage_dict[dataName].append((self.world.get_current_time(), snapshot))
 
-    def log_vehicle_at_intersection(self, vehicle, intersection_id, enter_time, leave_time):
+    def log_vehicle_at_intersection(self, vehicle, intersection_id, enter_time, leave_time, arrival_on_green):
         if not self.enabled:
             return
         dataName = 'vehicle_intersection_times'
         if dataName not in self.list_storage_dict:
             self.list_storage_dict[dataName] = []
-        self.list_storage_dict[dataName].append((vehicle.id, intersection_id, enter_time, leave_time))
+        self.list_storage_dict[dataName].append((vehicle.id, intersection_id, enter_time, leave_time, arrival_on_green))
     
     def log_action(self, time, action, intersection_id):
         if not self.enabled:

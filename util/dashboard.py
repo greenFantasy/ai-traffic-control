@@ -72,7 +72,7 @@ for i, metric in enumerate(graph_datanames):
     if smooth:
         y_data = np.convolve(y_data, np.ones(d)/d, mode='valid')
     fig_metric = go.Scatter(
-        x=list(x_data), 
+        x=list(x_data)[:len(y_data)], 
         y=list(y_data),
         line=dict(color='royalblue'),)
     final_fig.append_trace(fig_metric, row=i // 2 + 1, col=i % 2 + 1)
@@ -112,5 +112,6 @@ def render_animation(run_num):
 # Animate the simulations 
 import animator 
 stepsize = dash_params['stepsize']
-x = st.slider('Choose which simulation to animate', min_value=0, max_value=num_runs, step=stepsize)
+print(cached_animations.keys())
+x = st.slider('Choose which simulation to animate', min_value=0, max_value=max(list(cached_animations.keys())), step=stepsize)
 components.html(render_animation(x), width = 800, height=1000) 

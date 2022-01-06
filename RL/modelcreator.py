@@ -1,4 +1,3 @@
-from posixpath import split
 import numpy as np
 import torch
 import torch.nn as nn
@@ -6,11 +5,6 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 from typing import Optional, List, Tuple
 from sklearn.model_selection import train_test_split
-# import torchvision
-# from torchvision import models
-# import random
-# from flags import CUDA
-# from tqdm import tqdm
 import os
 import dill
 import time

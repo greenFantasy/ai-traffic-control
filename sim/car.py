@@ -66,7 +66,10 @@ class Car (Vehicle):
         Checks if the car is inside an intersection so that we can log it. 
         """
         distance, intersection_id = self.distance_to_nearest_intersection()
-        if distance <= INTERSECTION_ENTRANCE_THRESHOLD:
+        is_close = (distance <= INTERSECTION_ENTRANCE_THRESHOLD)
+        is_stopped = (distance < float('inf') and (not self.path.sub_path) and self.speed < 1 and self.get_distance_to_nearest_car() < 11)
+        if is_close or is_stopped:
+            self.arrival_on_green = True
             self.wait_time_data = (intersection_id, world.get_current_time())
             return True
         return False
@@ -78,14 +81,25 @@ class Car (Vehicle):
         assert self.wait_time_data, "Car was not recorded entering intersection but is being recorded leaving it"
         intersection_id, enter_time = self.wait_time_data
         leave_time = None if world.ended else world.get_current_time()
-        logger.logger.log_vehicle_at_intersection(self, intersection_id, enter_time, leave_time)
+        logger.logger.log_vehicle_at_intersection(self, intersection_id, enter_time, leave_time, self.arrival_on_green)
         self.wait_time_data = None
+        self.nearest_traffic_light = None
+    
+    def update_arrival_on_green(self, world):
+        if not self.nearest_traffic_light:
+            _, self.nearest_traffic_light = self.get_distance_to_nearest_traffic_light()
+        self.arrival_on_green = self.arrival_on_green and (self.nearest_traffic_light.state != TrafficLightStates.red)
 
     def move(self, time_step, world):
-        if not self.wait_time_data: # Check if we are entering an intersection if we aren't already in one.
-            self.is_entering_intersection(world)
         if self.despawned:
             return
+        
+        # Metric related calculations
+        if not self.wait_time_data: # Check if we are entering an intersection if we aren't already in one.
+            self.is_entering_intersection(world)
+        elif self.arrival_on_green: # If we are in intersection and we have arrived on green so far
+            self.update_arrival_on_green(world)
+
         #Recalculate speed at time step depending on distance2nearestobstacle
         assert self.path is not None, "Path is not set - cannot move car"
         d = self.distance2nearestobstacle()
@@ -178,22 +192,22 @@ class Car (Vehicle):
         """
         Returns the distance to the nearest traffic light
         """
-        currPath = self.path
         if not self.plan:
-            distclosestTrafficLight =  float("inf")
-            nextMove = None
-        else:
-            nextMove = self.plan[0]
-        if not currPath.traffic_light.get(nextMove):
-            # No traffic light at end of path
-            distclosestTrafficLight =  float("inf")
-        elif currPath.traffic_light[nextMove].state == TrafficLightStates.red:
-            # closest traffic light is at end of path
-            distclosestTrafficLight = currPath.parametrization.max_pos - self.p_value
-        else:
-            # No traffic light at end of path
-            distclosestTrafficLight =  float("inf")
-        return distclosestTrafficLight
+            return float("inf"), None
+        
+        total_distance = self.path.parametrization.max_pos - self.p_value
+        currpath = self.path
+        i = 0
+        while not any(currpath.traffic_light.values()):
+            if i >= len(self.plan):
+                return float("inf"), None
+            nextMove = self.plan[i]
+            currpath = currpath.connecting_paths[nextMove]
+            total_distance += currpath.parametrization.max_pos
+            i += 1
+        nextMove = self.plan[i]
+        # intersection_id = [x for x in currpath.traffic_light.values() if x][0].intersection.id
+        return total_distance, currpath.traffic_light[nextMove]
     
     def get_distance_to_car_on_next_path(self) -> float:
         """
@@ -224,8 +238,13 @@ class Car (Vehicle):
         """
         # First, get the cars on the same path
         distance2caronpath = self.get_distance_to_nearest_car()
+        # print(distance2caronpath)
         # Second, traffic lights
-        distance2trafficLight = self.get_distance_to_nearest_traffic_light()
+        distance2trafficLight, self.nearest_traffic_light = self.get_distance_to_nearest_traffic_light()
         # Third, check the paths ahead for cars
         distance2caronnextpath = self.get_distance_to_car_on_next_path()
-        return min([distance2caronpath, distance2trafficLight, distance2caronnextpath])        
+        return min([
+            distance2caronpath, 
+            distance2trafficLight if self.nearest_traffic_light and (self.nearest_traffic_light.state == TrafficLightStates.red) else float('inf'), 
+            distance2caronnextpath
+            ])        
