@@ -83,14 +83,15 @@ class World:
                 objects.append(self.__dict__[a])
         return objects
 
-    def add_vehicle_to_path(self, path: Path, id: str = None):
+    def add_vehicle_to_path(self, path: Path, plan: List[MovementOptions], id: str = None):
         self.car_id_counter += 1
         if not id:
             id = f"car{self.car_id_counter}"
         car = Car(path.start, 15, 6, 5, id = id) # TODO: set the size dynamically as a parameter
-        result = path.add_vehicle(car, spawn=True)
+        result = path.add_vehicle(car, plan, spawn=True)
         if result:
             self.vehicles.append(car)
+            return car
 
     def play(self):
         self.time += self.time_step

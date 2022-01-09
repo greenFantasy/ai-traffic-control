@@ -1,0 +1,2 @@
+from generator import SimpleGenerator
+from generator import MarkovGenerator

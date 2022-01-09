@@ -6,16 +6,23 @@ the cars are being generated from.
 
 Car appearance distributions can either by time-dependent (probability of a car being generated on 
 path a at time t_1 is not equal to probability of a car being generated on path a at time t_2).
+
+Can feed in a seed that is used only by the generator for reproducable results in the params dictionary argument.
 """
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 import random
 
+from planner import SimplePlanner
+
 class Generator(ABC):
 
     def __init__(self, world, params: Dict[str, Any]) -> None:
         self.world = world
+        seed = params.get('seed', None)
+        self.rand_generator = random.Random(seed)
+        self.planner = SimplePlanner(world, {})
         [setattr(self, k, v) for k, v in params.items()]
         
     @abstractmethod
@@ -41,9 +48,10 @@ class SimpleGenerator(Generator):
 
     def generate(self, verbose=False) -> None:
         for path in self.world.spawnable_paths:
-            if random.random() < self.p:
-                self.world.add_vehicle_to_path(path)
-                if verbose:
+            if self.rand_generator.random() < self.p:
+                plan = self.planner.create_plan(path)
+                car = self.world.add_vehicle_to_path(path, plan)
+                if car and verbose:
                     print(f"Adding car to {path}")
 
 class MarkovGenerator(Generator):
@@ -69,8 +77,12 @@ class MarkovGenerator(Generator):
         for path in self.world.spawnable_paths:
             time_since_last_car = self.world.get_current_time() - self.car_added.get(path, -float('inf'))
             car_prob = self.car2car if time_since_last_car <= 1 else 1 - self.nocar2nocar
-            if random.random() < car_prob:
-                self.world.add_vehicle_to_path(path)
-                self.car_added[path] = self.world.get_current_time()
-                if verbose:
-                    print(f"Adding car to {path}")
+
+            if self.rand_generator.random() < car_prob:
+                plan = self.planner.create_plan(path)
+                car = self.world.add_vehicle_to_path(path, plan)
+                if car:
+                    self.car_added[path] = self.world.get_current_time()
+                    if verbose:
+                        print(f"Adding car to {path}")
+

@@ -3,6 +3,11 @@ import dill
 import numpy as np
 import os
 
+def load_vehicle_intersection_times(dirname):
+    vehicle_intersection_times = dill.load(open(os.path.join(dirname, "vehicle_intersection_times.pkl"), "rb"))
+    keys = ('vehicle_id', 'intersection_id', 'enter_time', 'leave_time', 'arrived_on_green', 'aog_red_time')
+    return [{keys[i]: vals[i] for i in range(len(vals))} for vals in vehicle_intersection_times]
+
 def analyze(dirname, max_t=90.0):
     results = {}
 

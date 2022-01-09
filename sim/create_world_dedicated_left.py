@@ -9,7 +9,7 @@ sys.path.append('../generator')
 from generator import MarkovGenerator
 from map_creator import DynamicWorld
 
-despawned = []
+# despawned = []
 
 # for i in range(100):
 world = DynamicWorld()# 0.8, split_times=[1.,1.,1.,1.], rl=True)

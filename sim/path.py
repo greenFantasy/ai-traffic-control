@@ -50,7 +50,7 @@ class Path:
         end = endP if endP else self.parametrization.max_pos
         return [vehicle for vehicle in self.vehicles if end>=vehicle.p_value>=start]
 
-    def add_vehicle(self, vehicle, pos=None, spawn=False):
+    def add_vehicle(self, vehicle, plan, pos=None, spawn=False):
         if pos is None:
             pos = 0
         # Set path in vehicle so it knows where it is.
@@ -58,9 +58,9 @@ class Path:
             if not self.spawnable:
                 warnings.warn(f"Added vehicle {vehicle.id} to unspawnable path {self.id}")
             # warnings.warn(f"Added vehicle {vehicle.id} 10 feet behind last car in path {self.id}")
-            self.add_vehicle(vehicle, self.vehicles[0].p_value - 20)
+            self.add_vehicle(vehicle, plan, pos=self.vehicles[0].p_value - 20)
             return True
-        vehicle.setPath(self)
+        vehicle.setPath(self, plan=plan)
         vehicle.setPValue(pos)
         # Ensure vehicle is in the path boundaries - TODO(sssai)
         self.vehicles.insert(0, vehicle) #TODO(sssai): possible bug here - cars always added to the beginning of list

@@ -70,7 +70,7 @@ class Car (Vehicle):
         is_stopped = (distance < float('inf') and (not self.path.sub_path) and self.speed < 1 and self.get_distance_to_nearest_car() < 11)
         if is_close or is_stopped:
             self.arrival_on_green = True
-            self.wait_time_data = (intersection_id, world.get_current_time())
+            self.wait_time_data = [intersection_id, world.get_current_time(), None]
             return True
         return False
     
@@ -79,9 +79,9 @@ class Car (Vehicle):
         Logs that a car is leaving an intersection (also logs data about when the car entered that intersection).
         """
         assert self.wait_time_data, "Car was not recorded entering intersection but is being recorded leaving it"
-        intersection_id, enter_time = self.wait_time_data
+        intersection_id, enter_time, aog_red_time = self.wait_time_data
         leave_time = None if world.ended else world.get_current_time()
-        logger.logger.log_vehicle_at_intersection(self, intersection_id, enter_time, leave_time, self.arrival_on_green)
+        logger.logger.log_vehicle_at_intersection((self.id, intersection_id, enter_time, leave_time, self.arrival_on_green, aog_red_time))
         self.wait_time_data = None
         self.nearest_traffic_light = None
     
@@ -89,6 +89,8 @@ class Car (Vehicle):
         if not self.nearest_traffic_light:
             _, self.nearest_traffic_light = self.get_distance_to_nearest_traffic_light()
         self.arrival_on_green = self.arrival_on_green and (self.nearest_traffic_light.state != TrafficLightStates.red)
+        if not self.arrival_on_green and self.wait_time_data[2] is None:
+            self.wait_time_data[2] = world.get_current_time()
 
     def move(self, time_step, world):
         if self.despawned:
@@ -131,7 +133,7 @@ class Car (Vehicle):
                 self.path.vehicles[-1].setCarInFront(None)
             if nextPath:
                 # Car is changing paths
-                nextPath.add_vehicle(self, (self.p_value + self.speed*time_step) - old_path.parametrization.max_pos)
+                nextPath.add_vehicle(self, plan=None, pos=(self.p_value + self.speed*time_step) - old_path.parametrization.max_pos)
                 # If sub_path is True, we are entering the middle of an intersection, 
                 # which for us is equivalent to leaving the queue leading up the intersection.
                 if nextPath.sub_path: 
@@ -142,17 +144,20 @@ class Car (Vehicle):
             #print(self.p_value + self.speed*time_step)
             self.setPValue(self.p_value + self.speed*time_step)
 
-    def setPath(self, path):
+
+    def setPath(self, path, plan=None):
         if not self.path:
             # Spawn Vehicle
             logger.logger.logVehicleSpawn(self)
         self.path = path
-        if len(self.plan) == 0:
-            curr_path = path # Path that car is being placed on
-            while len(curr_path.connecting_paths) > 0:
-                idx = random.randint(0, len(curr_path.connecting_paths) - 1)
-                self.plan.append(list(curr_path.connecting_paths.keys())[idx])
-                curr_path = curr_path.connecting_paths[self.plan[-1]]
+        if plan is not None:
+            self.plan = plan
+        # if len(self.plan) == 0:
+        #     curr_path = path # Path that car is being placed on
+        #     while len(curr_path.connecting_paths) > 0:
+        #         idx = random.randint(0, len(curr_path.connecting_paths) - 1)
+        #         self.plan.append(list(curr_path.connecting_paths.keys())[idx])
+        #         curr_path = curr_path.connecting_paths[self.plan[-1]]
         self.time_path_entered = logger.logger.world.time
         # When setting the currentPath, set the next path as well
         self.setNextPath()
