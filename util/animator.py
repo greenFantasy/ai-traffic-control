@@ -3,6 +3,7 @@ import matplotlib
 import numpy as np
 from matplotlib import artist, pyplot as plt
 from matplotlib import animation
+import analyze
 import sys
 import pandas as pd
 import ast
@@ -48,6 +49,8 @@ def main(run_name):
     ax = plt.axes(xlim=(-300, 300), ylim=(-300, 300))
     ax.set_aspect('equal')
     cars, = ax.plot([], [], "bo", lw=2)
+    redcars, = ax.plot([], [], "ro", lw=2)
+    greencars, = ax.plot([], [], "go", lw=2)
     timeArtist = ax.annotate('', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
 
     # store the paths in a dict
@@ -95,6 +98,36 @@ def main(run_name):
     for tl in world.traffic_lights:
         tlHashmap[tl.id] = tl
 
+    # Load up vehicle state changes and store with timestamp for easy access
+    vehicle_id_set = set()
+    
+    vehicle_intersection_times = analyze.load_vehicle_intersection_times(dataPathPrefix)
+    vehicle_state_changes = dict()
+    for dic in vehicle_intersection_times:
+        enter_timestamp = dic['enter_time']
+        leave_timestamp = dic['leave_time']
+        aog_timestamp = dic.get('aog_red_time')
+        vehicle_id = dic['vehicle_id']
+        vehicle_id_set.add(vehicle_id)
+        if enter_timestamp in vehicle_state_changes:
+            vehicle_state_changes[enter_timestamp].append((vehicle_id, 'green'))
+        else:
+            vehicle_state_changes[enter_timestamp] = [(vehicle_id, 'green')]
+        if leave_timestamp in vehicle_state_changes:
+            vehicle_state_changes[leave_timestamp].append((vehicle_id, 'blue'))
+        else:
+            vehicle_state_changes[leave_timestamp] = [(vehicle_id, 'blue')]
+        if aog_timestamp:
+            if aog_timestamp in vehicle_state_changes:
+                vehicle_state_changes[aog_timestamp].append((vehicle_id, 'red'))
+            else:
+                vehicle_state_changes[aog_timestamp] = [(vehicle_id, 'red')] 
+
+    # initialize vehicle state hashmap
+    vehicle_state = dict()
+    for vehicle_id in vehicle_id_set:
+        vehicle_state[vehicle_id] = "blue"
+
     # plot the normal paths statically
     for key in paths.keys():
         (xs, ys) = paths[key]
@@ -110,8 +143,10 @@ def main(run_name):
     # initialization function: plot the background of each frame
     def init():
         cars.set_data([], [])
+        redcars.set_data([], [])
+        greencars.set_data([], [])
         timeArtist.set_text('Time @ 0')
-        artists = [cars, timeArtist]
+        artists = [cars, redcars, greencars, timeArtist]
         for key in subpathArtists.keys():
             (artis, color) = subpathArtists[key]
             (xs, ys) = subpaths[key]
@@ -127,7 +162,17 @@ def main(run_name):
         time = dfVehicles.iloc[i]['TimeStamp']
         x = [coord[0] for coord in coords]
         y = [coord[1] for coord in coords]
-        cars.set_data(x, y)
+        vehicle_ids = [coord[2] for coord in coords]
+        # update car colors
+        if time in vehicle_state_changes:
+            for (vehicle_id, color) in vehicle_state_changes[time]:
+                vehicle_state[vehicle_id] = color
+        carsx, carsy =[[data[i] for i in range(len(vehicle_ids)) if vehicle_state[vehicle_ids[i]]=='blue'] for data in [x,y]]
+        redcarsx, redcarsy =[[data[i] for i in range(len(vehicle_ids)) if vehicle_state[vehicle_ids[i]]=='red'] for data in [x,y]]
+        greencarsx, greencarsy =[[data[i] for i in range(len(vehicle_ids)) if vehicle_state[vehicle_ids[i]]=='green'] for data in [x,y]]
+        cars.set_data(carsx, carsy)
+        redcars.set_data(redcarsx, redcarsy)
+        greencars.set_data(greencarsx, greencarsy)
         timeArtist.set_text(f'Time @ {time}')
         if time in tlcHashmap:
             for (tlID, color) in tlcHashmap[time]:
@@ -140,9 +185,10 @@ def main(run_name):
                         color = "#7EBDC2"
                     artis.set_color(color)
                     subpathArtists[changing_path.id] = (artis, color)
-        artists = [cars, timeArtist]
+        artists = [cars, redcars, greencars, timeArtist]
         for (artis, _) in subpathArtists.values():
             artists.append(artis)
+        artists.reverse()
         return artists
 
     print("Animating...")

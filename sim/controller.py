@@ -55,6 +55,7 @@ class Controller:
         self.state_start_time = self.world.get_current_time()
         if self.verbose:
             print(f"Switching controller to state {self.state}")
+        # TODO(sssai): log the state changes w/ state number, intersection id and time and duration (by logging before state_start_time)
 
     def get_state_split_time(self) -> float:
         return self.split_times[self.state]

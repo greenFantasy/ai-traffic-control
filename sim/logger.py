@@ -101,7 +101,8 @@ class Logger:
         coords = []
         currTime = round(self.world.time, roundingPrecision)
         for vehicle in vehicleList:
-            coords.append(vehicle.center)
+            coord = vehicle.center
+            coords.append((coord[0], coord[1], vehicle.id))
         data = [coords, currTime]
         csvwriter.writerow(data)
 
