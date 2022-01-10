@@ -50,7 +50,7 @@ def main(run_name):
     ax.set_aspect('equal')
     cars, = ax.plot([], [], "bo", lw=2)
     redcars, = ax.plot([], [], "ro", lw=2)
-    greencars, = ax.plot([], [], "go", lw=2)
+    greencars, = ax.plot([], [], "o", lw=2, color="#7EBDC2")
     timeArtist = ax.annotate('', xy=(1, 0),xycoords='axes fraction', fontsize=10, horizontalalignment='right', verticalalignment='bottom')
 
     # store the paths in a dict
