@@ -48,6 +48,10 @@ class Controller:
         return all(l.state == TrafficLightStates.red for l in self.lights[self.state])
 
     def start_next_state(self) -> None:
+        # Before exiting state, log duration of last state
+        logger.logger.log_phase_change(self.state, self.intersection.id, 
+            self.world.get_current_time(), self.state_start_time,
+            self.world.get_current_time() - self.state_start_time)
         self.state = self.next_state
         for l in self.lights[self.state]:
             l.red_to_green(self.world.get_current_time())

@@ -1,3 +1,3 @@
 stepsize=40
 thresholds={'total_through': 15.5, 'total_spawned': 20.5, 'total_left_over': 5.5, 'mean_wait_time': 25}
-data_to_graph=['total_through','total_spawned','mean_wait_time','percentage_arrival_on_green','total_left_over']
+data_to_graph=['total_through','total_spawned','mean_wait_time','percentage_arrival_on_green','total_left_over', 'phase_changes']

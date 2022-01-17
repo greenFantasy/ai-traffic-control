@@ -190,3 +190,10 @@ class Logger:
             self.list_storage_dict[dataName] = []
         self.list_storage_dict[dataName].append((time, action, intersection_id))
 
+    def log_phase_change(self, exit_state, intersection_id, curr_time, start_time, duration):
+        if not self.enabled:
+            return
+        dataName = 'phase_changes'
+        if dataName not in self.list_storage_dict:
+            self.list_storage_dict[dataName] = []
+        self.list_storage_dict[dataName].append((exit_state, intersection_id, curr_time, start_time, duration))
