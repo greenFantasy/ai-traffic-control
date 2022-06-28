@@ -1,4 +1,15 @@
-# ai-traffic-control
+### Reinforcement Learning for Traffic Signal Optimization
+
+Traffic lights are often controlled via ancient technology and algorithms, especially outside of the biggest, highest-budget cities. Over 99% of traffic light networks in the U.S. are manually timed, that is, the timings for each green-red sequence is determined manually by a traffic engineer. These timings are inflexible, and cannot fully adapt to local changes in traffic (think holidays, rush hour, accidents, events, or even small temporary variance in traffic patterns). Coordination of traffic networks is also a nasty problem, engineers use heuristics to try and maximize the "arrival on green percentage" for cars through major roads.
+
+*In this project, we build*
+
+- a system to train DQN-based centralized traffic agents which can control a fleet of traffic lights to maximize coordination and minimize travel time for cars
+- a fast, flexible simulation software which can support arbitrary maps/road networks, used to train our DQN agent
+
+
+
+# For Contributing Devs: ai-traffic-control
 
 Link to design docs: https://docs.google.com/document/d/164u84Un-C45WBT_5X3l0JRWVUuWJGWQ1KaaaA1IaLko/edit
 
